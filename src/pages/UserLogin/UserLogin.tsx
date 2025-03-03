@@ -132,8 +132,7 @@ import {
                   }}
                 >
                   Don’t have an account yet?{" "}
-                  <Link
-                    to="/register"
+                  <a
                     style={{
                       color: "#1976d2",
                       textDecoration: "none",
@@ -142,7 +141,7 @@ import {
                     }}
                   >
                     Sign up here
-                  </Link>
+                  </a>
                 </p>
               </form>
             </ListItem>
