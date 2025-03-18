@@ -1,15 +1,16 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Card, Typography } from "@mui/material";
 import { PieChart } from "@mui/x-charts";
 import { dataset } from "./dataset";
 
 const DashboardPiechart = () => {
   return (
-    <Box 
-        bgcolor="#fff" 
-        borderRadius="15px" 
-        p="20px" 
-        height="100%"
-    >
+    // <Box 
+    //     bgcolor="#fff" 
+    //     borderRadius="15px" 
+    //     p="20px" 
+    //     height="100%"
+    // >
+    <Card sx={{ p: "20px", borderRadius: "15px", height: "100%"}}>
         <Typography variant="h5" component="p" fontWeight="bold">Expense Structure</Typography>
         <Box sx={{
             display: "flex",
@@ -17,7 +18,7 @@ const DashboardPiechart = () => {
             justifyContent: "center",
             flexDirection: "row",
             // margin: "auto",
-            height: "100%"
+            // height: "100%"
         }}>
             <PieChart 
                 series={[
@@ -35,7 +36,7 @@ const DashboardPiechart = () => {
                 }}
             />
         </Box>
-    </Box>
+    </Card>
   )
 }
 

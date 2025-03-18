@@ -1,4 +1,4 @@
-import { Box, FormControl, MenuItem, Select, SelectChangeEvent, Typography } from "@mui/material";
+import { Box, Card, FormControl, MenuItem, Select, SelectChangeEvent, Typography } from "@mui/material";
 import { BarChart } from "@mui/x-charts";
 import { dataset } from "./dataset";
 import { useState } from "react";
@@ -12,13 +12,14 @@ const DashboardBargraph: React.FC = () => {
   }
 
   return (
-    <Box
-        bgcolor= "#fff"
-        width= "100%"
-        borderRadius= "15px"
-        padding= "20px"
-        height= "100%"
-    >
+    // <Box
+    //     bgcolor= "#fff"
+    //     width= "100%"
+    //     borderRadius= "15px"
+    //     padding= "20px"
+    //     height= "100%"
+    // >
+    <Card sx={{ p: "20px", borderRadius: "15px", height: "100%"}}>
       <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
         <Typography variant="h5" component="p" fontWeight="bold">Statistics</Typography>
         <FormControl sx={{ m: 1, minWidth: 120 }}>
@@ -46,7 +47,7 @@ const DashboardBargraph: React.FC = () => {
             // width={800}
             height={350}
         />
-    </Box>
+    </Card>
   )
 }
 

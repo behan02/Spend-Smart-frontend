@@ -71,6 +71,8 @@ import DashboardOverview from "../../components/dashboardOverview/DashboardOverv
 import DashboardBargraph from "../../components/dashboardBargraph/DashboardBargraph";
 import DashboardPiechart from "../../components/dashboardPiechart/DashboardPiechart";
 import theme from "../../assets/styles/theme";
+import DashboardBudget from "../../components/dashboardBudget/DashboardBudget";
+import DashboardGoal from "../../components/dashboardGoals/DashboardGoal";
 
 const Dashboard = () => {
   return (
@@ -80,14 +82,23 @@ const Dashboard = () => {
         width: "85%",
       }}>
         <DashboardOverview />
-        <Grid container spacing={3} direction="row" sx={{ 
-          mt: "40px",
-        }}>
+
+        <Grid container spacing={3} direction="row" sx={{mt: 5}}>
           <Grid item mobile={12} desktop={8}>
             <DashboardBargraph />
           </Grid>
           <Grid item mobile={12} desktop={4}>
             <DashboardPiechart />
+          </Grid>
+        </Grid>
+        
+        
+        <Grid container spacing={3} direction="row" sx={{mt: 5}}>
+          <Grid item mobile={12} desktop={6}>
+            <DashboardBudget />
+          </Grid>
+          <Grid item mobile={12} desktop={6}>
+            <DashboardGoal />
           </Grid>
         </Grid>
       </Box>
