@@ -11,7 +11,7 @@ const DashboardGoal = () => {
             mb: "35px"
         }}>
             <Typography variant="h5" component="p" fontWeight="bold">Goal Status</Typography>
-            <Button variant="text" size="small">View all</Button>
+            <Button variant="text" size="small" sx={{textTransform: "none"}}>View all</Button>
         </Box>
         {goalset.map((item: Goal, index: number) => (
             <Box width="85%" m="auto" key={index}>

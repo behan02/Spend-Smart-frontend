@@ -18,7 +18,7 @@ const DashboardPiechart = () => {
             justifyContent: "center",
             flexDirection: "row",
             // margin: "auto",
-            // height: "100%"
+            height: "100%"
         }}>
             <PieChart 
                 series={[

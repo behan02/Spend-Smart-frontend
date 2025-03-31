@@ -29,6 +29,7 @@ const DashboardBargraph: React.FC = () => {
             displayEmpty
             inputProps={{ 'aria-label': 'Without label' }}
             size="small"
+            sx={{borderRadius: "15px"}}
           >
             <MenuItem value="Weekly">Weekly</MenuItem>
             <MenuItem value="">Monthly</MenuItem>

@@ -13,7 +13,7 @@ const DashboardBudget = () => {
                 mb: "35px"
             }}>
                 <Typography variant="h5" component="p" fontWeight="bold">Budget Status</Typography>
-                <Button variant="text" size="small">View all</Button>
+                <Button variant="text" size="small" sx={{textTransform: "none"}}>View all</Button>
             </Box>
             {budgetset.map((set: Budget, index: number)=>(
                 <Box width="85%" m="0px auto 35px" key={index}>
