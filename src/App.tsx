@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import Transaction from "./pages/Transaction";
+import Transaction from "./pages/Transaction/Transaction";
 
 function App() {
 

@@ -1,12 +1,12 @@
 import { Box } from "@mui/material";
-import TransactionBanner from "../components/transactionBanner/TransactionBanner";
-import TransactionFilter from "../components/transactionFilter/TransactionFilter";
-import TransactionTable from "../components/transactionTable/TransactionTable";
-import Footer from "../components/footer/Footer";
-import TransactionHeader from "../components/transactionHeader/TransactionHeader";
+import TransactionBanner from "../../components/transactionBanner/TransactionBanner";
+import TransactionFilter from "../../components/transactionFilter/TransactionFilter";
+import TransactionTable from "../../components/transactionTable/TransactionTable";
+import Footer from "../../components/footer/Footer";
+import TransactionHeader from "../../components/transactionHeader/TransactionHeader";
 import { useState } from "react";
-import RecurringTransactionForm from "../components/transactionForm/RecurringTransactionForm";
-import AddTransactionForm from "../components/transactionForm/AddTransactionForm";
+import RecurringTransactionForm from "../../components/transactionForm/RecurringTransactionForm";
+import AddTransactionForm from "../../components/transactionForm/AddTransactionForm";
 
 const Transaction: React.FC = () => {
 

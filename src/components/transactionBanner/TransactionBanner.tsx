@@ -25,7 +25,15 @@ const TransactionBanner: React.FC<TransactionBannerProps> = ({ setAddTransaction
                             variant="contained"
                             disableRipple
                             onClick={()=>setAddTransaction(true)}
-                            sx={{bgcolor: "primary.main", borderRadius: "15px", mt: "15px"}}
+                            sx={{
+                                bgcolor: "primary.main", 
+                                borderRadius: "15px", 
+                                mt: "15px",
+                                [theme.breakpoints.between("mobile", "tablet")]: {
+                                    width: "100%",
+                                    fontSize: "14px",
+                                }
+                            }}
                         >
                             + Add transaction
                         </Button>
@@ -33,7 +41,15 @@ const TransactionBanner: React.FC<TransactionBannerProps> = ({ setAddTransaction
                             variant="contained" 
                             disableRipple 
                             onClick={()=>setRecurringTransaction(true)}
-                            sx={{bgcolor: "primary.main", borderRadius: "15px", mt: "15px"}}
+                            sx={{
+                                bgcolor: "primary.main", 
+                                borderRadius: "15px", 
+                                mt: "15px",
+                                [theme.breakpoints.between("mobile", "tablet")]: {
+                                    width: "100%",
+                                    fontSize: "14px",
+                                }
+                            }}
                         >
                             + Add recurring transaction
                         </Button>

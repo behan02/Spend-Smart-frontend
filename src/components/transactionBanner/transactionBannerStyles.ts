@@ -10,7 +10,7 @@ const bannerContainerStyle: SxProps = {
     width: "80%",
     borderRadius: "15px",
     [theme.breakpoints.between("mobile", "laptop")]: {
-        width: "100%",
+        width: "100%",    
     },
     [theme.breakpoints.between("mobile", "tablet")]: {
         justifyContent: "center",

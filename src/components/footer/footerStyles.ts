@@ -15,6 +15,7 @@ const footerStyles: SxProps = {
         flexDirection: "column",
         justifyContent: "flex-start",
         gap: "20px",
+        width: "100%",
     },
 }
 

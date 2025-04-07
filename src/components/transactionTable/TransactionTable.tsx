@@ -1,4 +1,4 @@
-import { Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography } from "@mui/material";
+import { Box, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography, useMediaQuery } from "@mui/material";
 import { DeleteOutline } from "@mui/icons-material";
 import theme from "../../assets/styles/theme";
 
@@ -15,8 +15,7 @@ let tablelist: Transaction[] = [
     type: "Expense",
     category: "Transport",
     date: "20/11/2024",
-    description:
-      "Travelling expenses",
+    description: "Travelling expenses",
     amount: 670,
   },
   {
@@ -51,6 +50,8 @@ let tablelist: Transaction[] = [
 
 const TransactionTable: React.FC = () => {
 
+  const isTabletOrDesktop: boolean = useMediaQuery(theme.breakpoints.down("laptop"));
+
   return (
     <ThemeProvider theme={theme}>
       { /* Desktop and Tablet view */ }
@@ -69,7 +70,6 @@ const TransactionTable: React.FC = () => {
                 <TableCell sx={{fontWeight: "bold"}}>Date</TableCell>
                 <TableCell sx={{fontWeight: "bold"}}>Description</TableCell>
                 <TableCell sx={{fontWeight: "bold"}}>Amount</TableCell>
-                <TableCell></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -79,16 +79,36 @@ const TransactionTable: React.FC = () => {
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
                   <TableCell>##</TableCell>
-                  <TableCell>{list.type}</TableCell>
-                  <TableCell>{list.category}</TableCell>
-                  <TableCell>{list.date}</TableCell>
-                  <TableCell sx={{wordBreak: "break-word", whiteSpace: "normal", maxWidth: "250px"}}>{list.description}</TableCell>
-                  <TableCell sx={{
-                    color: list.type === "Income" ? "#19A23D" : "#EE3838",
-                    fontWeight: "bold",
-                  }}>{list.amount}
+                  <TableCell>
+                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.type}</Typography>
                   </TableCell>
-                  <TableCell align="right"><Button variant="text" sx={{color: "#000"}} onClick={() => confirm("Are you sure?")}><DeleteOutline /></Button> </TableCell>
+                  <TableCell>
+                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.category}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.date}</Typography>
+                  </TableCell>
+                  <TableCell sx={{wordBreak: "break-word", whiteSpace: "normal", maxWidth: "250px"}}>
+                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.description}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}>
+                      <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p" sx={{
+                        color: list.type === "Income" ? "#19A23D" : "#EE3838",
+                        fontWeight: "bold",
+                      }}
+                      >
+                        {list.amount}
+                      </Typography>
+                      <IconButton>
+                        <DeleteOutline fontSize="medium"/>
+                      </IconButton>
+                    </Box>  
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -112,22 +132,31 @@ const TransactionTable: React.FC = () => {
                 <TableRow key={index}>
                   <TableCell>##</TableCell>
                   <TableCell>
-                    <Typography variant="body1" component="p">{list.category}</Typography>
-                    <Typography variant="body1" component="p">{list.type}</Typography>
+                    <Typography variant="body2" component="p">{list.category}</Typography>
+                    <Typography variant="body2" component="p">{list.type}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body1" component="p">{list.date}</Typography>
+                    <Typography variant="body2" component="p">{list.date}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body1" component="p" sx={{
-                      color: list.type === "Income" ? "#19A23D" : "#EE3838",
-                      fontWeight: "bold",
-                    }}
-                    >
-                      {list.amount}
-                    </Typography>
+                    <Box sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}>
+                      <Typography variant="body2" component="p" sx={{
+                        color: list.type === "Income" ? "#19A23D" : "#EE3838",
+                        fontWeight: "bold",
+                      }}
+                      >
+                        {list.amount}
+                      </Typography>
+                      <IconButton>
+                        <DeleteOutline fontSize="small"/>
+                      </IconButton>
+                    </Box>  
                   </TableCell>
-                  <TableCell><DeleteOutline /></TableCell>
+                  {/* <TableCell><DeleteOutline /></TableCell> */}
                 </TableRow>
               ))}
             </TableBody>
