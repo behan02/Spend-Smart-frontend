@@ -1,9 +1,11 @@
-import { Box } from '@mui/material';
+import { Box } from "@mui/material";
+import Transaction from "./pages/Transaction/Transaction";
+
 function App() {
 
   return (
     <Box>
-
+      <Transaction />
     </Box>
   )
 }
