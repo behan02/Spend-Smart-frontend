@@ -3,10 +3,10 @@ import TransactionBanner from "../../components/transactionBanner/TransactionBan
 import TransactionFilter from "../../components/transactionFilter/TransactionFilter";
 import TransactionTable from "../../components/transactionTable/TransactionTable";
 import Footer from "../../components/footer/Footer";
-import TransactionHeader from "../../components/transactionHeader/TransactionHeader";
 import { useState } from "react";
 import RecurringTransactionForm from "../../components/transactionForm/RecurringTransactionForm";
 import AddTransactionForm from "../../components/transactionForm/AddTransactionForm";
+import Header from "../../components/header/Header";
 
 const Transaction: React.FC = () => {
 
@@ -19,7 +19,7 @@ const Transaction: React.FC = () => {
                 margin: "30px auto",
                 width: "85%",
             }}>
-                <TransactionHeader />
+                <Header pageName="Transactions" />
                 <TransactionBanner 
                     setAddTransaction={setAddTransaction} 
                     setRecurringTransaction={setRecurringTransaction} 

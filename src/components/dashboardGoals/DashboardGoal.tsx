@@ -3,7 +3,7 @@ import { colors, Goal, goalset } from "./goalset";
 
 const DashboardGoal = () => {
   return (
-    <Card sx={{ p: "20px", borderRadius: "15px", height: "100%"}}>
+    <Card sx={{ p: "20px", borderRadius: "15px", height: "100%", m: "0px"}}>
         <Box sx={{
             display: "flex",
             justifyContent: "space-between",
