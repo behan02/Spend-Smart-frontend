@@ -1,35 +1,85 @@
 import UserSettingsImage from "../../assets/images/settings-header.jpg";
-import { Box } from "@mui/material";
+import { Box, Avatar, Button, Stack, Typography, Divider } from "@mui/material";
 import ProfileImage from "../../assets/images/profile-photo.jpg";
+import AccountForm from "../../components/UserSettings-Forms/AccountForm";
 
 const UserSettings: React.FC = () => {
   return (
     <div>
-      <Box>
-        <img
-          src={UserSettingsImage}
-          alt="settings"
-          style={{
-            width: "100%",
-            height: "auto",
-            maxHeight: "100px",
-            objectFit: "cover",
-          }}
-        />
+      <Box
+        sx={{
+          minHeight: "",
+          backgroundColor: "#F6F6F8",
+        }}
+      >
+        <Box>
+          <Box
+            sx={{
+              position: "relative",
+              height: 100,
+              backgroundImage: `url(${UserSettingsImage})`,
+              backgroundSize: "cover",
+              backgroundposition: "center",
+            }}
+          >
+            <Avatar
+              src={ProfileImage}
+              alt="profile-picture"
+              sx={{
+                width: 110,
+                height: 110,
+                position: "absolute",
+                bottom: -50,
+                left: 30,
+                border: "4px solid white",
+              }}
+            />
+          </Box>
+          <Box sx={{ mt: 2, ml: 25 }}>
+            <Stack direction="row" spacing={5}>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={() => alert("Change picture clicked")}
+              >
+                Change Picture
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                size="small"
+                onClick={() => alert("Picture Deleted")}
+              >
+                Delete Picture
+              </Button>
+            </Stack>
+          </Box>
+          <Typography>
+            <h2>Lakshan Rajapaksha</h2>
+          </Typography>
+        </Box>
+        <Divider sx={{ mt: 2 }} />
+        <Typography>
+          <h2>Profile Settings</h2>
+        </Typography>
 
-        <img
-          src={ProfileImage}
-          alt="Profile picture"
-          style={{
-            width: "120px",
-            height: "120px",
-            borderRadius: "50%",
+        <Box
+          sx={{
+            borderRadius: "10px",
+            backgroundColor: "#FFFFFF",
+            my: 2,
+            mx: 5,
+            padding: 2,
+            height: 310,
           }}
-        />
+        >
+          <Typography sx={{ mb: 1 }}>
+            <h3>Account</h3>
+          </Typography>
+          <AccountForm />
+        </Box>
       </Box>
-
-      <h1>User Settings</h1>
-      <p>This is your user settings page</p>
     </div>
   );
 };
