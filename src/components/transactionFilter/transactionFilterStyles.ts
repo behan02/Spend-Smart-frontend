@@ -8,9 +8,9 @@ const filterContainerStyle: SxProps = {
     alignItems: "center",
     gap: "10px",
     mt: "30px",
-    [theme.breakpoints.between("mobile", "tablet")]: {
+    [theme.breakpoints.between("mobile", "laptop")]: {
         flexDirection: "column",
-        alignItems: "flex-start",
+        alignItems: "flex-start",    
     }
 }
 

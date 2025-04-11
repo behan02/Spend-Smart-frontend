@@ -47,13 +47,13 @@ const Header = ({ pageName }: TransactionHeaderProps) => {
                     variant="outlined"
                     size="small"
                     sx={{
-                        [theme.breakpoints.between("mobile", "tablet")]: {
+                        [theme.breakpoints.between("mobile", "laptop")]: {
                             display: "none",
                         },
                     }}
                 />
                 <Search sx={{
-                    [theme.breakpoints.up("tablet")]: {
+                    [theme.breakpoints.up("laptop")]: {
                         display: "none",
                     },
                 }}/>

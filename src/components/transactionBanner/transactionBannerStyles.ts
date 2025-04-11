@@ -9,13 +9,19 @@ const bannerContainerStyle: SxProps = {
     bgcolor: "#7C9AC1",
     width: "80%",
     borderRadius: "15px",
+    padding: "1px",
     [theme.breakpoints.between("mobile", "laptop")]: {
-        width: "100%",    
-    },
-    [theme.breakpoints.between("mobile", "tablet")]: {
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
         justifyContent: "center",
-        textAlign: "center",
-    }
+        textAlign: "center",  
+    },
+    // [theme.breakpoints.between("mobile", "tablet")]: {
+    //     justifyContent: "center",
+    //     textAlign: "center",
+    // }
 }
 
 export {bannerContainerStyle};

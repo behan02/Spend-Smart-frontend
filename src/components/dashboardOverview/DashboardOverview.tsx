@@ -70,7 +70,7 @@ const DashboardOverview = () => {
       </Typography>
       <Grid container spacing={3}>
         {overviewList.map((item) => (
-          <Grid item mobile={6} tablet={6} laptop={4} desktop={3} key={item.name}>
+          <Grid item mobile={6} tablet={6} laptop={3} desktop={3} key={item.name}>
             <Box sx={{
               width: "100%",
               height: "160px",
@@ -89,12 +89,12 @@ const DashboardOverview = () => {
                 alignItems: "center",
               }}>
                 <item.icon sx={{
-                  [theme.breakpoints.between("mobile","tablet")]: {
+                  [theme.breakpoints.between("mobile","laptop")]: {
                     fontSize: "18px",
                   },
                 }}/>
                 <Typography variant="h5" color="rgba(0,0,0,0.7)" sx={{
-                  [theme.breakpoints.between("mobile","tablet")]: {
+                  [theme.breakpoints.between("mobile","desktop")]: {
                     fontSize: "18px",
                   },
                 }}
@@ -103,7 +103,7 @@ const DashboardOverview = () => {
                 </Typography>
               </Box>
               <Typography variant="h3" fontSize={28} sx={{
-                [theme.breakpoints.between("mobile","tablet")]: {
+                [theme.breakpoints.between("mobile","desktop")]: {
                   fontSize: "20px",
                 },
               }}
@@ -115,7 +115,7 @@ const DashboardOverview = () => {
                 flexDirection: "row",
                 alignItems: "center",
                 gap: "5px",
-                [theme.breakpoints.between("mobile","tablet")]: {
+                [theme.breakpoints.between("mobile","desktop")]: {
                   flexDirection: "column",
                   gap: "0px",
                   mt: "5px",
@@ -123,14 +123,14 @@ const DashboardOverview = () => {
               }}>
                 {item.difference < 0 ? 
                   <Typography variant="body1" color="#EE3838" fontWeight="bold" sx={{
-                    [theme.breakpoints.between("mobile","tablet")]: {
+                    [theme.breakpoints.between("mobile","desktop")]: {
                       fontSize: "14px",
                     },
                   }}>
                     LKR {item.difference}
                   </Typography> : 
                   <Typography variant="body1" color="#19A23D" fontWeight="bold" sx={{
-                    [theme.breakpoints.between("mobile","tablet")]: {
+                    [theme.breakpoints.between("mobile","desktop")]: {
                       fontSize: "14px",
                     },
                   }}>
@@ -138,7 +138,7 @@ const DashboardOverview = () => {
                   </Typography>
                 }
                 <Typography variant="body1" sx={{
-                  [theme.breakpoints.between("mobile","tablet")]: {
+                  [theme.breakpoints.between("mobile","desktop")]: {
                     fontSize: "14px",
                   },
                 }}>
