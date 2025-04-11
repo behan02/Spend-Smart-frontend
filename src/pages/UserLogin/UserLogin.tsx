@@ -31,7 +31,6 @@ function UserLogin() {
   return (
     <div>
       <Grid container spacing={2} sx={{ height: "100vh" }}>
-        //side image
         <Grid
           item
           xs={false}
@@ -50,8 +49,6 @@ function UserLogin() {
           />
         </Grid>
 
-        
-        //right side form
         <Grid
           item
           xs={12}
@@ -63,29 +60,22 @@ function UserLogin() {
             justifyContent: "center",
             marginBottom: 0,
             minHeight: "100vh",
-            backgroundColor: {
-              xs: "#023E8A",
-              md: "transparent",
-            },
+            
           }}
         >
-          //logo
+         
           <img
             src={Logo}
             alt="Logo"
             style={{ maxWidth: "200px", height: "200px" }}
           />
 
-          //form input fields
           <Box
             sx={{
               padding: 0,
               margin: 0,
               textAlign: "center",
-              color: {
-                xs: "white",
-                md: "black",
-              },
+              
             }}
           >
             <Typography
@@ -94,27 +84,26 @@ function UserLogin() {
                   xs: "25px",
                   md: "30px",
                 },
-                fontWeight:{
-                  xs:"200",
-                  md:"300"
-                }
+                fontWeight: {
+                  xs: "200",
+                  md: "300",
+                },
               }}
             >
               Welcome Back!
             </Typography>
 
             <Typography
-            sx={{
-              fontSize:{
-                xs:"14px",
-                md:"15px"
-              },
-              marginBottom:"20px"
-            }}>
-            Let’s make managing your finances easy and stress-free.
+              sx={{
+                fontSize: {
+                  xs: "13px",
+                  md: "15px",
+                },
+                marginBottom: "20px",
+              }}
+            >
+              Let’s make managing your finances easy and stress-free.
             </Typography>
-             
-           
           </Box>
 
           <ListItem
@@ -123,128 +112,85 @@ function UserLogin() {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              color: {
-                xs: "white",
-                md: "black",
-              },
+             
             }}
           >
             <Box
               component="form"
               onSubmit={handleSubmit}
               sx={{
-                color: {
-                  xs: "white",
-                  md: "black",
-                },
+                
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              //email
-              <TextField
-                id="email"
-                label="Email"
-                placeholder="Enter your Email"
-                multiline
-                value={email}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setEmail(e.target.value)
-                }
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <MailIcon
-                        sx={{
-                          color: {
-                            xs: "white",
-                            md: "black",
-                          },
-                        }}
-                      />
-                      <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  width: "300px",
-                  "& .MuiInputBase-input": {
-                    color: {
-                      xs: "white",
-                      md: "black",
-                    },
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: {
-                      xs: "white",
-                      md: "black",
-                    },
-                  },
-                }}
-              />
-              <br />
-              <br />
-              //password
-              <TextField
-                id="password"
-                label="Password"
-                type="password"
-                placeholder="**********"
-                multiline
-                value={password}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setPassword(e.target.value)
-                }
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LockIcon
-                        sx={{
-                          color: {
-                            xs: "white",
-                            md: "black",
-                          },
-                        }}
-                      />
-                      <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  width: "300px",
-                  "& .MuiInputBase-input": {
-                    color: {
-                      xs: "white",
-                      md: "black",
-                    },
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: {
-                      xs: "white",
-                      md: "black",
-                    },
-                  },
-                }}
-              />
-              <br />
+              
+                <TextField
+                  id="email"
+                  label="Email"
+                  placeholder="Enter your Email"
+                  multiline
+                  value={email}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setEmail(e.target.value)
+                  }
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <MailIcon />
+                        <Divider
+                          orientation="vertical"
+                          flexItem
+                          sx={{ mx: 1 }}
+                        />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ width: "300px", marginBottom: "16px" }}
+                />
+
+                <TextField
+                  id="password"
+                  label="Password"
+                  type="password"
+                  placeholder="**********"
+                  multiline
+                  value={password}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setPassword(e.target.value)
+                  }
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockIcon />
+                        <Divider
+                          orientation="vertical"
+                          flexItem
+                          sx={{ mx: 1 }}
+                        />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ width: "300px", marginBottom: "24px" }}
+                />
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  sx={{
+                    height: "45px",
+                    width: "300px",
+                    backgroundColor: "#023E8A",
+                  }}
+                >
+                  Login
+                </Button>
+            
+
               <br />
 
-              //submit button
-              <Button
-                type="submit"
-                variant="contained"
-                sx={{
-                  height: "45px",
-                  width: "300px",
-                  backgroundColor: {
-                    xs: "#007FFF",
-                    md: "#023E8A",
-                  },
-                }}
-              >
-                Login
-              </Button>
-              <br />
-
-              //forgot password
               <Typography
                 variant="body2"
                 sx={{
@@ -260,6 +206,7 @@ function UserLogin() {
               >
                 Forgot password?
               </Typography>
+              
 
               <Typography
                 sx={{
@@ -269,7 +216,7 @@ function UserLogin() {
                   textDecoration: "none",
                   fontWeight: 200,
                   cursor: "pointer",
-                  fontSize: "0.85rem",
+                  fontSize: ".8rem",
                 }}
               >
                 Don’t have an account yet?{" "}
@@ -277,13 +224,14 @@ function UserLogin() {
                   <Typography
                     component="span"
                     sx={{
-                      color: {
-                        xs: "#7CB9E8",
-                        md: "#1976d2",
-                      },
-                      opacity: 0.5,
-                      fontWeight: "bold",
+                      fontSize: "0.9rem",
+                      color:"#023E8A",
+                      opacity:0.7,
+                      fontWeight:"bold"
+
                     }}
+
+                    
                   >
                     Sign up here
                   </Typography>
@@ -291,6 +239,7 @@ function UserLogin() {
               </Typography>
             </Box>
           </ListItem>
+          
         </Grid>
       </Grid>
     </div>
