@@ -2,7 +2,11 @@ import { NotificationsOutlined, Search } from "@mui/icons-material"
 import { Box, InputAdornment, TextField, ThemeProvider, Typography } from "@mui/material"
 import theme from "../../assets/styles/theme";
 
-const TransactionHeader = () => {
+interface TransactionHeaderProps {
+  pageName: string;
+}
+
+const Header = ({ pageName }: TransactionHeaderProps) => {
   return (
     <ThemeProvider theme={theme}>
         <Box sx={{
@@ -10,13 +14,14 @@ const TransactionHeader = () => {
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
+            mb: "40px",
         }}>
             <Box>
                 <Typography variant="h4" sx={{
                     [theme.breakpoints.between("mobile", "tablet")]: {
                         fontSize: "26px",
                     },
-                }}>Transaction</Typography>
+                }}>{pageName}</Typography>
             </Box>
             <Box sx={{
                 display: "flex",
@@ -42,13 +47,13 @@ const TransactionHeader = () => {
                     variant="outlined"
                     size="small"
                     sx={{
-                        [theme.breakpoints.between("mobile", "tablet")]: {
+                        [theme.breakpoints.between("mobile", "laptop")]: {
                             display: "none",
                         },
                     }}
                 />
                 <Search sx={{
-                    [theme.breakpoints.up("tablet")]: {
+                    [theme.breakpoints.up("laptop")]: {
                         display: "none",
                     },
                 }}/>
@@ -59,4 +64,4 @@ const TransactionHeader = () => {
   )
 }
 
-export default TransactionHeader;
+export default Header;

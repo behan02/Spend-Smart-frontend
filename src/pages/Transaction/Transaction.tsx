@@ -1,12 +1,13 @@
-import { Box } from "@mui/material";
+import { Box, ThemeProvider } from "@mui/material";
 import TransactionBanner from "../../components/transactionBanner/TransactionBanner";
 import TransactionFilter from "../../components/transactionFilter/TransactionFilter";
 import TransactionTable from "../../components/transactionTable/TransactionTable";
 import Footer from "../../components/footer/Footer";
-import TransactionHeader from "../../components/transactionHeader/TransactionHeader";
 import { useState } from "react";
 import RecurringTransactionForm from "../../components/transactionForm/RecurringTransactionForm";
 import AddTransactionForm from "../../components/transactionForm/AddTransactionForm";
+import Header from "../../components/header/Header";
+import theme from "../../assets/styles/theme";
 
 const Transaction: React.FC = () => {
 
@@ -14,12 +15,16 @@ const Transaction: React.FC = () => {
     const [recurringTransaction, setRecurringTransaction] = useState<boolean>(false);
 
     return (
+        <ThemeProvider theme={theme}>
         <Box>
             <Box sx={{
                 margin: "30px auto",
                 width: "85%",
+                [theme.breakpoints.between("mobile", "laptop")]: {  
+                    width: "90%",
+                },
             }}>
-                <TransactionHeader />
+                <Header pageName="Transactions" />
                 <TransactionBanner 
                     setAddTransaction={setAddTransaction} 
                     setRecurringTransaction={setRecurringTransaction} 
@@ -39,6 +44,7 @@ const Transaction: React.FC = () => {
                 <Footer />
             </Box>
         </Box>
+        </ThemeProvider>
     )
 }
 

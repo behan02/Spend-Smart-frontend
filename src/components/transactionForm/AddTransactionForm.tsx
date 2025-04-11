@@ -34,11 +34,14 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
                         left: "50%",
                         transform: "translate(-50%, -50%)",
                         borderRadius: "15px",
-                        [theme.breakpoints.between("tablet", "laptop")]: {
-                            width: "50%",
-                        },
                         [theme.breakpoints.between("mobile", "tablet")]: {
                             width: "80%",                        
+                        },
+                        [theme.breakpoints.between("tablet", "laptop")]: {
+                            width: "60%",
+                        },
+                        [theme.breakpoints.between("laptop", "desktop")]: {
+                            width: "50%",
                         },
                     }}>
                         <Box sx={{

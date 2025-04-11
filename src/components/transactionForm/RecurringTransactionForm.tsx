@@ -44,17 +44,27 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
                         left: "50%", 
                         transform: "translate(-50%, -50%)", 
                         borderRadius: "15px",
-                        [theme.breakpoints.between("tablet", "laptop")]: {
-                            width: "50%",
-                        },
                         [theme.breakpoints.between("mobile", "tablet")]: {
                             width: "80%",
-                            height: "auto"
+                            height: "auto",
+                            padding: "20px",
                         },
+                        [theme.breakpoints.between("tablet", "laptop")]: {
+                            width: "75%",
+                        },
+                        [theme.breakpoints.between("laptop", "desktop")]: {
+                            width: "50%",
+                        }
                     }}
                 >
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <Typography variant="h5">Add Recurring Transaction</Typography>
+                        <Typography variant="h5" sx={{
+                            [theme.breakpoints.between("mobile", "tablet")]: {
+                                fontSize: "20px",
+                            }
+                        }}>
+                            Add Recurring Transaction
+                        </Typography>
                         <IconButton onClick={() => {setRecurringTransaction(false); setType("")}}aria-label="close">
                             <Close />
                         </IconButton>
