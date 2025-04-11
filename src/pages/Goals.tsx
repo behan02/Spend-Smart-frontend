@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Stack } from '@mui/material';
-import Header from '../components/Header';
-import AddGoalModal from '../components/AddGoalModal';
-import GoalItem from '../components/GoalItem';
-import GoalDetails from '../components/GoalDetails';
+import Header from '../components/GoalsPageComponents/Header';
+import AddGoalModal from '../components/GoalsPageComponents/AddGoalModal';
+import GoalItem from '../components/GoalsPageComponents/GoalItem';
+import GoalDetails from '../components/GoalsPageComponents/GoalDetails';
 import { differenceInDays } from 'date-fns';
 import HeaderImage from '../assets/images/goal_page_image.png';
 
