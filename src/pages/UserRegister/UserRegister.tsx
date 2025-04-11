@@ -65,10 +65,7 @@ const Register: React.FC = () => {
           justifyContent: "center",
           marginBottom: 0,
           minHeight: "100vh",
-          backgroundColor: {
-            xs: "#023E8A",
-            md: "transparent",
-          },
+          
         }}
       >
         <img
@@ -81,10 +78,7 @@ const Register: React.FC = () => {
             padding: 0,
             margin: 0,
             textAlign: "center",
-            color: {
-              xs: "white",
-              md: "black",
-            },
+            
           }}
         >
           <Typography
@@ -118,10 +112,8 @@ const Register: React.FC = () => {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            color: {
-              xs: "white",
-              md: "black",
-            },
+            
+            
           }}
         >
           <form onSubmit={handleSubmit}>
@@ -136,12 +128,7 @@ const Register: React.FC = () => {
                 startAdornment: (
                   <InputAdornment position="start">
                     <User
-                      sx={{
-                        color: {
-                          xs: "white",
-                          md: "black",
-                        },
-                      }}
+                      
                     />
                     <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
                   </InputAdornment>
@@ -149,18 +136,8 @@ const Register: React.FC = () => {
               }}
               sx={{
                 width: "300px",
-                "& .MuiInputBase-input": {
-                  color: {
-                    xs: "white",
-                    md: "black",
-                  },
-                },
-                "& .MuiInputLabel-root": {
-                  color: {
-                    xs: "white",
-                    md: "black",
-                  },
-                },
+                
+                
               }}
             />
             <br />
@@ -176,32 +153,13 @@ const Register: React.FC = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <MailIcon
-                      sx={{
-                        color: {
-                          xs: "white",
-                          md: "black",
-                        },
-                      }}
-                    />
+                    <MailIcon />
                     <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
                   </InputAdornment>
                 ),
               }}
               sx={{
                 width: "300px",
-                "& .MuiInputBase-input": {
-                  color: {
-                    xs: "white",
-                    md: "black",
-                  },
-                },
-                "& .MuiInputLabel-root": {
-                  color: {
-                    xs: "white",
-                    md: "black",
-                  },
-                },
               }}
             />
             <br />
@@ -218,32 +176,14 @@ const Register: React.FC = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <LockIcon
-                      sx={{
-                        color: {
-                          xs: "white",
-                          md: "black",
-                        },
-                      }}
-                    />
+                    <LockIcon  />
                     <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
                   </InputAdornment>
                 ),
               }}
               sx={{
                 width: "300px",
-                "& .MuiInputBase-input": {
-                  color: {
-                    xs: "white",
-                    md: "black",
-                  },
-                },
-                "& .MuiInputLabel-root": {
-                  color: {
-                    xs: "white",
-                    md: "black",
-                  },
-                },
+                
               }}
             />
             <br />
@@ -260,32 +200,14 @@ const Register: React.FC = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <LockIcon
-                      sx={{
-                        color: {
-                          xs: "white",
-                          md: "black",
-                        },
-                      }}
-                    />
+                    <LockIcon/>
                     <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
                   </InputAdornment>
                 ),
               }}
               sx={{
                 width: "300px",
-                "& .MuiInputBase-input": {
-                  color: {
-                    xs: "white",
-                    md: "black",
-                  },
-                },
-                "& .MuiInputLabel-root": {
-                  color: {
-                    xs: "white",
-                    md: "black",
-                  },
-                },
+                
               }}
             />
             <br />
@@ -298,7 +220,7 @@ const Register: React.FC = () => {
                 height: "45px",
                 width: "300px",
                 backgroundColor: {
-                  xs: "#007FFF",
+                  xs: "#023E8A",
                   md: "#023E8A",
                 },
               }}
@@ -330,10 +252,8 @@ const Register: React.FC = () => {
                 <Typography
                   component="span"
                   sx={{
-                    color: {
-                      xs: "#7CB9E8",
-                      md: "#1976d2",
-                    },
+                    color: "#023E8A",
+    
                     opacity: 0.7,
                     fontWeight: "bold",
                   }}
