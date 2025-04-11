@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Grid,
@@ -7,28 +7,43 @@ import {
   InputAdornment,
   Divider,
   Button,
+  Typography,
 } from "@mui/material";
-import Image from "../../assets/images/userRegister.png"
+import Image from "../../assets/images/regitser1.png";
 import User from "@mui/icons-material/PermIdentity";
 import MailIcon from "@mui/icons-material/MailOutline";
 import LockIcon from "@mui/icons-material/LockOutlined";
-
+import { Link } from "react-router-dom";
+import Logo from "../../assets/images/logo/Logo.png";
 
 const Register: React.FC = () => {
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    console.log("Form submitted"); // Add actual form handling logic
+  // 🔧 State variables
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    // Here you would send data to the backend
+    console.log("Registering user:", { name, email, password });
   };
 
   return (
     <Grid container spacing={2} sx={{ height: "100vh" }}>
       <Grid
         item
-        xs={12}
+        xs={false}
         md={6}
         sx={{
+          display: { xs: "none", md: "flex" },
           backgroundColor: "#023E8A",
-          display: "flex",
           justifyContent: "center",
           alignItems: "center",
         }}
@@ -44,41 +59,97 @@ const Register: React.FC = () => {
         xs={12}
         md={6}
         sx={{
+          display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-         display:"flex",
-         flexDirection:"column"
+          marginBottom: 0,
+          minHeight: "100vh",
+          
         }}
       >
-        <Box sx={{ textAlign: "center" }}>
-          <h1 style={{ marginBottom: 0 }}>Join, Budget, Thrive!</h1>
-          <p style={{ marginTop: 0, marginBottom: "30px" }}>
+        <img
+          src={Logo}
+          alt="Logo"
+          style={{ maxWidth: "200px", height: "200px" }}
+        />
+        <Box
+          sx={{
+            padding: 0,
+            margin: 0,
+            textAlign: "center",
+            
+          }}
+        >
+          <Typography
+                        sx={{
+                          fontSize: {
+                            xs: "25px",
+                            md: "30px",
+                          },
+                          fontWeight:{
+                            xs:"200",
+                            md:"300"
+                          }
+                        }}
+                      >Join, Budget, Thrive!</Typography>
+          
+          <Typography
+            sx={{
+              fontSize:{
+                xs:"14px",
+                md:"15px"
+              },
+              marginBottom:"20px"
+            }}>
             Sign up to simplify saving and managing your finances.
-          </p>
+          </Typography>
         </Box>
 
-        <ListItem sx={{ flexDirection: "column", alignItems: "center" }}>
+        <ListItem
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            
+            
+          }}
+        >
           <form onSubmit={handleSubmit}>
             <TextField
-              id="name"
               label="Name"
               placeholder="Enter your name"
+              value={name}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setName(e.target.value)
+              }
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <User />
+                    <User
+                      
+                    />
                     <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
                   </InputAdornment>
                 ),
               }}
-              sx={{ width: "300px" }}
+              sx={{
+                width: "300px",
+                
+                
+              }}
             />
-            <br /><br />
+            <br />
+            <br />
 
             <TextField
-              id="email"
               label="Email"
               placeholder="Enter your Email"
+              value={email}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setEmail(e.target.value)
+              }
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -87,43 +158,60 @@ const Register: React.FC = () => {
                   </InputAdornment>
                 ),
               }}
-              sx={{ width: "300px" }}
+              sx={{
+                width: "300px",
+              }}
             />
-            <br /><br />
+            <br />
+            <br />
 
             <TextField
-              id="password"
               label="Password"
               type="password"
               placeholder="**********"
+              value={password}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setPassword(e.target.value)
+              }
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <LockIcon />
+                    <LockIcon  />
                     <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
                   </InputAdornment>
                 ),
               }}
-              sx={{ width: "300px" }}
+              sx={{
+                width: "300px",
+                
+              }}
             />
-            <br /><br />
+            <br />
+            <br />
 
             <TextField
-              id="confirm-password"
               label="Confirm Password"
               type="password"
               placeholder="**********"
+              value={confirmPassword}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setConfirmPassword(e.target.value)
+              }
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <LockIcon />
+                    <LockIcon/>
                     <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
                   </InputAdornment>
                 ),
               }}
-              sx={{ width: "300px" }}
+              sx={{
+                width: "300px",
+                
+              }}
             />
-            <br /><br />
+            <br />
+            <br />
 
             <Button
               type="submit"
@@ -131,17 +219,50 @@ const Register: React.FC = () => {
               sx={{
                 height: "45px",
                 width: "300px",
-                backgroundColor: "#023E8A",
+                backgroundColor: {
+                  xs: "#023E8A",
+                  md: "#023E8A",
+                },
               }}
             >
               Sign up
             </Button>
+            <br />
+            <Typography
+              sx={{
+                marginTop: "10px",
+                textAlign: "center",
+                width: "300px",
+                textDecoration: "none",
+                fontWeight: 200,
+                cursor: "pointer",
+                fontSize: "0.85rem",
+              }}
+            >
+              Already registered?{" "}
+              <Link
+                to="/"
+                style={{
+                  color: "#1976d2",
+                  textDecoration: "none",
+                  opacity: "50%",
+                  fontWeight: "bold",
+                }}
+              >
+                <Typography
+                  component="span"
+                  sx={{
+                    color: "#023E8A",
+    
+                    opacity: 0.7,
+                    fontWeight: "bold",
+                  }}
+                >
+                  Login here
+                </Typography>
+              </Link>
+            </Typography>
           </form>
-
-          <p style={{ marginTop: "1rem", fontSize: "0.9rem", textAlign: "center",display:"flex",flexDirection:"row" }}>
-            Already registered?{" "}
-            <p style={{color:"#1976d2"}}>Login here </p>
-          </p>
         </ListItem>
       </Grid>
     </Grid>
