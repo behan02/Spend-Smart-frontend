@@ -1,10 +1,10 @@
 import { Box } from '@mui/material';
-import GoalDetailsPage from './pages/GoalDetails';
+import GoalsPage from './pages/Goals';
 function App() {
 
   return (
     <Box>
-      <GoalDetailsPage />
+      <GoalsPage />
     </Box>
   )
 }

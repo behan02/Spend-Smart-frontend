@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Stack } from '@mui/material';
-import Header from '../components/GoalsPageComponents/Header';
+import HeaderCard from '../components/GoalsPageComponents/Header-card';
 import AddGoalModal from '../components/GoalsPageComponents/AddGoalModal';
 import GoalItem from '../components/GoalsPageComponents/GoalItem';
 import GoalDetails from '../components/GoalsPageComponents/GoalDetails';
+import Header from "../components/Header/header";
 import { differenceInDays } from 'date-fns';
 import HeaderImage from '../assets/images/goal_page_image.png';
 
@@ -27,9 +28,9 @@ const GoalsPage: React.FC = () => {
     { 
       id: 1, 
       name: 'Buying a guitar', 
-      savedAmount: 1458.30, 
+      savedAmount: 3458.30, 
       targetAmount: 4580.85, 
-      progress: 32,
+      progress: 75,
       deadline: new Date('2025-03-08'),
       description: 'Saving for a Fender Stratocaster guitar',
       remainingDays: 2
@@ -123,7 +124,10 @@ const GoalsPage: React.FC = () => {
   return (
     <Box sx={{ p: 3, maxWidth: '1200px', margin: '0 auto' }}>
       {/* Header Component */}
-      <Header 
+      <Header pageName="Goals" />
+
+      {/* Header-card Component */}
+      <HeaderCard
         title="Set personalized goals and track your savings effortlessly —whether it's for a dream vacation, a new gadget, or a special event."
         description="Start saving today!"
         buttonText="Add New Goal"

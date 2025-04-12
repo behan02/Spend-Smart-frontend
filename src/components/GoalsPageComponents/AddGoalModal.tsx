@@ -19,6 +19,7 @@ interface AddGoalModalProps {
   onSave: (goal: any) => void;
 }
 
+
 const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave }) => {
   const [name, setName] = useState('');
   const [targetAmount, setTargetAmount] = useState('');

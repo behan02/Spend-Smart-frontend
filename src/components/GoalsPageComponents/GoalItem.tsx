@@ -3,7 +3,9 @@ import {
   Box,
   Typography,
   Card,
-  CardContent
+  CardContent,
+  CircularProgress,
+  CircularProgressProps
 } from '@mui/material';
 
 interface Goal {
@@ -19,6 +21,37 @@ interface GoalItemProps {
   isSelected: boolean;
   onClick: () => void;
 }
+
+// CircularProgressWithLabel component
+const CircularProgressWithLabel = (props: CircularProgressProps & { value: number }) => {
+  return (
+    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+      <CircularProgress 
+        variant="determinate" 
+        {...props} 
+        sx={{
+          color: props.value === 100 ? '#4caf50' : '#3f51b5', // Green if 100%, otherwise primary
+        }}
+      />
+      <Box
+        sx={{
+          top: 0,
+          left: 0,
+          bottom: 0,
+          right: 0,
+          position: 'absolute',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Typography variant="caption" component="div" color="textSecondary">
+          {`${Math.round(props.value)}%`}
+        </Typography>
+      </Box>
+    </Box>
+  );
+};
 
 const GoalItem: React.FC<GoalItemProps> = ({ goal, isSelected, onClick }) => {
   return (
@@ -39,33 +72,7 @@ const GoalItem: React.FC<GoalItemProps> = ({ goal, isSelected, onClick }) => {
       <CardContent sx={{ p: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Box sx={{ flexBasis: '40px', flexShrink: 0 }}>
-            <Box 
-              sx={{
-                position: 'relative',
-                width: 40,
-                height: 40,
-              }}
-            >
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: 40,
-                  height: 40,
-                  borderRadius: '50%',
-                  border: '3px solid',
-                  borderColor: isSelected ? '#3f51b5' : '#4caf50',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Typography variant="body2" fontWeight="bold" color="textSecondary">
-                  {goal.progress}%
-                </Typography>
-              </Box>
-            </Box>
+            <CircularProgressWithLabel value={goal.progress} />
           </Box>
           <Box sx={{ ml: 2, flexGrow: 1 }}>
             <Typography variant="body1" fontWeight="medium">
