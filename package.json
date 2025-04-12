@@ -12,14 +12,18 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^6.4.7",
-    "@mui/material": "^6.4.7",
+
+    "@mui/icons-material": "^6.4.11",
+    "@mui/material": "^6.4.11",
+    "@mui/x-date-pickers": "^7.27.1",
+    "date-fns": "^2.29.3",
     "@mui/x-charts": "^7.27.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
+    "@types/date-fns": "^2.5.3",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
