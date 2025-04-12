@@ -1,5 +1,5 @@
-import { NotificationsOutlined, Search } from "@mui/icons-material"
-import { Box, InputAdornment, TextField, ThemeProvider, Typography } from "@mui/material"
+import { NotificationsOutlined } from "@mui/icons-material";
+import { Box, ThemeProvider, Typography } from "@mui/material";
 import theme from "../../assets/styles/theme";
 
 interface TransactionHeaderProps {
@@ -31,32 +31,6 @@ const Header = ({ pageName }: TransactionHeaderProps) => {
                     gap: "10%",
                 },
             }}>
-                <TextField
-                    id="input-with-icon-textfield"
-                    type="search"
-                    placeholder="Search"
-                    slotProps={{
-                        input: {
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <Search />
-                                </InputAdornment>
-                            ),
-                        },
-                    }}
-                    variant="outlined"
-                    size="small"
-                    sx={{
-                        [theme.breakpoints.between("mobile", "laptop")]: {
-                            display: "none",
-                        },
-                    }}
-                />
-                <Search sx={{
-                    [theme.breakpoints.up("laptop")]: {
-                        display: "none",
-                    },
-                }}/>
                 <NotificationsOutlined />
             </Box>
         </Box>
