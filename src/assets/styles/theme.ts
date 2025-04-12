@@ -26,7 +26,7 @@ const theme: Theme = createTheme({
     breakpoints: {
         values: {
             mobile: 0,
-            tablet: 425,
+            tablet: 426,
             laptop: 769,
             desktop: 1024,
         },
