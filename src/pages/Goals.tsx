@@ -5,7 +5,7 @@ import AddGoalModal from '../components/GoalsPageComponents/AddGoalModal';
 import GoalItem from '../components/GoalsPageComponents/GoalItem';
 import GoalDetails from '../components/GoalsPageComponents/GoalDetails';
 import Footer from "../components/footer/Footer";
-import Header from "../components/Header/header";
+import Header from "../components/header/header";
 import { differenceInDays } from 'date-fns';
 import HeaderImage from '../assets/images/goal_page_image.png';
 

@@ -6,7 +6,7 @@ import Footer from "../../components/footer/Footer";
 import { useState } from "react";
 import RecurringTransactionForm from "../../components/transactionForm/RecurringTransactionForm";
 import AddTransactionForm from "../../components/transactionForm/AddTransactionForm";
-import Header from "../../components/header/Header";
+import Header from "../../components/header/header";
 import theme from "../../assets/styles/theme";
 
 const Transaction: React.FC = () => {

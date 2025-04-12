@@ -6,7 +6,7 @@ import theme from "../../assets/styles/theme";
 import DashboardBudget from "../../components/dashboardBudget/DashboardBudget";
 import DashboardGoal from "../../components/dashboardGoals/DashboardGoal";
 import Footer from "../../components/footer/Footer";
-import Header from "../../components/header/Header";
+import Header from "../../components/header/header";
 import DashboardTransaction from "../../components/dashboardTransaction/DashboardTransaction";
 
 const Dashboard = () => {
