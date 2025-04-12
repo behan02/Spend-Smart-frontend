@@ -1,11 +1,15 @@
 import { Box } from '@mui/material';
 import GoalsPage from './pages/Goals';
+import { ThemeProvider } from "@mui/material";
+import theme from "./assets/styles/theme";
+
 function App() {
 
   return (
-    <Box>
+     <ThemeProvider theme={theme}>
       <GoalsPage />
-    </Box>
+    </ThemeProvider>
+
   )
 }
 

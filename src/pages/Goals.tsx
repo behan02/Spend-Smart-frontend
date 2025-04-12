@@ -4,6 +4,7 @@ import HeaderCard from '../components/GoalsPageComponents/Header-card';
 import AddGoalModal from '../components/GoalsPageComponents/AddGoalModal';
 import GoalItem from '../components/GoalsPageComponents/GoalItem';
 import GoalDetails from '../components/GoalsPageComponents/GoalDetails';
+import Footer from "../components/footer/Footer";
 import Header from "../components/Header/header";
 import { differenceInDays } from 'date-fns';
 import HeaderImage from '../assets/images/goal_page_image.png';
@@ -128,6 +129,7 @@ const GoalsPage: React.FC = () => {
 
       {/* Header-card Component */}
       <HeaderCard
+      
         title="Set personalized goals and track your savings effortlessly —whether it's for a dream vacation, a new gadget, or a special event."
         description="Start saving today!"
         buttonText="Add New Goal"
@@ -174,6 +176,9 @@ const GoalsPage: React.FC = () => {
         onSave={handleSaveGoal}
       />
     </Box>
+
+
+      
   );
 };
 
