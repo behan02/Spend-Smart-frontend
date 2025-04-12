@@ -2,13 +2,16 @@ import UserSettingsImage from "../../assets/images/settings-header.jpg";
 import { Box, Avatar, Button, Stack, Typography, Divider } from "@mui/material";
 import ProfileImage from "../../assets/images/profile-photo.jpg";
 import AccountForm from "../../components/UserSettings-Forms/AccountForm";
+import Passwordchange from "../../components/UserSettings-Forms/Passwordchange";
+import PageButton from "../../components/Button/PageButton";
+import ResetPwdImage from "../../assets/images/Reset password-bro.png";
 
 const UserSettings: React.FC = () => {
   return (
     <div>
       <Box
         sx={{
-          minHeight: "",
+          minHeight: "0",
           backgroundColor: "#F6F6F8",
         }}
       >
@@ -71,13 +74,50 @@ const UserSettings: React.FC = () => {
             my: 2,
             mx: 5,
             padding: 2,
-            height: 310,
+            height: 380,
           }}
         >
           <Typography sx={{ mb: 1 }}>
             <h3>Account</h3>
           </Typography>
           <AccountForm />
+          <PageButton
+            text="Save Changes"
+            onClick={() => alert("Changes saved!")}
+            type={"button"}
+          />
+        </Box>
+
+        <Box
+          sx={{
+            borderRadius: "10px",
+            backgroundColor: "#FFFFFF",
+            mt: 2,
+            my: 2,
+            mx: 5,
+            //padding: 2,
+            height: 650,
+          }}
+        >
+          <Typography sx={{ ml: 2 }}>
+            <h3>Password</h3>
+          </Typography>
+          <Passwordchange />
+
+          <Box sx={{ borderRadius: "10px", backgroundColor: "#FFFFFF" }}>
+            <Box
+              component="img"
+              src={ResetPwdImage}
+              alt="pwd Reset"
+              sx={{ maxWidth: "300px", height: "300px", ml: 120 }}
+            />
+          </Box>
+
+          <PageButton
+            text="Save Changes"
+            onClick={() => alert("Changes saved!")}
+            type={"button"}
+          />
         </Box>
       </Box>
     </div>

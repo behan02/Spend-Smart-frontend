@@ -1,14 +1,14 @@
-import { TextField, Stack, Typography } from "@mui/material";
+import { Stack, TextField, Typography } from "@mui/material";
 
-const AccountForm = () => {
+const Passwordchange = () => {
   return (
     <form>
       <Stack direction="column" spacing={3}>
         <label>
-          <Typography>First name</Typography>
+          <Typography sx={{ fontSize: 15 }}>Current Password</Typography>
           <TextField
-            type="text"
-            name="firstname"
+            type="password"
+            name="currentpwd"
             sx={{ width: 500, mb: 2, mx: 2 }}
             slotProps={{
               input: {
@@ -20,10 +20,10 @@ const AccountForm = () => {
           />
         </label>
         <label>
-          <Typography>Last name</Typography>
+          <Typography>New Password</Typography>
           <TextField
-            type="text"
-            name-="lastname"
+            type="password"
+            name-="newpwd"
             sx={{ width: 500, mb: 2, mx: 2 }}
             slotProps={{
               input: {
@@ -35,10 +35,10 @@ const AccountForm = () => {
           />
         </label>
         <label>
-          <Typography>Email</Typography>
+          <Typography>Re Enter New Password</Typography>
           <TextField
-            type="email"
-            name="email"
+            type="password"
+            name="reenterpwd"
             sx={{ width: 500, mb: 2, ml: 5.5 }}
             slotProps={{
               input: {
@@ -54,4 +54,4 @@ const AccountForm = () => {
   );
 };
 
-export default AccountForm;
+export default Passwordchange;
