@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Typography, Stack } from '@mui/material';
-import HeaderCard from '../components/GoalsPageComponents/Header-card';
-import AddGoalModal from '../components/GoalsPageComponents/AddGoalModal';
-import GoalItem from '../components/GoalsPageComponents/GoalItem';
-import GoalDetails from '../components/GoalsPageComponents/GoalDetails';
-import Footer from "../components/footer/Footer";
-import Header from "../components/Header/header";
+import HeaderCard from '../../components/GoalsPageComponents/Header-card';
+import AddGoalModal from '../../components/GoalsPageComponents/AddGoalModal';
+import GoalItem from '../../components/GoalsPageComponents/GoalItem';
+import GoalDetails from '../../components/GoalsPageComponents/GoalDetails';
+import Footer from "../../components/footer/Footer";
+import Header from "../../components/Header/Header";
 import { differenceInDays } from 'date-fns';
-import HeaderImage from '../assets/images/goal_page_image.png';
+import HeaderImage from '../../assets/images/goal_page_image.png';
 
 interface Goal {
   id: number;
