@@ -15,7 +15,7 @@ import {
   import { useState } from "react";
   import Logo from "../../assets/images/logo/Logo.png";
   
-  function UserLogin() {
+  function AdminLogin() {
     // State for email and password
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
@@ -247,5 +247,5 @@ import {
     );
   }
   
-  export default UserLogin;
+  export default AdminLogin;
   
