@@ -8,7 +8,7 @@ import  CustomDatePicker from "../../components/ReportComponents/DatePicker";
 
 function ReportGenerate() {
    // const [reportDate,setReportData]=useState<any>([]);
-
+   return (
      
        <Box
        sx={{
@@ -17,7 +17,7 @@ function ReportGenerate() {
          <Header pageName="Craft Your Custom Report"/>
          <CustomDatePicker />
        </Box>
-    
+   );
      
 }
 
