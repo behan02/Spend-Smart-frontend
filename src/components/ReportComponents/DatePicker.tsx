@@ -1,21 +1,33 @@
-import { useState } from "react";
+// CustomDatePicker.tsx
+
 import dayjs, { Dayjs } from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import {
-  
   Box,
+  Typography,
   useMediaQuery,
   useTheme,
   Breakpoint,
-  Typography,
 } from "@mui/material";
 
-function CustomDatePicker() {
-  const [startDate, setStartDate] = useState<Dayjs | null>(dayjs());
-  const [endDate, setEndDate] = useState<Dayjs | null>(dayjs());
 
+interface Props {
+  startDate: Dayjs | null;
+  endDate: Dayjs | null;
+  setStartDate: (date: Dayjs | null) => void;
+  setEndDate: (date: Dayjs | null) => void;
+  onGenerate: () => void;
+}
+
+function CustomDatePicker({
+  startDate,
+  endDate,
+  setStartDate,
+  setEndDate,
+  onGenerate,
+}: Props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm" as Breakpoint));
 
@@ -37,21 +49,12 @@ function CustomDatePicker() {
       </Typography>
 
       <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Box
-          display="flex"
-          flexDirection="row"
-          gap={2}
-          justifyContent="space-between"
-          flexWrap="wrap"
-         
-        >
+        <Box display="flex" flexDirection="row" gap={2} flexWrap="wrap">
           <Box flex="1 1 300px">
             <DatePicker
               label="Start Date"
               value={startDate}
-              onChange={(newValue) =>
-                setStartDate(newValue ? dayjs(newValue) : null)
-              }
+              onChange={(newValue) => setStartDate(newValue ? dayjs(newValue) : null)}
               slotProps={{
                 textField: {
                   fullWidth: true,
@@ -60,14 +63,11 @@ function CustomDatePicker() {
               }}
             />
           </Box>
-
           <Box flex="1 1 300px">
             <DatePicker
               label="End Date"
               value={endDate}
-              onChange={(newValue) =>
-                setEndDate(newValue ? dayjs(newValue) : null)
-              }
+              onChange={(newValue) => setEndDate(newValue ? dayjs(newValue) : null)}
               slotProps={{
                 textField: {
                   fullWidth: true,
@@ -88,11 +88,7 @@ function CustomDatePicker() {
               cursor: "pointer",
               fontSize: isMobile ? "0.8rem" : "1rem",
             }}
-            onClick={() => {
-              // Handle button click, e.g., submit the selected dates
-              console.log("Start Date:", startDate?.format("YYYY-MM-DD"));
-              console.log("End Date:", endDate?.format("YYYY-MM-DD"));
-            }}
+            onClick={onGenerate}
           >
             Generate Report
           </Box>
