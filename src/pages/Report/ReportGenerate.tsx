@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import Header from "../../components/header/header";
 import CustomDatePicker from "../../components/ReportComponents/DatePicker";
+
 import ReportDisplay from "./ReportDisplay";
 import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
@@ -19,6 +20,7 @@ function ReportGenerate() {
     setIsReportVisible(true);
   };
 
+
   return (
     <Box sx={{ p: 2 }}>
       <Header pageName="Craft Your Custom Report" />
@@ -30,6 +32,7 @@ function ReportGenerate() {
         onGenerate={handleGenerate}
       />
 
+
       {isReportVisible && (
         <Box >
           <ReportDisplay />
@@ -37,6 +40,7 @@ function ReportGenerate() {
       )}
     </Box>
   );
+
 }
 
 export default ReportGenerate;
