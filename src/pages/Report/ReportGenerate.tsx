@@ -20,7 +20,7 @@ function ReportGenerate() {
   };
 
   return (
-    <Box sx={{ p: 2 }}>
+    <Box sx={{ p: 3 }}>
       <Header pageName="Craft Your Custom Report" />
       <CustomDatePicker
         startDate={startDate}
