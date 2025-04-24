@@ -1,51 +1,131 @@
 import { Box, Button, Typography } from "@mui/material";
 import React from "react";
 import ReportImage from "../../assets/images/Report-amico.png";
+import Header from "../../components/header/header";
+import Footer from "../../components/footer/Footer";
+import ReportTable from "../../components/ReportOverview/ReportTable";
 
 const ReportOverview: React.FC = () => {
   return (
-    <Box
-      display="flex"
-      flexDirection={{ xs: "column", md: "row" }}
-      alignItems="center"
-      justifyContent="space-between"
-      bgcolor="#023E8A80"
-      borderRadius={4}
-      px={6}
-      gap={4}
-      mx={15}
-    >
-      <Box maxWidth="400px">
-        <Typography variant="h4" fontWeight="bold" gutterBottom>
-          Hello!
-        </Typography>
-        <Typography variant="body1" gutterBottom fontStyle={"poppins"}>
-          Tailor your report to perfection.
-        </Typography>
-        <Typography variant="body1" gutterBottom fontStyle={"poppins"}>
-          choose any date range you need and
-        </Typography>
-        <Typography variant="body1" gutterBottom fontStyle={"poppins"}>
-          get the insights that matter most to you!
-        </Typography>
+    <Box sx={{ p:4 }}>
+  
+      <Header pageName="Report Overview" />
 
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{ mt: 2, borderRadius: "16px", px: 3 }}
+      
+      <Box
+        display="flex"
+        flexDirection={{ xs: "column", md: "row" }}
+        alignItems="center"
+        justifyContent="space-between"
+        bgcolor="#023E8A80"
+        borderRadius={4}
+        p={4}
+        width="100%"
+        maxWidth="1200px"
+        height={{ xs: "auto", md: "400px" }}
+        mx="auto"
+        mt={2}
+      >
+        {/* Text Content */}
+        <Box
+          textAlign={{ xs: "center", md: "left" }}
+          mb={{ xs: 4, md: 0 }}
+          flex={{ xs: "1 1 auto", md: "1 1 50%" }}
         >
-          Generate Report
-        </Button>
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            gutterBottom
+            fontSize={{ xs: "1.8rem", sm: "2.2rem", md: "2.5rem" }}
+          >
+            Hello!
+          </Typography>
+          <Box>
+            <Typography
+              gutterBottom
+              sx={{
+                fontFamily: "Poppins",
+                fontSize: { xs: "1.5rem", md: "5rem" },
+                
+              }}
+            >
+              Tailor your report to perfection.
+            </Typography>
+
+            <Typography
+              gutterBottom
+              sx={{
+                fontFamily: "Poppins",
+                fontSize: { xs: "1.5rem", md: "2rem" },
+                
+              }}
+            >
+              Choose any date range you need and get the insights that matter
+              most to you!
+            </Typography>
+          </Box>
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{
+              mt: 2,
+              borderRadius: "10px",
+              px: { xs: 2, sm: 3 },
+              py: { xs: 1, sm: 1.5 },
+              fontSize: { xs: "0.8rem", sm: "1rem" },
+            }}
+          >
+            Generate Report
+          </Button>
+        </Box>
+
+        {/* Image */}
+        <Box
+          component="img"
+          src={ReportImage}
+          alt="Report Illustration"
+          sx={{
+            width: { xs: "80%", sm: "60%", md: "50%" },
+            maxWidth: "350px",
+            height: "auto",
+            display: "block",
+            mx: "auto",
+          }}
+        />
       </Box>
 
+      {/* Report Table Section */}
       <Box
-        component="img"
-        src={ReportImage}
-        alt="Report Illustration"
-        width="100%"
-        maxWidth="300px"
-        height="300px"
-      />
+        sx={{
+          mt: 4,
+          p: { xs: 2, sm: 3 },
+          borderRadius: 4,
+          bgcolor: "#F8F9FA",
+          boxShadow: 1,
+          width: { xs: "100%", md: "80%" },
+          mx: "auto",
+          padding:3
+        }}
+      >
+        <Typography
+          variant="h5"
+          fontWeight="bold"
+          gutterBottom
+          fontSize={{ xs: "1.2rem", sm: "1.5rem", md: "1.8rem" }}
+        >
+          Reports
+        </Typography>
+        <ReportTable />
+      </Box>
+
+      {/* Footer */}
+      <Box
+        sx={{
+          mt: 4,
+        }}
+      >
+        <Footer />
+      </Box>
     </Box>
   );
 };
