@@ -1,16 +1,19 @@
-import { CssBaseline } from '@mui/material';
+import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material";
 import theme from "./assets/styles/theme";
+
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import ReportGenerate from './pages/Report/ReportGenerate';
 import Goals from './pages/Goals'; // Import the GoalsPage component
 
 
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+
       <Router>
         <Routes>
 
@@ -21,6 +24,7 @@ function App() {
       </Router>
     </ThemeProvider>
   )
+
 }
 
 export default App;
