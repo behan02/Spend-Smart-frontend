@@ -4,6 +4,7 @@ import ReportImage from "../../assets/images/Report-amico.png";
 import Header from "../../components/header/header";
 import Footer from "../../components/footer/Footer";
 import ReportTable from "../../components/ReportOverview/ReportTable";
+import GenerateReport from "../../components/ReportOverview/GenerateReport";
 
 const ReportOverview: React.FC = () => {
   return (
@@ -30,22 +31,25 @@ const ReportOverview: React.FC = () => {
         <Box
           textAlign={{ xs: "center", md: "left" }}
           mb={{ xs: 4, md: 0 }}
-          flex={{ xs: "1 1 auto", md: "1 1 50%" }}
+          
         >
           <Typography
             variant="h4"
             fontWeight="bold"
             gutterBottom
-            fontSize={{ xs: "1.8rem", sm: "2.2rem", md: "2.5rem" }}
+            sx={{
+              fontSize: { xs: "1.8rem", sm: "2.2rem", md: "2.5rem" },
+            }}
           >
             Hello!
           </Typography>
-          <Box>
+          <Box >
             <Typography
               gutterBottom
               sx={{
                 fontFamily: "Poppins",
                 fontSize: { xs: "1.5rem", md: "5rem" },
+               
                 
               }}
             >
@@ -56,7 +60,8 @@ const ReportOverview: React.FC = () => {
               gutterBottom
               sx={{
                 fontFamily: "Poppins",
-                fontSize: { xs: "1.5rem", md: "2rem" },
+                fontSize: { xs: "1.5rem", md: "5rem" },
+                
                 
               }}
             >
@@ -64,19 +69,7 @@ const ReportOverview: React.FC = () => {
               most to you!
             </Typography>
           </Box>
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{
-              mt: 2,
-              borderRadius: "10px",
-              px: { xs: 2, sm: 3 },
-              py: { xs: 1, sm: 1.5 },
-              fontSize: { xs: "0.8rem", sm: "1rem" },
-            }}
-          >
-            Generate Report
-          </Button>
+          <GenerateReport/>
         </Box>
 
         {/* Image */}
@@ -98,20 +91,19 @@ const ReportOverview: React.FC = () => {
       <Box
         sx={{
           mt: 4,
-          p: { xs: 2, sm: 3 },
           borderRadius: 4,
           bgcolor: "#F8F9FA",
           boxShadow: 1,
           width: { xs: "100%", md: "80%" },
           mx: "auto",
-          padding:3
+          padding: 3
         }}
       >
         <Typography
           variant="h5"
           fontWeight="bold"
           gutterBottom
-          fontSize={{ xs: "1.2rem", sm: "1.5rem", md: "1.8rem" }}
+          fontSize={{ xs: "100px",  md: "200px" }}
         >
           Reports
         </Typography>

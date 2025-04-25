@@ -28,7 +28,7 @@ const rows: RowData[] = [
 const ReportTable: React.FC = () => {
   return (
     <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="report table">
+      <Table sx={{ minWidth: 350 }} aria-label="report table">
         <TableHead>
           <TableRow>
             <TableCell sx={{ fontWeight: "bold" }}>Report Name</TableCell>
