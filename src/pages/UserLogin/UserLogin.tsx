@@ -30,7 +30,7 @@ function UserLogin() {
 
   return (
     <div>
-      <Grid container spacing={2} sx={{ maxWidth: "1000px", height: "auto" }}>
+      <Grid container spacing={2} sx={{ maxWidth: "100%", height: "auto" }}>
         <Grid
           item
           xs={false}
@@ -45,7 +45,7 @@ function UserLogin() {
           <img
             src={userLoginImage}
             alt="Login"
-            style={{ maxWidth: "500px", height: "500px" }}
+            style={{ maxWidth: "700px", height: "700px" }}
           />
         </Grid>
 
@@ -62,10 +62,11 @@ function UserLogin() {
             minHeight: "100vh",
           }}
         >
-          <img
+          <Box
+            component="img"
             src={Logo}
             alt="Logo"
-            style={{ maxWidth: "200px", height: "200px" }}
+            sx={{ maxWidth: { xs: "200px", md: "250px" }, height: { xs: "200px", md: "250px" } }}
           />
 
           <Box
@@ -78,8 +79,8 @@ function UserLogin() {
             <Typography
               sx={{
                 fontSize: {
-                  xs: "25px",
-                  md: "30px",
+                  xs: "30px",
+                  md: "40px",
                 },
                 fontWeight: {
                   xs: "200",
@@ -93,8 +94,8 @@ function UserLogin() {
             <Typography
               sx={{
                 fontSize: {
-                  xs: "13px",
-                  md: "15px",
+                  xs: "15px",
+                  md: "19px",
                 },
                 marginBottom: "20px",
               }}
@@ -127,6 +128,7 @@ function UserLogin() {
                 placeholder="Enter your Email"
                 multiline
                 value={email}
+                
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setEmail(e.target.value)
                 }
@@ -138,7 +140,7 @@ function UserLogin() {
                     </InputAdornment>
                   ),
                 }}
-                sx={{ width: "300px", marginBottom: "16px" }}
+                sx={{ width:{xs:"300px",md:"400px"}, marginBottom: "16px" }}
               />
 
               <TextField
@@ -159,24 +161,25 @@ function UserLogin() {
                     </InputAdornment>
                   ),
                 }}
-                sx={{ width: "300px", marginBottom: "24px" }}
+                sx={{ width:{xs:"300px",md:"400px"}, marginBottom: "16px" }}
               />
 
-              <Link to="/report" style={{ textDecoration: "none" }}>
+              
                 <Button
                   type="submit"
                   variant="contained"
                   sx={{
                     height: "45px",
-                    width: "300px",
+                    width:{xs:"300px",md:"400px"} ,
                     backgroundColor: "#023E8A",
+                    fontSize: {xs:"1rem",md:"1.2rem"},
                   }}
                 >
                   Login
                 </Button>
-              </Link>
+             
 
-              <br />
+             
 
               <Typography
                 variant="body2"
@@ -188,7 +191,7 @@ function UserLogin() {
                   textDecoration: "none",
                   fontWeight: 200,
                   cursor: "pointer",
-                  fontSize: "0.8rem",
+                  fontSize: {xs:".8rem",md:"1rem"},
                 }}
               >
                 Forgot password?
@@ -202,24 +205,26 @@ function UserLogin() {
                   textDecoration: "none",
                   fontWeight: 200,
                   cursor: "pointer",
-                  fontSize: ".8rem",
+                  fontSize: {xs:".8rem",md:"1rem"},
                 }}
               >
                 Don’t have an account yet?{" "}
-                <Link to="/register" style={{ textDecoration: "none" }}>
-                  <Typography
-                    component="span"
-                    sx={{
-                      fontSize: "0.9rem",
-                      color: "#023E8A",
-                      opacity: 0.7,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Sign up here
-                  </Typography>
-                </Link>
-              </Typography>
+                
+                  <span>
+                    <Link
+                      to="/register"
+                      style={{
+                        textDecoration: "none",
+                        color: "#023E8A",
+                        opacity: 0.7,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Sign up here
+                    </Link>
+                  </span>
+                </Typography>
+             
             </Box>
           </ListItem>
         </Grid>
