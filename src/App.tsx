@@ -9,6 +9,9 @@ import Goals from './pages/Goals'; // Import the GoalsPage component
 
 
 
+
+
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
@@ -23,8 +26,7 @@ function App() {
         </Routes>
       </Router>
     </ThemeProvider>
-  )
-
+  );
 }
 
 export default App;
