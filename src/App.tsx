@@ -1,11 +1,17 @@
-import { Box } from '@mui/material';
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import UserLogin from './pages/UserLogin/UserLogin';
+
+
 function App() {
-
   return (
-    <Box>
-
-    </Box>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<UserLogin />} />
+        
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;
