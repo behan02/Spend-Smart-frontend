@@ -9,9 +9,6 @@ import {
   IconButton
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 interface AddGoalModalProps {
   open: boolean;
@@ -19,18 +16,20 @@ interface AddGoalModalProps {
   onSave: (goal: any) => void;
 }
 
-
 const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave }) => {
   const [name, setName] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
   const [currentAmount, setCurrentAmount] = useState('');
-  const [deadline, setDeadline] = useState<Date | null>(null);
+  const [deadlineDate, setDeadlineDate] = useState('');
   const [description, setDescription] = useState('');
 
   const handleSave = () => {
     if (!name || !targetAmount || !currentAmount) {
       return;
     }
+
+    // Convert the date string to a Date object if it exists
+    const deadline = deadlineDate ? new Date(deadlineDate) : null;
 
     const newGoal = {
       name,
@@ -49,7 +48,7 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave }) =>
     setName('');
     setTargetAmount('');
     setCurrentAmount('');
-    setDeadline(null);
+    setDeadlineDate('');
     setDescription('');
     onClose();
   };
@@ -120,13 +119,17 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave }) =>
 
         <Box sx={{ mb: 2 }}>
           <Typography variant="body2" sx={{ mb: 1 }}>Deadline</Typography>
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DatePicker
-              value={deadline}
-              onChange={(newValue) => setDeadline(newValue)}
-              slotProps={{ textField: { size: 'small', fullWidth: true } }}
-            />
-          </LocalizationProvider>
+          <TextField
+            fullWidth
+            variant="outlined"
+            type="date"
+            value={deadlineDate}
+            onChange={(e) => setDeadlineDate(e.target.value)}
+            size="small"
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
         </Box>
 
         <Box sx={{ mb: 3 }}>
