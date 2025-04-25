@@ -5,11 +5,11 @@ const AccountForm = () => {
     <form>
       <Stack direction="column" spacing={3}>
         <label>
-          <Typography>First name</Typography>
+          <Typography sx={{ fontSize: 15 }}>First name</Typography>
           <TextField
             type="text"
             name="firstname"
-            sx={{ width: 500, mb: 2, mx: 2 }}
+            sx={{ width: 500, mb: 2, ml: 24, mt: -2.5 }}
             slotProps={{
               input: {
                 sx: {
@@ -20,11 +20,11 @@ const AccountForm = () => {
           />
         </label>
         <label>
-          <Typography>Last name</Typography>
+          <Typography sx={{ fontSize: 15 }}>Last name</Typography>
           <TextField
             type="text"
             name-="lastname"
-            sx={{ width: 500, mb: 2, mx: 2 }}
+            sx={{ width: 500, mb: 2, ml: 24, mt: -2.5 }}
             slotProps={{
               input: {
                 sx: {
@@ -35,11 +35,11 @@ const AccountForm = () => {
           />
         </label>
         <label>
-          <Typography>Email</Typography>
+          <Typography sx={{ fontSize: 15 }}>Email</Typography>
           <TextField
             type="email"
             name="email"
-            sx={{ width: 500, mb: 2, ml: 5.5 }}
+            sx={{ width: 500, mb: 2, ml: 24, mt: -2.5 }}
             slotProps={{
               input: {
                 sx: {

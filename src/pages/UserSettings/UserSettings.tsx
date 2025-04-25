@@ -77,7 +77,7 @@ const UserSettings: React.FC = () => {
             height: 380,
           }}
         >
-          <Typography sx={{ mb: 1 }}>
+          <Typography sx={{ mb: 2 }}>
             <h3>Account</h3>
           </Typography>
           <AccountForm />
@@ -99,7 +99,7 @@ const UserSettings: React.FC = () => {
             height: 650,
           }}
         >
-          <Typography sx={{ ml: 2 }}>
+          <Typography sx={{ ml: 2, mb: 2 }}>
             <h3>Password</h3>
           </Typography>
           <Passwordchange />
@@ -118,19 +118,29 @@ const UserSettings: React.FC = () => {
             <Typography sx={{ ml: 3, mt: 2, color: "white" }}>
               Password Requirements Your Password needs to have
             </Typography>
+            <Typography sx={{ ml: 3, mt: 2, color: "white" }}>
+              Your Password needs to have
+            </Typography>
             <Box
               component="img"
               src={ResetPwdImage}
               alt="pwd Reset"
-              sx={{ maxWidth: "250px", height: "250px", ml: 90, mt: -3.8 }}
+              sx={{
+                maxWidth: "250px",
+                height: "250px",
+                ml: 90,
+                mt: -9,
+              }}
             />
           </Box>
 
-          <PageButton
-            text="Save Changes"
-            onClick={() => alert("Changes saved!")}
-            type={"button"}
-          />
+          <Box sx={{ mt: 7 }}>
+            <PageButton
+              text="Save Changes"
+              onClick={() => alert("Changes saved!")}
+              type={"button"}
+            />
+          </Box>
         </Box>
       </Box>
     </div>
