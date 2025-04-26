@@ -5,8 +5,6 @@ import AccountForm from "../../components/UserSettings-Forms/AccountForm";
 import Passwordchange from "../../components/UserSettings-Forms/Passwordchange";
 import PageButton from "../../components/Button/PageButton";
 import ResetPwdImage from "../../assets/images/Reset password-bro.png";
-import CurrencySettings from "../../components/UserSettings-Forms/Addcurencyform";
-import { Form } from "react-router-dom";
 import CurrencySelector from "../../components/UserSettings-Forms/Addcurencyform";
 
 const UserSettings: React.FC = () => {
