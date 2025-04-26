@@ -5,6 +5,9 @@ import AccountForm from "../../components/UserSettings-Forms/AccountForm";
 import Passwordchange from "../../components/UserSettings-Forms/Passwordchange";
 import PageButton from "../../components/Button/PageButton";
 import ResetPwdImage from "../../assets/images/Reset password-bro.png";
+import CurrencySettings from "../../components/UserSettings-Forms/Addcurencyform";
+import { Form } from "react-router-dom";
+import CurrencySelector from "../../components/UserSettings-Forms/Addcurencyform";
 
 const UserSettings: React.FC = () => {
   return (
@@ -66,7 +69,6 @@ const UserSettings: React.FC = () => {
         <Typography>
           <h2>Profile Settings</h2>
         </Typography>
-
         <Box
           sx={{
             borderRadius: "10px",
@@ -74,7 +76,7 @@ const UserSettings: React.FC = () => {
             my: 2,
             mx: 5,
             padding: 2,
-            height: 380,
+            height: 380, //Acount form box
           }}
         >
           <Typography sx={{ mb: 2 }}>
@@ -87,7 +89,6 @@ const UserSettings: React.FC = () => {
             type={"button"}
           />
         </Box>
-
         <Box
           sx={{
             borderRadius: "10px",
@@ -95,8 +96,7 @@ const UserSettings: React.FC = () => {
             mt: 2,
             my: 2,
             mx: 5,
-            //padding: 2,
-            height: 650,
+            height: 650, //Password change form box
           }}
         >
           <Typography sx={{ ml: 2, mb: 2 }}>
@@ -109,17 +109,29 @@ const UserSettings: React.FC = () => {
               borderRadius: "10px",
               backgroundColor: "#023E8A80",
               width: 900,
-              height: 200,
+              height: 220,
               alignContent: "center",
               ml: 35,
-              mt: 3,
+              mt: 3, //Pasword Requirements box
             }}
           >
             <Typography sx={{ ml: 3, mt: 2, color: "white" }}>
               Password Requirements Your Password needs to have
             </Typography>
-            <Typography sx={{ ml: 3, mt: 2, color: "white" }}>
+            <Typography sx={{ ml: 3, mt: 1, color: "white" }}>
               Your Password needs to have
+            </Typography>
+            <Typography sx={{ ml: 7, mt: 1, color: "white" }}>
+              At least 8 characters
+            </Typography>
+            <Typography sx={{ ml: 7, mt: 1, color: "white" }}>
+              At least 1 uppercase letter
+            </Typography>
+            <Typography sx={{ ml: 7, mt: 1, color: "white" }}>
+              At least one number
+            </Typography>
+            <Typography sx={{ ml: 7, mt: 1, color: "white" }}>
+              At least one special character
             </Typography>
             <Box
               component="img"
@@ -128,8 +140,8 @@ const UserSettings: React.FC = () => {
               sx={{
                 maxWidth: "250px",
                 height: "250px",
-                ml: 90,
-                mt: -9,
+                ml: 82,
+                mt: -26.4,
               }}
             />
           </Box>
@@ -141,6 +153,23 @@ const UserSettings: React.FC = () => {
               type={"button"}
             />
           </Box>
+        </Box>
+        <Box
+          sx={{
+            borderRadius: "10px",
+            backgroundColor: "#FFFFFF",
+            my: 2,
+            mx: 5,
+            padding: 2,
+            height: 380, //Acount form box
+          }}
+        >
+          <Typography sx={{ ml: 2, mb: 2 }}>
+            <h3>Currencies</h3>
+          </Typography>
+          <Typography>Add a new currency</Typography>
+
+          <CurrencySelector />
         </Box>
       </Box>
     </div>
