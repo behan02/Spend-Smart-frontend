@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Grid,
@@ -8,6 +9,8 @@ import {
   Divider,
   Button,
   Typography,
+  LinearProgress,
+  CircularProgress,
 } from "@mui/material";
 import Image from "../../assets/images/userRegister.png";
 import User from "@mui/icons-material/PermIdentity";
@@ -16,149 +19,244 @@ import LockIcon from "@mui/icons-material/LockOutlined";
 import { Link } from "react-router-dom";
 import Logo from "../../assets/images/logo/Logo.png";
 
-const UserRegister: React.FC = () => {
+interface FormErrors {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+interface AuthResponse {
+  id: string;
+  name: string;
+  email: string;
+  token: string;
+}
+
+const Register: React.FC = () => {
+  const navigate = useNavigate();
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [errors, setErrors] = useState<FormErrors>({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const validateForm = (): boolean => {
+    let valid = true;
+    const newErrors: FormErrors = {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    };
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match!");
-      return;
+    if (!name.trim()) {
+      newErrors.name = "Name is required";
+      valid = false;
     }
 
-    const response = await fetch("", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+      valid = false;
+    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+      newErrors.email = "Email is invalid";
+      valid = false;
+    }
 
-    if (response.ok) {
-      alert("Registered successfully!");
-      // Navigate to login page if needed
-    } else {
-      const error = await response.text();
-      alert(`Error: ${error}`);
+    if (!password) {
+      newErrors.password = "Password is required";
+      valid = false;
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+      valid = false;
+    }
+
+    if (password !== confirmPassword) {
+      newErrors.confirmPassword = "Passwords don't match";
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
+  };
+
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("http://your-api-endpoint.com/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          confirmPassword,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Registration failed");
+      }
+
+      const data: AuthResponse = await response.json();
+
+      // Store token and user data
+      localStorage.setItem("authToken", data.token);
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id: data.id,
+          name: data.name,
+          email: data.email,
+        })
+      );
+
+      alert("Registration successful!");
+      navigate("/dashboard");
+    } catch (err) {
+      const error = err as Error;
+      alert(`Error: ${error.message || "Unknown error"}`);
+      console.error("Registration error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  const PasswordStrengthIndicator: React.FC<{ password: string }> = ({
+    password,
+  }) => {
+    const getStrength = (): number => {
+      if (!password) return 0;
+      if (password.length < 6) return 1;
+      if (/[A-Z]/.test(password) && /[0-9]/.test(password)) return 3;
+      return 2;
+    };
+
+    const strength = getStrength();
+    const strengthText = ["Weak", "Fair", "Good", "Strong"][strength];
+    const strengthColor = ["#ff4444", "#ffbb33", "#00C851", "#00C851"][
+      strength
+    ];
+
+    return (
+      <Box sx={{ width: "100%" }}>
+        <LinearProgress
+          variant="determinate"
+          value={(strength + 1) * 25}
+          sx={{
+            height: 6,
+            borderRadius: 3,
+            backgroundColor: "#e0e0e0",
+            "& .MuiLinearProgress-bar": {
+              backgroundColor: strengthColor,
+            },
+          }}
+        />
+        <Typography variant="caption" sx={{ color: strengthColor }}>
+          Password Strength: {strengthText}
+        </Typography>
+      </Box>
+    );
+  };
+
   return (
-    <Grid
-    container
-    sx={{
-      minHeight: "100vh", // Ensures the container always fills the viewport height
-      overflowX: "hidden", // Prevents horizontal scrolling
-      flexDirection: { xs: "column", md: "row" }, // Stacks items vertically on small screens, horizontally on medium+
-      alignItems: { xs: "center", md: "stretch" }, // Centers items on small screens
-      justifyContent: { xs: "flex-start", md: "space-between" }, // Adjusts spacing based on screen size
-    }}
-  >
-      {/* Left Image Side - Hidden on small screens (xs) */}
+    <Grid container spacing={2} sx={{ height: "100vh" }}>
+      {/* Left side with image */}
       <Grid
         item
         xs={false}
-        sm={false} 
         md={6}
         sx={{
-          display: { xs: "none", md: "flex" }, 
+          display: { xs: "none", md: "flex" },
+          backgroundColor: "#023E8A",
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#023E8A",
-          p: 2,
         }}
       >
         <img
           src={Image}
           alt="Register"
-          style={{ 
-            width: "80%", 
-            maxWidth: "400px", 
-            height: "auto",
-            objectFit: "contain" 
-          }}
+          style={{ maxWidth: "500px", height: "500px" }}
         />
       </Grid>
 
-      {/* Right Form Side - Full width on small screens */}
+      {/* Right side with form */}
       <Grid
         item
-        xs={12} 
+        xs={12}
         md={6}
         sx={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: { xs: "flex-start", md: "center" }, 
-          p: { xs: 3, md: 2 }, 
-          overflowY: "auto", 
+          justifyContent: "center",
+          marginBottom: 0,
+          minHeight: "100vh",
         }}
       >
-        {/* Logo with responsive sizing */}
-        <Box sx={{ 
-          width: "100%", 
-          display: "flex", 
-          justifyContent: "center",
-          mt: { xs: 4, md: 0 } 
-        }}>
-          <img
-            src={Logo}
-            alt="Logo"
-            style={{
-              width: "clamp(150px, 50%, 200px)",
-              height: "auto",
-            }}
-          />
-        </Box>
+        {/* Logo and title */}
+        <img
+          src={Logo}
+          alt="Logo"
+          style={{ maxWidth: "180px", height: "180px" }}
+        />
 
-        {/* Heading with responsive typography */}
-        <Box textAlign="center" sx={{ width: "100%", mt: 2 }}>
+        <Box sx={{ padding: 0, margin: 0, textAlign: "center" }}>
           <Typography
-            variant="h5"
             sx={{
-              fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" },
-              fontWeight: 600,
-              color: "text.primary",
+              fontSize: { xs: "20px", md: "25px" },
+              fontWeight: { xs: "200", md: "300" },
             }}
           >
             Join, Budget, Thrive!
           </Typography>
+
           <Typography
-            variant="body1"
             sx={{
-              fontSize: { xs: "0.875rem", md: "1rem" },
-              mt: 1,
-              color: "text.secondary",
+              fontSize: { xs: "12px", md: "14px" },
+              marginBottom: "10px",
             }}
           >
             Sign up to simplify saving and managing your finances.
           </Typography>
         </Box>
 
-        {/* Form container */}
+        {/* Registration form */}
         <ListItem
           sx={{
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            width: "100%",
-            maxWidth: "400px",
-            p: 0, 
-            mt: { xs: 2, md: 4 },
+            justifyContent: "center",
           }}
         >
-          <form onSubmit={handleSubmit} style={{ width: "100%" }}>
-            {/* Name Field */}
+          <form onSubmit={handleSubmit}>
             <TextField
               label="Name"
               placeholder="Enter your name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              InputLabelProps={{
-                shrink: true, 
-              }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setName(e.target.value)
+              }
+              error={!!errors.name}
+              helperText={errors.name}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -167,22 +265,21 @@ const UserRegister: React.FC = () => {
                   </InputAdornment>
                 ),
               }}
-              variant="outlined"
-              size="small"
+              sx={{ width: "300px" }}
               fullWidth
               margin="normal"
-              sx={{ mt: 2 }}
             />
+            <br />
 
-            {/* Email Field */}
             <TextField
               label="Email"
-              placeholder="Enter your email"
+              placeholder="Enter your Email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              InputLabelProps={{
-                shrink: true,
-              }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setEmail(e.target.value)
+              }
+              error={!!errors.email}
+              helperText={errors.email}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -191,23 +288,23 @@ const UserRegister: React.FC = () => {
                   </InputAdornment>
                 ),
               }}
-              variant="outlined"
-              size="small"
+              sx={{ width: "300px" }}
               fullWidth
               margin="normal"
-              sx={{ mt: 2 }}
             />
 
-            {/* Password Field */}
+            <br />
+
             <TextField
               label="Password"
               type="password"
-              placeholder="********"
+              placeholder="**********"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              InputLabelProps={{
-                shrink: true,
-              }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setPassword(e.target.value)
+              }
+              error={!!errors.password}
+              helperText={errors.password}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -216,23 +313,22 @@ const UserRegister: React.FC = () => {
                   </InputAdornment>
                 ),
               }}
-              variant="outlined"
-              size="small"
+              sx={{ width: "300px" }}
               fullWidth
               margin="normal"
-              sx={{ mt: 2 }}
             />
+            <PasswordStrengthIndicator password={password} />
 
-            {/* Confirm Password Field */}
             <TextField
               label="Confirm Password"
               type="password"
-              placeholder="********"
+              placeholder="**********"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              InputLabelProps={{
-                shrink: true,
-              }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setConfirmPassword(e.target.value)
+              }
+              error={!!errors.confirmPassword}
+              helperText={errors.confirmPassword}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -241,35 +337,42 @@ const UserRegister: React.FC = () => {
                   </InputAdornment>
                 ),
               }}
-              variant="outlined"
-              size="small"
+              sx={{ width: "300px" }}
               fullWidth
               margin="normal"
-              sx={{ mt: 2 }}
             />
+            <br />
 
-            {/* Submit Button */}
             <Button
               type="submit"
               variant="contained"
-              fullWidth
+              disabled={isLoading}
               sx={{
                 height: "45px",
-                mt: 3,
+                width: "300px",
                 backgroundColor: "#023E8A",
-                ":hover": { backgroundColor: "#0353A4" },
-                fontSize: { xs: "0.875rem", md: "1rem" },
+                mt: 2,
+                "&:hover": {
+                  backgroundColor: "#022E6A",
+                },
               }}
             >
-              Sign up
+              {isLoading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Sign up"
+              )}
             </Button>
 
-            {/* Login Link */}
             <Typography
               sx={{
-                mt: 2,
+                marginTop: "10px",
                 textAlign: "center",
-                fontSize: { xs: "0.875rem", md: "0.9rem" },
+                width: "300px",
+                textDecoration: "none",
+                fontWeight: 200,
+                cursor: "pointer",
+                fontSize: "0.85rem",
               }}
             >
               Already registered?{" "}
@@ -283,8 +386,11 @@ const UserRegister: React.FC = () => {
                   component="span"
                   sx={{
                     color: "#023E8A",
+                    opacity: 0.7,
                     fontWeight: "bold",
-                    "&:hover": { textDecoration: "underline" },
+                    "&:hover": {
+                      opacity: 1,
+                    },
                   }}
                 >
                   Login here
@@ -298,4 +404,4 @@ const UserRegister: React.FC = () => {
   );
 };
 
-export default UserRegister;
+export default Register;
