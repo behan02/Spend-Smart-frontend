@@ -10,7 +10,7 @@ import {
   DialogContent, 
   DialogContentText, 
   DialogActions, 
-  Button 
+  Button
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -30,9 +30,10 @@ interface GoalDetailsProps {
   goal: Goal | null;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
+  onViewDetails: (id: number) => void;
 }
 
-const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete }) => {
+const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onViewDetails }) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   if (!goal) {
@@ -44,15 +45,6 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete }) => 
       </Paper>
     );
   }
-
-  const formatDate = (date: Date) => {
-    const options: Intl.DateTimeFormatOptions = { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    };
-    return new Date(date).toLocaleDateString('en-US', options);
-  };
 
   const handleOpenDeleteDialog = () => {
     setDeleteDialogOpen(true);
@@ -69,88 +61,90 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete }) => 
 
   return (
     <>
-      <Paper elevation={1} sx={{ p: 3, mb: 3, borderRadius: '8px' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6" fontWeight="bold">
-            {goal.name}
-          </Typography>
+      <Paper elevation={1} sx={{ p: 4, borderRadius: '8px', bgcolor: 'white' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
           <Box>
-            <IconButton size="small" onClick={() => onEdit(goal.id)}>
-              <EditIcon fontSize="small" />
-            </IconButton>
-            <IconButton size="small" onClick={handleOpenDeleteDialog}>
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Box>
-        </Box>
-
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Box sx={{ width: '48%' }}>
             <Typography variant="subtitle2" color="textSecondary">
               Spend
             </Typography>
             <Typography variant="h5" color="primary" fontWeight="bold">
               ${goal.savedAmount.toFixed(2)}
             </Typography>
-            <Box sx={{ mt: 1 }}>
-              <LinearProgress 
-                variant="determinate" 
-                value={goal.progress} 
-                sx={{ 
-                  height: 8, 
-                  borderRadius: 5,
-                  backgroundColor: '#e0e0e0',
-                  '& .MuiLinearProgress-bar': {
-                    backgroundColor: '#3f51b5'
-                  }
-                }} 
-              />
-              <Typography variant="caption" color="textSecondary" sx={{ mt: 0.5 }}>
-                {goal.progress}%
-              </Typography>
-            </Box>
           </Box>
-          <Box sx={{ width: '48%', textAlign: 'right' }}>
+          <Box sx={{ textAlign: 'right' }}>
             <Typography variant="subtitle2" color="textSecondary">
-              Goals
+              Goal
             </Typography>
             <Typography variant="h5" color="primary" fontWeight="bold">
               ${goal.targetAmount.toFixed(2)}
             </Typography>
-            <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
-              <Typography variant="caption" color="textSecondary" sx={{ mt: 0.5 }}>
-                {100 - goal.progress}%
-              </Typography>
-            </Box>
           </Box>
         </Box>
-        
-        {goal.deadline && (
-          <Box sx={{ mt: 3 }}>
-            <Typography variant="body2" color="textSecondary">
-              Deadline: {formatDate(goal.deadline)}
+
+        <Box sx={{ my: 2 }}>
+          <LinearProgress 
+            variant="determinate" 
+            value={goal.progress} 
+            sx={{ 
+              height: 8, 
+              borderRadius: 5,
+              backgroundColor: '#e0e0e0',
+              '& .MuiLinearProgress-bar': {
+                backgroundColor: '#2952CC'
+              }
+            }} 
+          />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+            <Typography variant="caption" color="textSecondary">
+              {goal.progress}%
+            </Typography>
+            <Typography variant="caption" color="textSecondary">
+              {100 - goal.progress}%
             </Typography>
           </Box>
-        )}
-        
-        {goal.remainingDays !== undefined && (
-          <Box sx={{ mt: 1 }}>
-            <Typography variant="body2" color="primary" fontWeight="medium">
-              {goal.remainingDays} days left
-            </Typography>
+        </Box>
+
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          my: 3
+        }}>
+          <Typography variant="subtitle1" color="primary" fontWeight="medium">
+            {goal.remainingDays !== undefined ? `${goal.remainingDays} days left` : ''}
+          </Typography>
+        </Box>
+
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          mt: 2
+        }}>
+          <Button 
+            variant="contained" 
+            color="primary"
+            sx={{ 
+              borderRadius: '50px', 
+              textTransform: 'none', 
+              px: 6,
+              py: 1,
+              backgroundColor: '#2952CC',
+              height: '30px',
+            }}
+            onClick={() => onViewDetails(goal.id)}
+          >
+            View Details
+          </Button>
+          
+          <Box>
+            <IconButton size="medium" onClick={() => onEdit(goal.id)}>
+              <EditIcon fontSize="medium" />
+            </IconButton>
+            <IconButton size="medium" onClick={handleOpenDeleteDialog}>
+              <DeleteIcon fontSize="medium" />
+            </IconButton>
           </Box>
-        )}
-        
-        {goal.description && (
-          <Box sx={{ mt: 3 }}>
-            <Typography variant="body2" color="textSecondary" fontWeight="medium">
-              Description:
-            </Typography>
-            <Typography variant="body2" color="textSecondary" sx={{ mt: 0.5 }}>
-              {goal.description}
-            </Typography>
-          </Box>
-        )}
+        </Box>
       </Paper>
 
       {/* Delete Confirmation Dialog */}
@@ -161,7 +155,7 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete }) => 
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete the goal <Typography variant="h6" component="span">{goal.name}?</Typography> 
+            Are you sure you want to delete the goal "{goal.name}"?
           </DialogContentText>
         </DialogContent>
         <DialogActions>

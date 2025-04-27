@@ -28,7 +28,7 @@ const HeaderCard: React.FC<HeaderProps> = ({
       marginBottom: '20px',
       position: 'relative',
       overflow: 'visible', // Changed from 'hidden' to allow overflow
-      minHeight: '230px',
+      minHeight: '240px',
       width: '100%'
     }}>
       <Box sx={{
@@ -70,10 +70,10 @@ const HeaderCard: React.FC<HeaderProps> = ({
         alt="Banner illustration"
         sx={{
           position: 'absolute',
-          right: '-180px', // Move the image to the right to create overflow
-          top: '-45px', // Move the image up slightly to create overflow
-          width: '55%', // Increase width to make it larger
-          height: '140%', 
+          right: '-200px', // Move the image to the right to create overflow
+          top: '-85px', // Move the image up slightly to create overflow
+          width: '70%', // Increase width to make it larger
+          height: '170%', 
           zIndex: 1,
           objectFit: 'contain'
         }}

@@ -3,7 +3,7 @@ import { ThemeProvider } from "@mui/material";
 import theme from "./assets/styles/theme";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ReportGenerate from './pages/Report/ReportGenerate';
-import Goals from './pages/Goals'; // Import the GoalsPage component
+import Goals from './pages/Goals/Goals'; 
 
 function App() {
   return (

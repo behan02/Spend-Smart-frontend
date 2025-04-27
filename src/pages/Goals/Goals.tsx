@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Stack } from '@mui/material';
-import HeaderCard from '../components/GoalsPageComponents/Header-card';
-import AddGoalModal from '../components/GoalsPageComponents/AddGoalModal';
-import GoalItem from '../components/GoalsPageComponents/GoalItem';
-import GoalDetails from '../components/GoalsPageComponents/GoalDetails';
-import Footer from "../components/footer/Footer";
-import Header from "../components/header/header";
-import HeaderImage from '../assets/images/goal_page_image.png';
+import HeaderCard from '../../components/GoalsPageComponents/Header-card';
+import AddGoalModal from '../../components/GoalsPageComponents/AddGoalModal';
+import GoalItem from '../../components/GoalsPageComponents/GoalItem';
+import GoalDetails from '../../components/GoalsPageComponents/GoalDetails';
+import Footer from "../../components/footer/Footer";
+import Header from "../../components/header/header";
+import HeaderImage from '../../assets/images/goal_page_image.png';
 
 interface Goal {
   id: number;
@@ -126,6 +126,10 @@ const Goals: React.FC = () => {
     }
   };
 
+  function handleViewGoalDetails(id: number): void {
+    throw new Error('Function not implemented.');
+  }
+
   return (
     <Box sx={{ p: 3, maxWidth: '1200px', margin: '0 auto' }}>
       {/* Header Component */}
@@ -165,10 +169,11 @@ const Goals: React.FC = () => {
             Goal Details
           </Typography>
           <GoalDetails 
-            goal={selectedGoal}
-            onEdit={handleEditGoal}
-            onDelete={handleDeleteGoal}
-          />
+              goal={selectedGoal} 
+              onEdit={handleEditGoal} 
+              onDelete={handleDeleteGoal} 
+              onViewDetails={handleViewGoalDetails} 
+/>
         </Box>
       </Box>
 
