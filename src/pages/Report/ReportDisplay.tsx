@@ -3,6 +3,8 @@ import Cards from "../../components/ReportComponents/Cards";
 import PieChart from "../../components/ReportComponents/PieChart";
 import BarGraph from "../../components/ReportComponents/BarGraph";
 import BalanceAreaChart from "../../components/ReportComponents/Incomechart";
+import ReportGoal from "../../components/ReportComponents/Reportgoal/reportgoal";
+import BasicTable from "../../components/ReportComponents/Reporttable/transactiontable";
 
 function ReportDisplay() {
   return (
@@ -25,12 +27,19 @@ function ReportDisplay() {
           </Grid>
         </Grid>
         <Box sx={{ mt: 2 }}>
-          <Grid sx={{ ml: 1.8 }}>
+          <Grid container spacing={2} sx={{ width: "100%", margin: 0 }}>
             <Grid item xs={12} md={6}>
               <BalanceAreaChart />
             </Grid>
+
+            <Grid item xs={12} md={6}>
+              <ReportGoal />
+            </Grid>
           </Grid>
         </Box>
+      </Box>
+      <Box>
+        <BasicTable />
       </Box>
     </Box>
   );

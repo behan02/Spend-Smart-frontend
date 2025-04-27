@@ -14,7 +14,7 @@ export default function BalanceAreaChart() {
     <Box
       sx={{
         width: "100%",
-        maxWidth: 600,
+        maxWidth: 1000,
         mt: 2,
         p: 2,
         boxShadow: 3,
@@ -24,6 +24,7 @@ export default function BalanceAreaChart() {
     >
       <LineChart
         height={300}
+        width={600}
         series={[
           {
             data: uData,
