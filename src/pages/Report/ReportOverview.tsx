@@ -5,9 +5,11 @@ import Header from "../../components/header/header";
 import Footer from "../../components/footer/Footer";
 import ReportTable from "../../components/ReportOverview/ReportTable";
 import GenerateReport from "../../components/ReportOverview/GenerateReport";
+import Sidebar from "../../components/sidebar/sidebar";
 
 const ReportOverview: React.FC = () => {
   return (
+    <Sidebar/>
     <Box sx={{ p:4 }}>
   
       <Header pageName="Report Overview" />
