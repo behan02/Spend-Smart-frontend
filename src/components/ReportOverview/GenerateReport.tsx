@@ -12,7 +12,7 @@ function GenerateReport() {
     borderRadius: "10px",
     px: { xs: 2, sm: 3 },
     py: { xs: 1, sm: 1.5 },
-    fontSize: { xs: "1.5rem", md: "2.5rem" } // Set directly here
+    fontSize: { xs: ".5rem", md: ".9rem" } // Set directly here
   }}
 >
   Generate Report
