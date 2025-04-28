@@ -9,21 +9,20 @@ import {
   Button,
   Typography,
 } from "@mui/material";
-import Image from "../../assets/images/regitser1.png";
+import Image from "../../assets/images/userRegister.png";
 import User from "@mui/icons-material/PermIdentity";
 import MailIcon from "@mui/icons-material/MailOutline";
 import LockIcon from "@mui/icons-material/LockOutlined";
 import { Link } from "react-router-dom";
 import Logo from "../../assets/images/logo/Logo.png";
 
-const Register: React.FC = () => {
-  // 🔧 State variables
+const UserRegister: React.FC = () => {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
@@ -31,125 +30,159 @@ const Register: React.FC = () => {
       return;
     }
 
-    // Here you would send data to the backend
-    console.log("Registering user:", { name, email, password });
+    const response = await fetch("", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
+    });
+
+    if (response.ok) {
+      alert("Registered successfully!");
+      // Navigate to login page if needed
+    } else {
+      const error = await response.text();
+      alert(`Error: ${error}`);
+    }
   };
 
   return (
-    <Grid container spacing={2} sx={{ height: "100vh" }}>
+    <Grid
+    container
+    sx={{
+      minHeight: "100vh", // Ensures the container always fills the viewport height
+      overflowX: "hidden", // Prevents horizontal scrolling
+      flexDirection: { xs: "column", md: "row" }, // Stacks items vertically on small screens, horizontally on medium+
+      alignItems: { xs: "center", md: "stretch" }, // Centers items on small screens
+      justifyContent: { xs: "flex-start", md: "space-between" }, // Adjusts spacing based on screen size
+    }}
+  >
+      {/* Left Image Side - Hidden on small screens (xs) */}
       <Grid
         item
         xs={false}
+        sm={false} 
         md={6}
         sx={{
-          display: { xs: "none", md: "flex" },
-          backgroundColor: "#023E8A",
+          display: { xs: "none", md: "flex" }, 
           justifyContent: "center",
           alignItems: "center",
+          backgroundColor: "#023E8A",
+          p: 2,
         }}
       >
         <img
           src={Image}
           alt="Register"
-          style={{ maxWidth: "500px", height: "500px" }}
+          style={{ 
+            width: "80%", 
+            maxWidth: "400px", 
+            height: "auto",
+            objectFit: "contain" 
+          }}
         />
       </Grid>
+
+      {/* Right Form Side - Full width on small screens */}
       <Grid
         item
-        xs={12}
+        xs={12} 
         md={6}
         sx={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
-          marginBottom: 0,
-          minHeight: "100vh",
-          
+          justifyContent: { xs: "flex-start", md: "center" }, 
+          p: { xs: 3, md: 2 }, 
+          overflowY: "auto", 
         }}
       >
-        <img
-          src={Logo}
-          alt="Logo"
-          style={{ maxWidth: "200px", height: "200px" }}
-        />
-        <Box
-          sx={{
-            padding: 0,
-            margin: 0,
-            textAlign: "center",
-            
-          }}
-        >
+        {/* Logo with responsive sizing */}
+        <Box sx={{ 
+          width: "100%", 
+          display: "flex", 
+          justifyContent: "center",
+          mt: { xs: 4, md: 0 } 
+        }}>
+          <img
+            src={Logo}
+            alt="Logo"
+            style={{
+              width: "clamp(150px, 50%, 200px)",
+              height: "auto",
+            }}
+          />
+        </Box>
+
+        {/* Heading with responsive typography */}
+        <Box textAlign="center" sx={{ width: "100%", mt: 2 }}>
           <Typography
-                        sx={{
-                          fontSize: {
-                            xs: "25px",
-                            md: "30px",
-                          },
-                          fontWeight:{
-                            xs:"200",
-                            md:"300"
-                          }
-                        }}
-                      >Join, Budget, Thrive!</Typography>
-          
-          <Typography
+            variant="h5"
             sx={{
-              fontSize:{
-                xs:"14px",
-                md:"15px"
-              },
-              marginBottom:"20px"
-            }}>
+              fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" },
+              fontWeight: 600,
+              color: "text.primary",
+            }}
+          >
+            Join, Budget, Thrive!
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              fontSize: { xs: "0.875rem", md: "1rem" },
+              mt: 1,
+              color: "text.secondary",
+            }}
+          >
             Sign up to simplify saving and managing your finances.
           </Typography>
         </Box>
 
+        {/* Form container */}
         <ListItem
           sx={{
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            justifyContent: "center",
-            
-            
+            width: "100%",
+            maxWidth: "400px",
+            p: 0, 
+            mt: { xs: 2, md: 4 },
           }}
         >
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+            {/* Name Field */}
             <TextField
               label="Name"
               placeholder="Enter your name"
               value={name}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setName(e.target.value)
-              }
+              onChange={(e) => setName(e.target.value)}
+              InputLabelProps={{
+                shrink: true, 
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <User
-                      
-                    />
+                    <User />
                     <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
                   </InputAdornment>
                 ),
               }}
-              sx={{
-                width: "300px",
-                
-                
-              }}
+              variant="outlined"
+              size="small"
+              fullWidth
+              margin="normal"
+              sx={{ mt: 2 }}
             />
-            <br />
-            <br />
 
+            {/* Email Field */}
             <TextField
               label="Email"
-              placeholder="Enter your Email"
+              placeholder="Enter your email"
               value={email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setEmail(e.target.value)
-              }
+              onChange={(e) => setEmail(e.target.value)}
+              InputLabelProps={{
+                shrink: true,
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -158,104 +191,100 @@ const Register: React.FC = () => {
                   </InputAdornment>
                 ),
               }}
-              sx={{
-                width: "300px",
-              }}
+              variant="outlined"
+              size="small"
+              fullWidth
+              margin="normal"
+              sx={{ mt: 2 }}
             />
-            <br />
-            <br />
 
+            {/* Password Field */}
             <TextField
               label="Password"
               type="password"
-              placeholder="**********"
+              placeholder="********"
               value={password}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setPassword(e.target.value)
-              }
+              onChange={(e) => setPassword(e.target.value)}
+              InputLabelProps={{
+                shrink: true,
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <LockIcon  />
+                    <LockIcon />
                     <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
                   </InputAdornment>
                 ),
               }}
-              sx={{
-                width: "300px",
-                
-              }}
+              variant="outlined"
+              size="small"
+              fullWidth
+              margin="normal"
+              sx={{ mt: 2 }}
             />
-            <br />
-            <br />
 
+            {/* Confirm Password Field */}
             <TextField
               label="Confirm Password"
               type="password"
-              placeholder="**********"
+              placeholder="********"
               value={confirmPassword}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setConfirmPassword(e.target.value)
-              }
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              InputLabelProps={{
+                shrink: true,
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <LockIcon/>
+                    <LockIcon />
                     <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
                   </InputAdornment>
                 ),
               }}
-              sx={{
-                width: "300px",
-                
-              }}
+              variant="outlined"
+              size="small"
+              fullWidth
+              margin="normal"
+              sx={{ mt: 2 }}
             />
-            <br />
-            <br />
 
+            {/* Submit Button */}
             <Button
               type="submit"
               variant="contained"
+              fullWidth
               sx={{
                 height: "45px",
-                width: "300px",
-                backgroundColor: {
-                  xs: "#023E8A",
-                  md: "#023E8A",
-                },
+                mt: 3,
+                backgroundColor: "#023E8A",
+                ":hover": { backgroundColor: "#0353A4" },
+                fontSize: { xs: "0.875rem", md: "1rem" },
               }}
             >
               Sign up
             </Button>
-            <br />
+
+            {/* Login Link */}
             <Typography
               sx={{
-                marginTop: "10px",
+                mt: 2,
                 textAlign: "center",
-                width: "300px",
-                textDecoration: "none",
-                fontWeight: 200,
-                cursor: "pointer",
-                fontSize: "0.85rem",
+                fontSize: { xs: "0.875rem", md: "0.9rem" },
               }}
             >
               Already registered?{" "}
               <Link
                 to="/"
                 style={{
-                  color: "#1976d2",
                   textDecoration: "none",
-                  opacity: "50%",
-                  fontWeight: "bold",
                 }}
               >
                 <Typography
                   component="span"
                   sx={{
                     color: "#023E8A",
-    
-                    opacity: 0.7,
                     fontWeight: "bold",
+                    "&:hover": { textDecoration: "underline" },
                   }}
                 >
                   Login here
@@ -269,4 +298,4 @@ const Register: React.FC = () => {
   );
 };
 
-export default Register;
+export default UserRegister;
