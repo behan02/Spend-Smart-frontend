@@ -1,13 +1,14 @@
-import { Box, Grid, ThemeProvider } from "@mui/material";
-import DashboardOverview from "../../components/dashboardOverview/DashboardOverview";
-import DashboardBargraph from "../../components/dashboardBargraph/DashboardBargraph";
-import DashboardPiechart from "../../components/dashboardPiechart/DashboardPiechart";
+import { Box, ThemeProvider } from "@mui/material";
+import DashboardOverview from "../../components/DashboardComponents/dashboardOverview/DashboardOverview";
+import DashboardBargraph from "../../components/DashboardComponents/dashboardBargraph/DashboardBargraph";
+import DashboardPiechart from "../../components/DashboardComponents/dashboardPiechart/DashboardPiechart";
 import theme from "../../assets/styles/theme";
-import DashboardBudget from "../../components/dashboardBudget/DashboardBudget";
-import DashboardGoal from "../../components/dashboardGoals/DashboardGoal";
+import DashboardBudget from "../../components/DashboardComponents/dashboardBudget/DashboardBudget";
+import DashboardGoal from "../../components/DashboardComponents/dashboardGoals/DashboardGoal";
 import Footer from "../../components/footer/Footer";
 import Header from "../../components/header/header";
-import DashboardTransaction from "../../components/dashboardTransaction/DashboardTransaction";
+import DashboardTransaction from "../../components/DashboardComponents/dashboardTransaction/DashboardTransaction";
+import Grid from '@mui/material/Grid';
 
 const Dashboard = () => {
   return (
@@ -25,22 +26,22 @@ const Dashboard = () => {
           </Box>
 
           <Grid container rowSpacing={{mobile: 3, tablet: 4, laptop: 4, desktop: 4}} columnSpacing={3} direction="row" sx={{mt: 5}}>
-            <Grid item mobile={12} desktop={12}>
+            <Grid size={{mobile:12, laptop:12, desktop:12}}>
               <DashboardOverview />
             </Grid>
-            <Grid item mobile={12} desktop={8} laptop={7}>
+            <Grid size={{mobile:12, desktop:8, laptop:7}}>
               <DashboardBargraph />
             </Grid>
-            <Grid item mobile={12} desktop={4} laptop={5}>
+            <Grid size={{mobile:12, desktop:4, laptop:5}}>
               <DashboardPiechart />
             </Grid>
-            <Grid item mobile={12} desktop={6} laptop={6}>
+            <Grid size={{mobile:12, desktop:6, laptop:6}}>
               <DashboardBudget />
             </Grid>
-            <Grid item mobile={12} desktop={6} laptop={6}>
+            <Grid size={{mobile:12, desktop:6, laptop:6}}>
               <DashboardGoal />
             </Grid>
-            <Grid item mobile={12} desktop={12}>
+            <Grid size={{mobile:12, desktop:12}}>
               <DashboardTransaction />
             </Grid>
           </Grid>

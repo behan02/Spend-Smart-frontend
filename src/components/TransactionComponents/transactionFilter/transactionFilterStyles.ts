@@ -1,5 +1,5 @@
 import { SxProps } from "@mui/material";
-import theme from "../../assets/styles/theme";
+import theme from "../../../assets/styles/theme";
 
 const filterContainerStyle: SxProps = {
     display: "flex",
