@@ -6,7 +6,6 @@ import GoalItem from '../components/GoalsPageComponents/GoalItem';
 import GoalDetails from '../components/GoalsPageComponents/GoalDetails';
 import Footer from "../components/footer/Footer";
 import Header from "../components/header/header";
-import { differenceInDays } from 'date-fns';
 import HeaderImage from '../assets/images/goal_page_image.png';
 
 interface Goal {
@@ -20,7 +19,7 @@ interface Goal {
   remainingDays?: number;
 }
 
-const GoalsPage: React.FC = () => {
+const Goals: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [nextId, setNextId] = useState(5); // Starting from 5 since we have 4 initial goals
@@ -76,8 +75,13 @@ const GoalsPage: React.FC = () => {
     const updatedGoals = goals.map(goal => {
       if (goal.deadline) {
         const today = new Date();
-        const days = differenceInDays(new Date(goal.deadline), today);
-        return { ...goal, remainingDays: days > 0 ? days : 0 };
+        const deadlineDate = new Date(goal.deadline);
+        
+        // Calculate difference in days
+        const diffTime = deadlineDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        return { ...goal, remainingDays: diffDays > 0 ? diffDays : 0 };
       }
       return goal;
     });
@@ -129,7 +133,6 @@ const GoalsPage: React.FC = () => {
 
       {/* Header-card Component */}
       <HeaderCard
-      
         title="Set personalized goals and track your savings effortlessly —whether it's for a dream vacation, a new gadget, or a special event."
         description="Start saving today!"
         buttonText="Add New Goal"
@@ -175,11 +178,11 @@ const GoalsPage: React.FC = () => {
         onClose={handleCloseModal}
         onSave={handleSaveGoal}
       />
-    </Box>
-
-
       
+      {/* Footer */}
+      <Footer />
+    </Box>
   );
 };
 
-export default GoalsPage;
+export default Goals;

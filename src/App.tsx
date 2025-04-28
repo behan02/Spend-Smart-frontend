@@ -1,21 +1,21 @@
-import { CssBaseline } from '@mui/material';
-import { ThemeProvider } from "@mui/material";
-import theme from "./assets/styles/theme";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import ReportGenerate from "./pages/Report/ReportGenerate";
-function App() {
+import Sidebar from "./components/sidebar/sidebar";
+import UserLogin from "./pages/UserLogin/UserLogin";
+import UserRegister from "./pages/UserRegister/UserRegister";
 
+function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
-        <Routes>
-          
-          <Route path="/" element={<ReportGenerate/>} />
-        </Routes>
-      </Router>
-    </ThemeProvider>
-  )
+    <Router>
+      <Sidebar />
+      <Routes>
+        <Route path="/" element={<UserLogin />} />
+        <Route path="/register" element={<UserRegister />} />{" "}
+        {/* Add the route for Goals page */}
+      </Routes>
+    </Router>
+  );
+
+  
 
 }
 

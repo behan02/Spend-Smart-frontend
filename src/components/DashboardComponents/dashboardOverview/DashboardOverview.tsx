@@ -55,7 +55,7 @@
 
 import { Box, Typography, Grid, ThemeProvider } from "@mui/material";
 import { overviewList } from "./overview";
-import theme from "../../assets/styles/theme";
+import theme from "../../../assets/styles/theme";
 
 const DashboardOverview = () => {
   return (
@@ -70,7 +70,7 @@ const DashboardOverview = () => {
       </Typography>
       <Grid container spacing={3}>
         {overviewList.map((item) => (
-          <Grid item mobile={6} tablet={6} laptop={3} desktop={3} key={item.name}>
+          <Grid size={{mobile:6, tablet:6, laptop:3, desktop:3}} key={item.name}>
             <Box sx={{
               width: "100%",
               height: "160px",

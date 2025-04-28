@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { format } from 'date-fns';
 
 interface Goal {
   id: number;
@@ -34,7 +33,7 @@ interface GoalDetailsProps {
 }
 
 const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete }) => {
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false); // State for delete confirmation dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   if (!goal) {
     return (
@@ -46,6 +45,15 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete }) => 
     );
   }
 
+  const formatDate = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    };
+    return new Date(date).toLocaleDateString('en-US', options);
+  };
+
   const handleOpenDeleteDialog = () => {
     setDeleteDialogOpen(true);
   };
@@ -55,7 +63,7 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete }) => 
   };
 
   const handleConfirmDelete = () => {
-    onDelete(goal.id); // Call the onDelete function passed as a prop
+    onDelete(goal.id);
     setDeleteDialogOpen(false);
   };
 
@@ -120,7 +128,7 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete }) => 
         {goal.deadline && (
           <Box sx={{ mt: 3 }}>
             <Typography variant="body2" color="textSecondary">
-              Deadline: {format(new Date(goal.deadline), 'MMM d, yyyy')}
+              Deadline: {formatDate(goal.deadline)}
             </Typography>
           </Box>
         )}
@@ -153,7 +161,7 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete }) => 
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete the goal<Typography variant="h6">{goal.name} ?</Typography> 
+            Are you sure you want to delete the goal <Typography variant="h6" component="span">{goal.name}?</Typography> 
           </DialogContentText>
         </DialogContent>
         <DialogActions>
