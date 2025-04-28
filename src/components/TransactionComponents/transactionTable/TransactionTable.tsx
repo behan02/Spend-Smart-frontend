@@ -1,6 +1,6 @@
 import { Box, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography, useMediaQuery } from "@mui/material";
 import { DeleteOutline } from "@mui/icons-material";
-import theme from "../../assets/styles/theme";
+import theme from "../../../assets/styles/theme";
 
 interface Transaction {
   type: string;
