@@ -6,9 +6,8 @@ import {
   ListItemText,
   Box,
 } from "@mui/material";
-import HouseSidingIcon from "@mui/icons-material/HouseSiding";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import SummarizeIcon from "@mui/icons-material/Summarize";
-import Logo from "../../assets/images/logo/Logo.png";
 import {
   AccountBalanceWallet,
   Flag,
@@ -16,28 +15,33 @@ import {
   Settings,
   ExitToApp,
 } from "@mui/icons-material";
+import Logo from "../../assets/images/logo/Logo.png";
+import React from "react";
 
-const menuItems = [
+// ✅ Define a type for menu items
+interface MenuItem {
+  text: string;
+  icon: React.ReactNode;
+  path: string;
+}
+
+// ✅ Type menuItems
+const menuItems: MenuItem[] = [
   {
     text: "Dashboard",
-    icon: (
-      <HouseSidingIcon sx={{ color: "white", transition: "color 0.03s" }} />
-    ),
+    icon: <DashboardIcon />,
     path: "/",
   },
   { text: "Report", icon: <SummarizeIcon />, path: "/report" },
   { text: "Budget", icon: <AccountBalanceWallet />, path: "/budget" },
   { text: "Goals", icon: <Flag />, path: "/goals" },
   { text: "Transaction", icon: <Receipt />, path: "/transaction" },
-  {
-    text: "Settings",
-    icon: <Settings />,
-    path: "/settings",
-  },
+  { text: "Settings", icon: <Settings />, path: "/settings" },
   { text: "Logout", icon: <ExitToApp />, path: "/logout" },
 ];
 
-const Sidebar = () => {
+// ✅ Sidebar component typed
+const Sidebar: React.FC = () => {
   return (
     <Drawer
       variant="permanent"
@@ -54,11 +58,11 @@ const Sidebar = () => {
       }}
     >
       <Box
-        component="img" //Site Logo
+        component="img"
         src={Logo}
         alt="site logo"
-        sx={{ width: 200, height: 200, padding: 5 }}
-      ></Box>
+        sx={{ width: 150, height: 200, padding: 5 }}
+      />
       <List>
         {menuItems.map((item) => (
           <ListItemButton
@@ -72,9 +76,14 @@ const Sidebar = () => {
                 borderRadius: 30,
                 color: "#023e8a",
               },
+              "&:hover .icon": {
+                color: "#023e8a",
+              },
             }}
           >
-            <ListItemIcon sx={{ color: "#fff" }}>{item.icon}</ListItemIcon>
+            <ListItemIcon className="icon" sx={{ color: "#fff" }}>
+              {item.icon}
+            </ListItemIcon>
             <ListItemText primary={item.text} />
           </ListItemButton>
         ))}
