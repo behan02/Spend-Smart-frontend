@@ -18,14 +18,14 @@ import {
 import Logo from "../../assets/images/logo/Logo.png";
 import React from "react";
 
-// ✅ Define a type for menu items
+//  Define a type for menu items
 interface MenuItem {
   text: string;
   icon: React.ReactNode;
   path: string;
 }
 
-// ✅ Type menuItems
+//  Type menuItems
 const menuItems: MenuItem[] = [
   {
     text: "Dashboard",
@@ -40,7 +40,7 @@ const menuItems: MenuItem[] = [
   { text: "Logout", icon: <ExitToApp />, path: "/logout" },
 ];
 
-// ✅ Sidebar component typed
+//  Sidebar component typed
 const Sidebar: React.FC = () => {
   return (
     <Drawer
