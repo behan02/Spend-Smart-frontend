@@ -183,8 +183,6 @@ const Goals: React.FC = () => {
         onClose={handleCloseModal}
         onSave={handleSaveGoal}
       />
-      
-      {/* Footer */}
       <Footer />
     </Box>
   );
