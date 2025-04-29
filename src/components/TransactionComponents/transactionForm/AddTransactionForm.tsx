@@ -1,6 +1,6 @@
 import { Close } from "@mui/icons-material";
 import { Box, Button, FormControl, IconButton, InputLabel, MenuItem, Modal, Paper, Select, TextField, ThemeProvider, Typography } from "@mui/material";
-import theme from "../../assets/styles/theme";
+import theme from "../../../assets/styles/theme";
 import { useState } from "react";
 
 interface TransactionFormProps {

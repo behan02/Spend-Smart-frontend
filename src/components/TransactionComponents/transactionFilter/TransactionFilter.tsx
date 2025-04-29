@@ -1,7 +1,7 @@
 import { Box, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, ThemeProvider } from "@mui/material";
 import { useState } from "react";
 import { filterContainerStyle } from "./transactionFilterStyles";
-import theme from "../../assets/styles/theme";
+import theme from "../../../assets/styles/theme";
 
 const TransactionFilter: React.FC = () => {
     

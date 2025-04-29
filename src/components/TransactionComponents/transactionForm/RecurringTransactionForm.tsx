@@ -1,7 +1,7 @@
 import { Close } from "@mui/icons-material";
 import { Box, Button, Checkbox, FormControl, FormControlLabel, IconButton, InputLabel, MenuItem, Modal, Paper, Select, TextField, ThemeProvider, Typography } from "@mui/material";
 import { useState } from "react";
-import theme from "../../assets/styles/theme";
+import theme from "../../../assets/styles/theme";
 
 
 interface RecurringTransactionProps {

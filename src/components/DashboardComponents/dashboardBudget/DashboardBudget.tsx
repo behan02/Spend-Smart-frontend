@@ -1,6 +1,6 @@
 import { Box, Button, Card, LinearProgress, ThemeProvider, Typography } from "@mui/material";
 import { Budget, budgetset } from "./budgetset";
-import theme from "../../assets/styles/theme";
+import theme from "../../../assets/styles/theme";
 
 const DashboardBudget = () => {
   return (
