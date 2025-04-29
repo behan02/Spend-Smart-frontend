@@ -14,9 +14,10 @@ const ReportGoal = () => {
       sx={{
         p: "20px",
         borderRadius: "15px",
-        height: "500px",
-        m: "0px",
-        width: "700px",
+        height: "400px",
+        mt: -64,
+        ml: 115,
+        width: "480px",
       }}
     >
       <Box

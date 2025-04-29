@@ -31,7 +31,8 @@ export default function BasicTable() {
       component={Paper}
       sx={{
         mt: 2,
-        width: "100%",
+        ml: 35,
+        width: 1125,
         padding: 2,
         boxShadow: 3,
         borderRadius: 2,
