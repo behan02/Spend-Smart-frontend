@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Stack } from '@mui/material';
+import { Box, Typography, Stack, ThemeProvider, CssBaseline } from '@mui/material';
 import HeaderCard from '../../components/GoalsPageComponents/Header-card';
 import AddGoalModal from '../../components/GoalsPageComponents/AddGoalModal';
 import GoalItem from '../../components/GoalsPageComponents/GoalItem';
@@ -7,6 +7,8 @@ import GoalDetails from '../../components/GoalsPageComponents/GoalDetails';
 import Footer from "../../components/footer/Footer";
 import Header from "../../components/header/header";
 import HeaderImage from '../../assets/images/goal_page_image.png';
+import Sidebar from '../../components/sidebar/sidebar';
+import theme from '../../assets/styles/theme';
 
 interface Goal {
   id: number;
@@ -20,10 +22,10 @@ interface Goal {
 }
 
 const Goals: React.FC = () => {
+  // State definitions
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
-  const [nextId, setNextId] = useState(5); // Starting from 5 since we have 4 initial goals
-  
+  const [nextId, setNextId] = useState(5);
   const [goals, setGoals] = useState<Goal[]>([
     { 
       id: 1, 
@@ -63,24 +65,21 @@ const Goals: React.FC = () => {
     }
   ]);
 
-  // Set first goal as selected by default
+  // Default goal selection
   useEffect(() => {
     if (goals.length > 0 && !selectedGoal) {
       setSelectedGoal(goals[0]);
     }
   }, [goals, selectedGoal]);
 
-  // Calculate remaining days for goals with deadlines
+  // Calculate remaining days
   useEffect(() => {
     const updatedGoals = goals.map(goal => {
       if (goal.deadline) {
         const today = new Date();
         const deadlineDate = new Date(goal.deadline);
-        
-        // Calculate difference in days
         const diffTime = deadlineDate.getTime() - today.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
         return { ...goal, remainingDays: diffDays > 0 ? diffDays : 0 };
       }
       return goal;
@@ -89,34 +88,17 @@ const Goals: React.FC = () => {
     setGoals(updatedGoals);
   }, []);
 
-  const handleOpenModal = () => {
-    setModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-  };
-
+  // Event handlers
+  const handleOpenModal = () => setModalOpen(true);
+  const handleCloseModal = () => setModalOpen(false);
   const handleSaveGoal = (goalData: any) => {
-    const newGoal = {
-      ...goalData,
-      id: nextId,
-    };
-    
+    const newGoal = { ...goalData, id: nextId };
     setGoals([...goals, newGoal]);
     setNextId(nextId + 1);
     setSelectedGoal(newGoal);
   };
-
-  const handleSelectGoal = (goal: Goal) => {
-    setSelectedGoal(goal);
-  };
-
-  const handleEditGoal = (id: number) => {
-    // Implementation for editing goal would go here
-    console.log('Edit goal:', id);
-  };
-
+  const handleSelectGoal = (goal: Goal) => setSelectedGoal(goal);
+  const handleEditGoal = (id: number) => console.log('Edit goal:', id);
   const handleDeleteGoal = (id: number) => {
     const updatedGoals = goals.filter(goal => goal.id !== id);
     setGoals(updatedGoals);
@@ -125,66 +107,129 @@ const Goals: React.FC = () => {
       setSelectedGoal(updatedGoals.length > 0 ? updatedGoals[0] : null);
     }
   };
-
-  function handleViewGoalDetails(id: number): void {
-    throw new Error('Function not implemented.');
-  }
+  const handleViewGoalDetails = (id: number) => {
+    console.log('View goal details:', id);
+    // Implementation to be added
+  };
 
   return (
-    <Box sx={{ p: 3, maxWidth: '1200px', margin: '0 auto' }}>
-      {/* Header Component */}
-      <Header pageName="Goals" />
-
-      {/* Header-card Component */}
-      <HeaderCard
-        title="Set personalized goals and track your savings effortlessly —whether it's for a dream vacation, a new gadget, or a special event."
-        description="Start saving today!"
-        buttonText="Add New Goal"
-        onButtonClick={handleOpenModal}
-        imagePath={HeaderImage}
-      />
-
-      {/* Main Content */}
-      <Box sx={{ display: 'flex', gap: 3 }}>
-        {/* Left Side - Goals List */}
-        <Box sx={{ width: '35%' }}>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-            Your Goals
-          </Typography>
-          <Stack spacing={2}>
-            {goals.map((goal) => (
-              <GoalItem 
-                key={goal.id}
-                goal={goal}
-                isSelected={selectedGoal?.id === goal.id}
-                onClick={() => handleSelectGoal(goal)}
-              />
-            ))}
-          </Stack>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ display: 'flex', minHeight: '100vh'}}>
+        {/* Sidebar */}
+        <Box 
+          component="nav" 
+          sx={{ 
+            width: 260,
+            flexShrink: 0,
+            position: { xs: 'fixed', md: 'sticky' },
+            top: 0,
+            height: '100vh',
+            zIndex: 1000,
+            overflowY: 'auto',
+            borderRight: `1px solid ${theme.palette.divider}`
+          }}
+        >
+          <Sidebar />
         </Box>
-
-        {/* Right Side - Goal Details */}
-        <Box sx={{ width: '65%' }}>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-            Goal Details
-          </Typography>
-          <GoalDetails 
-              goal={selectedGoal} 
-              onEdit={handleEditGoal} 
-              onDelete={handleDeleteGoal} 
-              onViewDetails={handleViewGoalDetails} 
-/>
+        
+        {/* Main content */}
+        <Box 
+          component="main" 
+          sx={{ 
+            flexGrow: 1,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            backgroundColor: theme.palette.background.default,
+          }}
+        >
+          {/* Content container */}
+          <Box sx={{ 
+            maxWidth: 1200,
+            width: '100%',
+            mx: 'auto',
+            px: { xs: 2, sm: 3 },
+            pt: 3,
+            pb: 6,
+            flexGrow: 1
+          }}>
+            {/* Header */}
+            <Header pageName="Goals" />
+            
+            {/* Header Card */}
+            <Box sx={{ mb: 4 }}>
+              <HeaderCard
+                title="Set personalized goals and track your savings effortlessly —whether it's for a dream vacation, a new gadget, or a special event."
+                description="Start saving today!"
+                buttonText="Add New Goal"
+                onButtonClick={handleOpenModal}
+                imagePath={HeaderImage}
+              />
+            </Box>
+            
+            {/* Main Content Area */}
+            <Box sx={{ 
+              display: 'flex',
+              flexDirection: { xs: 'column', md: 'row' },
+              gap: 3,
+              mb: 4
+            }}>
+              {/* Goals List */}
+              <Box sx={{ 
+                width: { xs: '100%', md: '35%' },
+                minWidth: { md: 280 }
+              }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+                  Your Goals
+                </Typography>
+                <Stack spacing={2}>
+                  {goals.map((goal) => (
+                    <GoalItem 
+                      key={goal.id}
+                      goal={goal}
+                      isSelected={selectedGoal?.id === goal.id}
+                      onClick={() => handleSelectGoal(goal)}
+                    />
+                  ))}
+                </Stack>
+              </Box>
+              
+              {/* Goal Details */}
+              <Box sx={{ 
+                width: { xs: '100%', md: '65%' },
+                flexGrow: 1
+              }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+                  Goal Details
+                </Typography>
+                <GoalDetails 
+                  goal={selectedGoal} 
+                  onEdit={handleEditGoal} 
+                  onDelete={handleDeleteGoal} 
+                  onViewDetails={handleViewGoalDetails} 
+                />
+              </Box>
+            </Box>
+            
+            {/* Goal Modal */}
+            <AddGoalModal
+              open={modalOpen}
+              onClose={handleCloseModal}
+              onSave={handleSaveGoal}
+            />
+          </Box>
+          
+          {/* Footer */}
+          <Box component="footer" sx={{ 
+            mt: 'auto', 
+            borderTop: `1px solid ${theme.palette.divider}` 
+          }}>
+            <Footer />
+          </Box>
         </Box>
       </Box>
-
-      {/* Add Goal Modal */}
-      <AddGoalModal
-        open={modalOpen}
-        onClose={handleCloseModal}
-        onSave={handleSaveGoal}
-      />
-      <Footer />
-    </Box>
+    </ThemeProvider>
   );
 };
 
