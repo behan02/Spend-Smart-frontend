@@ -1,4 +1,5 @@
 import { createTheme, Theme } from "@mui/material/styles";
+import { max } from "date-fns";
 
 declare module '@mui/material/styles' {
     interface BreakpointOverrides {
@@ -26,11 +27,27 @@ const theme: Theme = createTheme({
     breakpoints: {
         values: {
             mobile: 0,
-            tablet: 425,
+            tablet: 426,
             laptop: 769,
             desktop: 1024,
         },
-    }
+    },
+    components: {
+        MuiCssBaseline: {
+            styleOverrides: {
+                '*': {
+                    margin: 0,
+                    padding: 0,
+                    boxSizing: 'border-box',
+                },
+                body: {
+                    backgroundColor: '#F6F6F8',
+                    maxWidth: '100%',
+                }
+            }
+        }
+    },
+    
 })
 
 export default theme;
