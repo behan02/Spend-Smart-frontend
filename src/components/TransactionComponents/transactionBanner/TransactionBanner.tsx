@@ -1,5 +1,5 @@
 import { Box, Button, ThemeProvider, Typography, useMediaQuery } from "@mui/material";
-import theme from "../../assets/styles/theme";
+import theme from "../../../assets/styles/theme";
 import bannerImg from "../../assets/images/transactionBanner.png";
 import { bannerContainerStyle } from "./transactionBannerStyles";
 
