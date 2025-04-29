@@ -1,16 +1,22 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Sidebar from "./components/sidebar/sidebar";
-import UserLogin from "./pages/UserLogin/UserLogin";
-import UserRegister from "./pages/UserRegister/UserRegister";
+
+
+
+import { Dashboard } from "@mui/icons-material";
+import ReportOverview from "./pages/Report/ReportOverview";
+import Goals from "./pages/Goals";
+import Transaction from "./pages/Transaction/Transaction";
 
 function App() {
   return (
     <Router>
-      <Sidebar />
+    
       <Routes>
-        <Route path="/" element={<UserLogin />} />
-        <Route path="/register" element={<UserRegister />} />{" "}
-        {/* Add the route for Goals page */}
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/report" element={<ReportOverview />} />
+        <Route path="/goals" element={<Goals />} />{/* Add the route for Goals page */}
+        <Route path="/transaction" element={<Transaction />} />
+        {/* Add more routes as needed */}
       </Routes>
     </Router>
   );
