@@ -177,8 +177,7 @@ const Goals: React.FC = () => {
             }}>
               {/* Goals List */}
               <Box sx={{ 
-                width: { xs: '100%', md: '35%' },
-                minWidth: { md: 280 }
+                width: { xs: '100%', md: '45%' },
               }}>
                 <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
                   Your Goals
@@ -197,7 +196,6 @@ const Goals: React.FC = () => {
               
               {/* Goal Details */}
               <Box sx={{ 
-                width: { xs: '100%', md: '65%' },
                 flexGrow: 1
               }}>
                 <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>

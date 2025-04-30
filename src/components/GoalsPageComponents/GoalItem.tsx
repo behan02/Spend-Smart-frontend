@@ -31,7 +31,7 @@ const GoalItem: React.FC<GoalItemProps> = ({ goal, isSelected, onClick }) => {
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-        <Box sx={{ position: 'relative', mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Box sx={{ position: 'relative', mr: 20,ml:2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {/* CircularProgress component for the progress indicator */}
           <CircularProgress 
             variant="determinate" 
