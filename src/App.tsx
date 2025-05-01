@@ -1,20 +1,12 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import ReportDisplay from "./pages/Report/ReportDisplay";
-import Sidebar from "./components/sidebar/sidebar";
-import Footer from "./components/footer/Footer";
-import BudgetPage from "./pages/Budget/Budget";
-
+import Budget from "./pages/Budget/Budget";
+import { Box } from "@mui/material";
+        
 function App() {
-  return (
-    <Router>
-      <Sidebar />
-      <Routes>
-        <Route path="/" element={<BudgetPage />} />
-        <Route path="/reportdisplay" element={<ReportDisplay />} />
-      </Routes>
-      <Footer />
-    </Router>
-  );
+  return(
+    <Box>
+      <Budget />
+    </Box>
+  )
 }
 
 export default App;
