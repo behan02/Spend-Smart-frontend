@@ -28,7 +28,6 @@ const PageButton: React.FC<PageButtonProps> = ({
         width: 150,
         borderRadius: 2,
         ml: 110,
-        //fontWeight: "bold",
       }}
     >
       Save Changes

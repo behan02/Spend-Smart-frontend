@@ -114,35 +114,8 @@ const UserSettings: React.FC = () => {
           </Typography>
           <Passwordchange />
 
-          <Box
-            sx={{
-              borderRadius: "10px",
-              backgroundColor: "#023E8A80",
-              width: 900,
-              height: 220,
-              alignContent: "center",
-              ml: 35,
-              mt: 3, //Pasword Requirements box
-            }}
-          >
-            <Typography sx={{ ml: 3, mt: 2, color: "white" }}>
-              Password Requirements Your Password needs to have
-            </Typography>
-            <Typography sx={{ ml: 3, mt: 1, color: "white" }}>
-              Your Password needs to have
-            </Typography>
-            <Typography sx={{ ml: 7, mt: 1, color: "white" }}>
-              At least 8 characters
-            </Typography>
-            <Typography sx={{ ml: 7, mt: 1, color: "white" }}>
-              At least 1 uppercase letter
-            </Typography>
-            <Typography sx={{ ml: 7, mt: 1, color: "white" }}>
-              At least one number
-            </Typography>
-            <Typography sx={{ ml: 7, mt: 1, color: "white" }}>
-              At least one special character
-            </Typography>
+          <Box>
+        
             <Box
               component="img"
               src={ResetPwdImage}
@@ -150,8 +123,9 @@ const UserSettings: React.FC = () => {
               sx={{
                 maxWidth: "250px",
                 height: "250px",
-                ml: 82,
-                mt: -26.4,
+                ml: 63,
+                mt: 2,
+                alignContent: "center",
               }}
             />
           </Box>

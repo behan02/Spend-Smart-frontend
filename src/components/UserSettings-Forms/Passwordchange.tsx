@@ -1,4 +1,4 @@
-import { Stack, TextField, Typography } from "@mui/material";
+import { Stack, TextField, Typography, Box } from "@mui/material";
 import { useState } from "react";
 
 const PasswordStrengthIndicator: React.FC<{ password: string }> = ({ password }) => {
@@ -14,9 +14,32 @@ const PasswordStrengthIndicator: React.FC<{ password: string }> = ({ password })
   const strengthColor = ["#ff4444", "#ffbb33", "#00C851", "#00C851"][strength];
 
   return (
-    <Typography sx={{ color: strengthColor, ml: 24, mt: 1 }}>
-      Strength: {strengthText}
-    </Typography>
+    <>
+      <Box
+        sx={{
+          height: 4,
+          width: 500,
+          backgroundColor: "#e0e0e0",
+          ml: 24,
+          mt: 0.5,
+          mb: 0.5,
+          borderRadius: 1,
+          overflow: "hidden"
+        }}
+      >
+        <Box
+          sx={{
+            height: "100%",
+            width: `${(strength / 3) * 100}%`,
+            backgroundColor: strengthColor,
+            transition: "width 0.3s ease-in-out, background-color 0.3s ease-in-out"
+          }}
+        />
+      </Box>
+      <Typography sx={{ color: strengthColor, ml: 24, mt: 0 }}>
+        Strength: {strengthText}
+      </Typography>
+    </>
   );
 };
 
@@ -49,7 +72,7 @@ const Passwordchange = () => {
             name="newpwd"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            sx={{ width: 500, mb: 2, ml: 24, mt: -2.5 }}
+            sx={{ width: 500, ml: 24, mt: -2.5 }}
             slotProps={{
               input: {
                 sx: {

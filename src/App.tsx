@@ -8,7 +8,7 @@ function App() {
     <Router>
       <Sidebar />
       <Routes>
-        <Route path="/" element={<UserSettings />} />
+        <Route path="/settings" element={<UserSettings />} />
       </Routes>
       <Footer />
     </Router>
