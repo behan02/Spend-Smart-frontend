@@ -1,12 +1,11 @@
-import { BrowserRouter as Router, Routes, Route, BrowserRouter } from "react-router-dom";
-import ReportDisplay from "./pages/Report/ReportDisplay";
+import { Routes, Route, BrowserRouter } from "react-router-dom";
+
 import ReportOverview from "./pages/Report/ReportOverview";
-import Sidebar from "./components/sidebar/sidebar";
+
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Transaction from "./pages/Transaction/Transaction";
 import Goals from "./pages/Goals";
-import { CssBaseline, ThemeProvider } from "@mui/material";
-import theme from "./assets/styles/theme";
+
 import UserSettings from "./pages/UserSettings/UserSettings";
 import ReportGenerate from "./pages/Report/ReportGenerate";
 
@@ -20,8 +19,7 @@ function App() {
     //   </Routes>
     //   <Footer />
     // </Router>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Dashboard />} />
@@ -33,7 +31,7 @@ function App() {
           <Route path="/reportGenerate" element={<ReportGenerate />} />
         </Routes>
       </BrowserRouter>
-    </ThemeProvider>
+    
   );
 }
 
