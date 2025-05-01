@@ -8,6 +8,7 @@ import Goals from "./pages/Goals";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import theme from "./assets/styles/theme";
 import UserSettings from "./pages/UserSettings/UserSettings";
+import ReportGenerate from "./pages/Report/ReportGenerate";
 
 function App() {
   return (
@@ -28,6 +29,8 @@ function App() {
           <Route path="/goals" element={<Goals />} />
           <Route path="/transaction" element={<Transaction />} />
           <Route path="/settings" element={<UserSettings />} />
+      
+          <Route path="/reportGenerate" element={<ReportGenerate />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
