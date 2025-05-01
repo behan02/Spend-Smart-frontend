@@ -19,7 +19,6 @@ interface AddBudgetModalProps {
   onSave: (budget: any) => void;
 }
 
-
 const AddBudgetModal: React.FC<AddBudgetModalProps> = ({ open, onClose, onSave }) => {
   const [name, setName] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
