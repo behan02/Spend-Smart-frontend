@@ -1,14 +1,14 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { Box, Typography, Stack } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Stack, ThemeProvider, CssBaseline } from '@mui/material';
 import HeaderCard from '../../components/Budget/Header-Card';
 import AddBudgetModal from '../../components/Budget/AddBudgetModal';
 import BudgetItem from '../../components/Budget/BudgetItem';
 import BudgetDetails from '../../components/Budget/BudgetDetails';
 import Footer from "../../components/footer/Footer";
 import Header from "../../components/header/header";
-import { differenceInDays } from 'date-fns';
-import HeaderImage from '../../assets/images/Budget_Page_Image.png';
+import HeaderImage from '../../assets/images/budget_page_image.png';
+import Sidebar from '../../components/sidebar/sidebar';
+import theme from '../../assets/styles/theme';
 
 interface Budget {
   id: number;
@@ -21,11 +21,11 @@ interface Budget {
   remainingDays?: number;
 }
 
-const BudgetPage: React.FC = () => {
+const Budget: React.FC = () => {
+  // State definitions
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedBudget, setSelectedBudget] = useState<Budget| null>(null);
-  const [nextId, setNextId] = useState(5); // Starting from 5 since we have 4 initial budget
-  
+  const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
+  const [nextId, setNextId] = useState(5);
   const [budgets, setBudgets] = useState<Budget[]>([
     { 
       id: 1, 
@@ -65,20 +65,22 @@ const BudgetPage: React.FC = () => {
     }
   ]);
 
-  // Set first Budget as selected by default
+  // Default budget selection
   useEffect(() => {
     if (budgets.length > 0 && !selectedBudget) {
       setSelectedBudget(budgets[0]);
     }
   }, [budgets, selectedBudget]);
 
-  // Calculate remaining days for budgets with deadlines
+  // Calculate remaining days
   useEffect(() => {
     const updatedBudgets = budgets.map(budget => {
       if (budget.deadline) {
         const today = new Date();
-        const days = differenceInDays(new Date(budget.deadline), today);
-        return { ...budget, remainingDays: days > 0 ? days : 0 };
+        const deadlineDate = new Date(budget.deadline);
+        const diffTime = deadlineDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return { ...budget, remainingDays: diffDays > 0 ? diffDays : 0 };
       }
       return budget;
     });
@@ -86,34 +88,17 @@ const BudgetPage: React.FC = () => {
     setBudgets(updatedBudgets);
   }, []);
 
-  const handleOpenModal = () => {
-    setModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-  };
-
-  const handleSaveBudget = (budegtData: any) => {
-    const newBudget = {
-      ...budegtData,
-      id: nextId,
-    };
-    
+  // Event handlers
+  const handleOpenModal = () => setModalOpen(true);
+  const handleCloseModal = () => setModalOpen(false);
+  const handleSaveBudget = (budgetData: any) => {
+    const newBudget = { ...budgetData, id: nextId };
     setBudgets([...budgets, newBudget]);
     setNextId(nextId + 1);
     setSelectedBudget(newBudget);
   };
-
-  const handleSelectBudget = (budget: Budget) => {
-    setSelectedBudget(budget);
-  };
-
-  const handleEditBudget = (id: number) => {
-    // Implementation for editing budget would go here
-    console.log('Edit budget:', id);
-  };
-
+  const handleSelectBudget = (budget: Budget) => setSelectedBudget(budget);
+  const handleEditBudget = (id: number) => console.log('Edit budget:', id);
   const handleDeleteBudget = (id: number) => {
     const updatedBudgets = budgets.filter(budget => budget.id !== id);
     setBudgets(updatedBudgets);
@@ -122,65 +107,127 @@ const BudgetPage: React.FC = () => {
       setSelectedBudget(updatedBudgets.length > 0 ? updatedBudgets[0] : null);
     }
   };
+  const handleViewBudgetDetails = (id: number) => {
+    console.log('View budget details:', id);
+    // Implementation to be added
+  };
 
   return (
-    <Box sx={{ p: 3, maxWidth: '1200px', margin: '0 auto' }}>
-      {/* Header Component */}
-      <Header pageName="Budgets" />
-
-      {/* Header-card Component */}
-      <HeaderCard
-      
-        title="Set personalized budgets and track your savings effortlessly —whether it's for a dream vacation, a new gadget, or a special event."
-        description="Start saving today!"
-        buttonText="Add New budget"
-        onButtonClick={handleOpenModal}
-        imagePath={HeaderImage}
-      />
-
-      {/* Main Content */}
-      <Box sx={{ display: 'flex', gap: 3 }}>
-        {/* Left Side - Budgets List */}
-        <Box sx={{ width: '35%' }}>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-            Your Budgets
-          </Typography>
-          <Stack spacing={2}>
-            {budgets.map((budget) => (
-              <BudgetItem 
-                key={budget.id}
-                budget={budget}
-                isSelected={selectedBudget?.id === budget.id}
-                onClick={() => handleSelectBudget(budget)}
-              />
-            ))}
-          </Stack>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ display: 'flex', minHeight: '100vh'}}>
+        {/* Sidebar */}
+        <Box 
+          component="nav" 
+          sx={{ 
+            width: 260,
+            flexShrink: 0,
+            position: { xs: 'fixed', md: 'sticky' },
+            top: 0,
+            height: '100vh',
+            zIndex: 1000,
+            overflowY: 'auto',
+            borderRight: `1px solid ${theme.palette.divider}`
+          }}
+        >
+          <Sidebar />
         </Box>
-
-        {/* Right Side - Budget Details */}
-        <Box sx={{ width: '65%' }}>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-            Budget Details
-          </Typography>
-          <BudgetDetails 
-            budget={selectedBudget}
-            onEdit={handleEditBudget}
-            onDelete={handleDeleteBudget}
-          />
+        
+        {/* Main content */}
+        <Box 
+          component="main" 
+          sx={{ 
+            flexGrow: 1,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            backgroundColor: theme.palette.background.default,
+          }}
+        >
+          {/* Content container */}
+          <Box sx={{ 
+            maxWidth: 1200,
+            width: '100%',
+            mx: 'auto',
+            px: { xs: 2, sm: 3 },
+            pt: 3,
+            pb: 6,
+            flexGrow: 1
+          }}>
+            {/* Header */}
+            <Header pageName="Budget" />
+            
+            {/* Header Card */}
+            <Box sx={{ mb: 4 }}>
+              <HeaderCard
+                title="Set personalized budgets and track your savings effortlessly —whether it's for a dream vacation, a new gadget, or a special event."
+                description="Start saving today!"
+                buttonText="Add New Budget"
+                onButtonClick={handleOpenModal}
+                imagePath={HeaderImage}
+              />
+            </Box>
+            
+            {/* Main Content Area */}
+            <Box sx={{ 
+              display: 'flex',
+              flexDirection: { xs: 'column', md: 'row' },
+              gap: 3,
+              mb: 4
+            }}>
+              {/* Budgets List */}
+              <Box sx={{ 
+                width: { xs: '100%', md: '45%' },
+              }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+                  Your Budgets
+                </Typography>
+                <Stack spacing={2}>
+                  {budgets.map((budget) => (
+                    <BudgetItem 
+                      key={budget.id}
+                      budget={budget}
+                      isSelected={selectedBudget?.id === budget.id}
+                      onClick={() => handleSelectBudget(budget)}
+                    />
+                  ))}
+                </Stack>
+              </Box>
+              
+              {/* Budget Details */}
+              <Box sx={{ 
+                flexGrow: 1
+              }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+                  Budget Details
+                </Typography>
+                <BudgetDetails 
+                  budget={selectedBudget} 
+                  onEdit={handleEditBudget} 
+                  onDelete={handleDeleteBudget} 
+                />
+              </Box>
+            </Box>
+            
+            {/* Budget Modal */}
+            <AddBudgetModal
+              open={modalOpen}
+              onClose={handleCloseModal}
+              onSave={handleSaveBudget}
+            />
+          </Box>
+          
+          {/* Footer */}
+          <Box component="footer" sx={{ 
+            mt: 'auto', 
+            borderTop: `1px solid ${theme.palette.divider}` 
+          }}>
+            <Footer />
+          </Box>
         </Box>
       </Box>
-
-      {/* Add Budget Modal */}
-      <AddBudgetModal
-        open={modalOpen}
-        onClose={handleCloseModal}
-        onSave={handleSaveBudget}
-      />
-    </Box>
-
-
-      
+    </ThemeProvider>
   );
 };
 
-export default BudgetPage;
+export default Budget;
