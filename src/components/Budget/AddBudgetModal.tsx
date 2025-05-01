@@ -21,21 +21,30 @@ interface AddBudgetModalProps {
 
 const AddBudgetModal: React.FC<AddBudgetModalProps> = ({ open, onClose, onSave }) => {
   const [name, setName] = useState('');
-  const [targetAmount, setTargetAmount] = useState('');
-  const [currentAmount, setCurrentAmount] = useState('');
+  const [budgetLimit, setBudgetLimit] = useState('');  // Total budget amount
+  const [spentAmount, setSpentAmount] = useState(''); // Amount already spent
   const [deadline, setDeadline] = useState<Date | null>(null);
   const [description, setDescription] = useState('');
 
   const handleSave = () => {
-    if (!name || !targetAmount || !currentAmount) {
+    if (!name || !budgetLimit) {
       return;
     }
 
+    // Default spent amount to 0 if not provided
+    const spent = spentAmount ? parseFloat(spentAmount) : 0;
+    const limit = parseFloat(budgetLimit);
+
+    // Calculate remaining amount and percentage
+    const remainingAmount = Math.max(0, limit - spent);
+    const spentPercentage = Math.min(100, Math.round((spent / limit) * 100));
+
     const newBudget = {
       name,
-      targetAmount: parseFloat(targetAmount),
-      savedAmount: parseFloat(currentAmount),
-      progress: Math.round((parseFloat(currentAmount) / parseFloat(targetAmount)) * 100),
+      budgetLimit: limit,
+      spentAmount: spent,
+      remainingAmount: remainingAmount,
+      progress: spentPercentage, // Progress now represents percentage spent
       deadline: deadline,
       description,
     };
@@ -46,8 +55,8 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({ open, onClose, onSave }
 
   const handleClose = () => {
     setName('');
-    setTargetAmount('');
-    setCurrentAmount('');
+    setBudgetLimit('');
+    setSpentAmount('');
     setDeadline(null);
     setDescription('');
     onClose();
@@ -82,48 +91,51 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({ open, onClose, onSave }
         </Box>
 
         <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" sx={{ mb: 1 }}>Name</Typography>
+          <Typography variant="body2" sx={{ mb: 1 }}>Budget Name</Typography>
           <TextField
             fullWidth
             variant="outlined"
             value={name}
             onChange={(e) => setName(e.target.value)}
             size="small"
+            placeholder="e.g., Groceries, Entertainment"
           />
         </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
           <Box sx={{ width: '48%' }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>Target amount</Typography>
+            <Typography variant="body2" sx={{ mb: 1 }}>Budget Limit</Typography>
             <TextField
               fullWidth
               variant="outlined"
-              value={targetAmount}
-              onChange={(e) => setTargetAmount(e.target.value)}
+              value={budgetLimit}
+              onChange={(e) => setBudgetLimit(e.target.value)}
               type="number"
               size="small"
+              placeholder="Total budget"
             />
           </Box>
           <Box sx={{ width: '48%' }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>Current amount</Typography>
+            <Typography variant="body2" sx={{ mb: 1 }}>Already Spent</Typography>
             <TextField
               fullWidth
               variant="outlined"
-              value={currentAmount}
-              onChange={(e) => setCurrentAmount(e.target.value)}
+              value={spentAmount}
+              onChange={(e) => setSpentAmount(e.target.value)}
               type="number"
               size="small"
+              placeholder="Optional"
             />
           </Box>
         </Box>
 
         <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" sx={{ mb: 1 }}>Deadline</Typography>
+          <Typography variant="body2" sx={{ mb: 1 }}>Budget Period End Date</Typography>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
               value={deadline}
               onChange={(newValue) => setDeadline(newValue)}
-              slotProps={{ textField: { size: 'small', fullWidth: true } }}
+              slotProps={{ textField: { size: 'small', fullWidth: true, placeholder: "When does this budget end?" } }}
             />
           </LocalizationProvider>
         </Box>
@@ -138,6 +150,7 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({ open, onClose, onSave }
             multiline
             rows={4}
             size="small"
+            placeholder="Add notes about this budget"
           />
         </Box>
 

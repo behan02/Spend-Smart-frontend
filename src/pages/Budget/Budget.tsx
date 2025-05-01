@@ -29,40 +29,25 @@ const Budget: React.FC = () => {
   const [budgets, setBudgets] = useState<Budget[]>([
     { 
       id: 1, 
-      name: 'Buying a guitar', 
-      savedAmount: 3458.30, 
-      targetAmount: 4580.85, 
-      progress: 75,
-      deadline: new Date('2025-03-08'),
-      description: 'Saving for a Fender Stratocaster guitar',
-      remainingDays: 2
+      name: 'May', 
+      savedAmount: 500000, 
+      targetAmount: 5000, 
+      progress: 10,
+      deadline: new Date('2025-05-31'),
+      description: 'May Salary',
+      remainingDays: 30
     },
-    { 
-      id: 2, 
-      name: 'Laptop', 
-      savedAmount: 1458.30, 
-      targetAmount: 4580.85, 
-      progress: 32,
-      deadline: new Date('2025-04-15'),
-      description: 'New MacBook Pro'
-    },
+   
     { 
       id: 3, 
-      name: 'Vacation', 
-      savedAmount: 1458.30, 
-      targetAmount: 4580.85, 
-      progress: 32,
+      name: 'School Fees', 
+      savedAmount: 30000, 
+      targetAmount: 15000, 
+      progress: 50,
       deadline: new Date('2025-06-01'),
-      description: 'Trip to Bali'
+      description: 'null'
     },
-    { 
-      id: 4, 
-      name: 'Phone', 
-      savedAmount: 1458.30, 
-      targetAmount: 4580.85, 
-      progress: 32,
-      deadline: new Date('2025-05-10')
-    }
+    
   ]);
 
   // Default budget selection
@@ -183,15 +168,21 @@ const Budget: React.FC = () => {
                   Your Budgets
                 </Typography>
                 <Stack spacing={2}>
-                  {budgets.map((budget) => (
-                    <BudgetItem 
-                      key={budget.id}
-                      budget={budget}
-                      isSelected={selectedBudget?.id === budget.id}
-                      onClick={() => handleSelectBudget(budget)}
-                    />
-                  ))}
-                </Stack>
+                    {budgets.map((budget) => (
+                      <BudgetItem 
+                        key={budget.id}
+                        budget={{
+                          id: budget.id,
+                          name: budget.name,
+                          spentAmount: budget.savedAmount,
+                          budgetAmount: budget.targetAmount,
+                          expensePercentage: budget.progress
+                        }}
+                        isSelected={selectedBudget?.id === budget.id}
+                        onClick={() => handleSelectBudget(budget)}
+                      />
+                    ))}
+                  </Stack>
               </Box>
               
               {/* Budget Details */}

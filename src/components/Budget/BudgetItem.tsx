@@ -11,9 +11,9 @@ import {
 interface Budget {
   id: number;
   name: string;
-  savedAmount: number;
-  targetAmount: number;
-  progress: number;
+  spentAmount: number;
+  budgetAmount: number;
+  expensePercentage: number;
 }
 
 interface BudgetItemProps {
@@ -61,6 +61,7 @@ const BudgetItem: React.FC<BudgetItemProps> = ({ budget, isSelected, onClick }) 
         mb: 2, 
         border: '1px solid',
         borderColor: isSelected ? '#3f51b5' : '#f0f0f0',
+        backgroundColor: isSelected ? '#e8f0fe' : 'white',
         borderRadius: '8px',
         boxShadow: isSelected ? 2 : 'none',
         cursor: 'pointer',
@@ -72,14 +73,14 @@ const BudgetItem: React.FC<BudgetItemProps> = ({ budget, isSelected, onClick }) 
       <CardContent sx={{ p: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Box sx={{ flexBasis: '40px', flexShrink: 0 }}>
-            <CircularProgressWithLabel value={budget.progress} />
+            <CircularProgressWithLabel value={budget.expensePercentage} />
           </Box>
           <Box sx={{ ml: 2, flexGrow: 1 }}>
             <Typography variant="body1" fontWeight="medium">
               {budget.name}
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              ${budget.savedAmount.toFixed(2)} / ${budget.targetAmount.toFixed(2)}
+              ${budget.spentAmount.toFixed(2)} / ${budget.budgetAmount.toFixed(2)}
             </Typography>
           </Box>
         </Box>
