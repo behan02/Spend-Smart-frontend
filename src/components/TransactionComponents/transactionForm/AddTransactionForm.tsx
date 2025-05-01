@@ -28,7 +28,7 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
     useEffect(() => {
         async function fetchCategories() {
             try{
-                const response = await fetch("http://localhost:5110/api/Category");
+                const response = await fetch("http://localhost:5110/api/Category/GetCategories");
                 if(!response.ok){
                     throw new Error("Failed to fetch categories");
                 }
@@ -54,7 +54,7 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
         };
 
         try{
-            const response = await fetch("http://localhost:5110/api/Transaction", {
+            const response = await fetch("http://localhost:5110/api/Transaction/CreateTransaction", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -129,10 +129,10 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
                             }}>
                                 <Button 
                                     type="button" 
-                                    variant= {type==="income" ? "contained" : "outlined"} 
+                                    variant= {type==="Income" ? "contained" : "outlined"} 
                                     size="medium"
                                     color="success"
-                                    onClick={() => setType("income")}
+                                    onClick={() => setType("Income")}
                                     sx={{
                                         borderRadius: "15px 0 0 15px",
                                     }}
@@ -141,10 +141,10 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
                                 </Button>
                                 <Button 
                                     type="button" 
-                                    variant= {type==="expense" ? "contained" : "outlined"}
+                                    variant= {type==="Expense" ? "contained" : "outlined"}
                                     size="medium"
                                     color="error"
-                                    onClick={() => setType("expense")}
+                                    onClick={() => setType("Expense")}
                                     sx={{
                                         borderRadius: "0 15px 15px 0",
                                     }}

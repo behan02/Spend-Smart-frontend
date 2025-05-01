@@ -1,56 +1,59 @@
 import { Box, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography, useMediaQuery } from "@mui/material";
 import { DeleteOutline } from "@mui/icons-material";
 import theme from "../../../assets/styles/theme";
+import { useEffect, useState } from "react";
+import CategoryIcons, { iconType } from "../../../assets/categoryIcons/CategoryIcons";
 
 interface Transaction {
+  id: number;
   type: string;
   category: string;
+  amount: number;
   date: string;
   description: string;
-  amount: number;
+  userId: number;  
 }
-
-let tablelist: Transaction[] = [
-  {
-    type: "Expense",
-    category: "Transport",
-    date: "20/11/2024",
-    description: "Travelling expenses",
-    amount: 670,
-  },
-  {
-    type: "Income",
-    category: "Salary",
-    date: "22/11/2024",
-    description: "Salary income",
-    amount: 180000,
-  },
-  {
-    type: "Income",
-    category: "Sales",
-    date: "29/11/2024",
-    description: "Sales",
-    amount: 18000,
-  },
-  {
-    type: "Expense",
-    category: "Food",
-    date: "16/11/2024",
-    description: "For my lunch",
-    amount: 450,
-  },
-  {
-    type: "Income",
-    category: "Salary",
-    date: "30/11/2024",
-    description: "Salary income",
-    amount: 180000,
-  }
-];
 
 const TransactionTable: React.FC = () => {
 
   const isTabletOrDesktop: boolean = useMediaQuery(theme.breakpoints.down("laptop"));
+
+  const [transactionList, setTransactionList] = useState<Transaction[]>([]);
+
+  useEffect(() => {
+    async function fetchTransactions(){
+      try{
+        const response = await fetch("http://localhost:5110/api/Transaction/GetTransaction");
+        if(!response.ok){
+          throw new Error("Failed to fetch transactions");
+        }
+        const data = await response.json();
+        setTransactionList(data);
+      }catch(error){
+        console.error("Error fetching transactions:", error);
+      }
+    }
+
+    fetchTransactions();
+  },[]);
+
+  async function deleteTransaction(id: number) {
+    try{
+      console.log("Deleting transaction with ID:", id);
+      const response = await fetch(`http://localhost:5110/api/Transaction/DeleteTransaction/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if(!response.ok){
+        throw new Error("Failed to delete transaction");
+      }
+      setTransactionList((prevList) => prevList.filter((transaction) => transaction.id !== id));
+    }catch(error){
+      console.error("Error deleting transaction:", error);
+    }
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -73,12 +76,14 @@ const TransactionTable: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {tablelist.map((list: Transaction, index: number) => (
+              {transactionList.map((list: Transaction, index: number) => (
                 <TableRow 
                   key={index} 
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
-                  <TableCell>##</TableCell>
+                  <TableCell sx={{textAlign: "center"}}>{CategoryIcons.map((item: iconType, iconIndex: number) => (
+                    list.category === item.category ? <item.icon key={iconIndex} sx={{color: item.color}}/> : null
+                  ))}</TableCell>
                   <TableCell>
                     <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.type}</Typography>
                   </TableCell>
@@ -104,7 +109,7 @@ const TransactionTable: React.FC = () => {
                       >
                         {list.amount}
                       </Typography>
-                      <IconButton>
+                      <IconButton onClick={() => deleteTransaction(list.id)}>
                         <DeleteOutline fontSize="medium"/>
                       </IconButton>
                     </Box>  
@@ -128,7 +133,7 @@ const TransactionTable: React.FC = () => {
         <TableContainer component={Paper} sx={{borderRadius: "15px"}}>
           <Table aria-label="simple table">
             <TableBody>
-              {tablelist.map((list: Transaction, index: number) => (
+              {transactionList.map((list: Transaction, index: number) => (
                 <TableRow key={index}>
                   <TableCell>##</TableCell>
                   <TableCell>
@@ -151,7 +156,7 @@ const TransactionTable: React.FC = () => {
                       >
                         {list.amount}
                       </Typography>
-                      <IconButton>
+                      <IconButton onClick={() => deleteTransaction(list.id)}>
                         <DeleteOutline fontSize="small"/>
                       </IconButton>
                     </Box>  
