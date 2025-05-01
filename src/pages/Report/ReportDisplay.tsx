@@ -5,10 +5,12 @@ import BarGraph from "../../components/ReportComponents/BarGraph";
 import BalanceAreaChart from "../../components/ReportComponents/Incomechart";
 import ReportGoal from "../../components/ReportComponents/Reportgoal/reportgoal";
 import BasicTable from "../../components/ReportComponents/Reporttable/transactiontable";
+import Footer from "../../components/footer/Footer";
+import ExportButtons from "../../components/ReportComponents/downloadbutton";
 
 function ReportDisplay() {
-  return (
-    
+  return 
+    <Box>
     <Box
       sx={{
         display: "flex",
@@ -16,6 +18,7 @@ function ReportDisplay() {
         
       }}
     >
+      
       <Cards />
       <Box sx={{ mt: 2 }}>
         <Grid container spacing={2} sx={{ width: "100%", margin: 0 }}>
@@ -42,7 +45,12 @@ function ReportDisplay() {
       <Box>
         <BasicTable />
       </Box>
-    </Box>
+      <ExportButtons onExport={function (format: "PDF" | "CSV" | "XLSX"): void {
+          throw new Error("Function not implemented.");
+        }} />
+      <Footer/>
+    </Box></Box>
+    
   );
 }
 

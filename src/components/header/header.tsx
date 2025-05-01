@@ -15,6 +15,7 @@ const Header = ({ pageName }: TransactionHeaderProps) => {
             justifyContent: "space-between",
             alignItems: "center",
             mb: "40px",
+            
         }}>
             <Box>
                 <Typography variant="h4" sx={{
