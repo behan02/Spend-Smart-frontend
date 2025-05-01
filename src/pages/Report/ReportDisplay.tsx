@@ -9,13 +9,13 @@ import Footer from "../../components/footer/Footer";
 import ExportButtons from "../../components/ReportComponents/downloadbutton";
 
 function ReportDisplay() {
-  return (
+  return 
     <Box>
-      <Box
+    <Box
       sx={{
         display: "flex",
         flexDirection: "column",
-        p: 3,
+        
       }}
     >
       
