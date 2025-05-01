@@ -9,13 +9,13 @@ const footerStyles: SxProps = {
     backgroundColor: 'primary.main',
     padding: '20px 0px 20px 0px',
     color: 'rgba(255, 255, 255, 0.8)',
-    width: "100%",
+   // width: "100%",
     [theme.breakpoints.down('laptop')]: {
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-start",
         gap: "20px",
-        width: "100%",
+       // width: "100%",
     },
 }
 

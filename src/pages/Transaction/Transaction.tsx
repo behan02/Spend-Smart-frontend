@@ -1,11 +1,11 @@
 import { Box, ThemeProvider } from "@mui/material";
-import TransactionBanner from "../../components/transactionBanner/TransactionBanner";
-import TransactionFilter from "../../components/transactionFilter/TransactionFilter";
-import TransactionTable from "../../components/transactionTable/TransactionTable";
+import TransactionBanner from "../../components/TransactionComponents/transactionBanner/TransactionBanner";
+import TransactionFilter from "../../components/TransactionComponents/transactionFilter/TransactionFilter";
+import TransactionTable from "../../components/TransactionComponents/transactionTable/TransactionTable";
 import Footer from "../../components/footer/Footer";
 import { useState } from "react";
-import RecurringTransactionForm from "../../components/transactionForm/RecurringTransactionForm";
-import AddTransactionForm from "../../components/transactionForm/AddTransactionForm";
+import RecurringTransactionForm from "../../components/TransactionComponents/transactionForm/RecurringTransactionForm";
+import AddTransactionForm from "../../components/TransactionComponents/transactionForm/AddTransactionForm";
 import Header from "../../components/header/header";
 import theme from "../../assets/styles/theme";
 
