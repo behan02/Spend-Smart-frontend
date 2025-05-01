@@ -9,7 +9,7 @@ import Sidebar from "../../components/sidebar/sidebar";
 
 const ReportOverview: React.FC = () => {
   return (
-    <Box display="flex">
+    <Box display="flex" sx={{ mt: -138}}>
       <Sidebar />
 
       <Box sx={{  flexGrow: 1 }}>
