@@ -17,6 +17,7 @@ import {
 } from "@mui/icons-material";
 import Logo from "../../assets/images/logo/Logo.png";
 import React from "react";
+import { Link } from "react-router-dom";
 
 //  Define a type for menu items
 interface MenuItem {
@@ -27,11 +28,7 @@ interface MenuItem {
 
 //  Type menuItems
 const menuItems: MenuItem[] = [
-  {
-    text: "Dashboard",
-    icon: <DashboardIcon />,
-    path: "/",
-  },
+  { text: "Dashboard", icon: <DashboardIcon />, path: "/", },
   { text: "Report", icon: <SummarizeIcon />, path: "/report" },
   { text: "Budget", icon: <AccountBalanceWallet />, path: "/budget" },
   { text: "Goals", icon: <Flag />, path: "/goals" },
@@ -63,8 +60,10 @@ const Sidebar: React.FC = () => {
         alt="site logo"
         sx={{ width: 150, height: 200, padding: 5 }}
       />
+      
       <List>
         {menuItems.map((item) => (
+          <Link to={item.path} style={{ textDecoration: "none" }}>
           <ListItemButton
             key={item.text}
             sx={{
@@ -86,6 +85,7 @@ const Sidebar: React.FC = () => {
             </ListItemIcon>
             <ListItemText primary={item.text} />
           </ListItemButton>
+          </Link>
         ))}
       </List>
     </Drawer>
