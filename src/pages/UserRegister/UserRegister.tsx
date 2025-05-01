@@ -96,22 +96,20 @@ const Register: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://your-api-endpoint.com/register", {
+      // In your AdminRegister.tsx
+      const response = await fetch(``, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          confirmPassword,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, confirmPassword }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
+        if (response.status === 401) {
+          throw new Error("Unauthorized access");
+        } else if (response.status === 403) {
+          throw new Error("Forbidden - check CORS configuration");
+        }
         throw new Error(errorData.message || "Registration failed");
       }
 
@@ -131,9 +129,16 @@ const Register: React.FC = () => {
       alert("Registration successful!");
       navigate("/dashboard");
     } catch (err) {
-      const error = err as Error;
-      alert(`Error: ${error.message || "Unknown error"}`);
-      console.error("Registration error:", error);
+      if (err instanceof TypeError) {
+        console.error("Network/CORS error:", err);
+        alert(
+          "Connection error. Please check your network or contact support."
+        );
+      } else {
+        const error = err as Error;
+        alert(`Error: ${error.message || "Unknown error"}`);
+        console.error("Registration error:", error);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -211,7 +216,6 @@ const Register: React.FC = () => {
           minHeight: "100vh",
         }}
       >
-        {/* Logo and title */}
         <img
           src={Logo}
           alt="Logo"
@@ -221,7 +225,7 @@ const Register: React.FC = () => {
         <Box sx={{ padding: 0, margin: 0, textAlign: "center" }}>
           <Typography
             sx={{
-              fontSize: { xs: "20px", md: "25px" },
+              fontSize: { xs: "25px", md: "30px" },
               fontWeight: { xs: "200", md: "300" },
             }}
           >
@@ -230,15 +234,14 @@ const Register: React.FC = () => {
 
           <Typography
             sx={{
-              fontSize: { xs: "12px", md: "14px" },
-              marginBottom: "10px",
+              fontSize: { xs: "14px", md: "15px" },
+              marginBottom: "20px",
             }}
           >
             Sign up to simplify saving and managing your finances.
           </Typography>
         </Box>
 
-        {/* Registration form */}
         <ListItem
           sx={{
             display: "flex",
@@ -298,7 +301,7 @@ const Register: React.FC = () => {
             <TextField
               label="Password"
               type="password"
-              placeholder="**********"
+              placeholder=""
               value={password}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setPassword(e.target.value)
@@ -322,7 +325,7 @@ const Register: React.FC = () => {
             <TextField
               label="Confirm Password"
               type="password"
-              placeholder="**********"
+              placeholder=""
               value={confirmPassword}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setConfirmPassword(e.target.value)
