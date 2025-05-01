@@ -3,7 +3,7 @@ import { TextField, Stack, Typography } from "@mui/material";
 const AccountForm = () => {
   return (
     <form>
-      <Stack direction="column" spacing={3}>
+      <Stack direction="column" spacing={3} sx={{ ml: 15}}>
         <label>
           <Typography sx={{ fontSize: 15 }}>First name</Typography>
           <TextField

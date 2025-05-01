@@ -17,15 +17,19 @@ const UserSettings: React.FC = () => {
         }}
       >
         <Box>
+          {/*Header Image */}
           <Box
             sx={{
               position: "relative",
               height: 100,
+              mt: -141,
+              ml: 34,
               backgroundImage: `url(${UserSettingsImage})`,
               backgroundSize: "cover",
               backgroundposition: "center",
             }}
           >
+            {/*Profile Picture */}
             <Avatar
               src={ProfileImage}
               alt="profile-picture"
@@ -39,7 +43,9 @@ const UserSettings: React.FC = () => {
               }}
             />
           </Box>
-          <Box sx={{ mt: 2, ml: 25 }}>
+
+          {/*Change Picture and Delete Picture Button */}
+          <Box sx={{ mt: 2, ml: 60 }}>
             <Stack direction="row" spacing={5}>
               <Button
                 variant="contained"
@@ -59,20 +65,23 @@ const UserSettings: React.FC = () => {
               </Button>
             </Stack>
           </Box>
-          <Typography>
+          <Typography sx={{ ml: 38 }}>
             <h2>Lakshan Rajapaksha</h2>
           </Typography>
         </Box>
-        <Divider sx={{ mt: 2 }} />
-        <Typography>
+        <Divider sx={{ mt: 2, ml: 35 }} />
+        <Typography sx={{ ml: 38, mt: 2 }}>
           <h2>Profile Settings</h2>
         </Typography>
+
+        {/*Account Settings Box */}
         <Box
           sx={{
             borderRadius: "10px",
             backgroundColor: "#FFFFFF",
             my: 2,
             mx: 5,
+            ml: 38,
             padding: 2,
             height: 380, //Acount form box
           }}
@@ -87,6 +96,8 @@ const UserSettings: React.FC = () => {
             type={"button"}
           />
         </Box>
+
+        {/*Password Change Form Box */}
         <Box
           sx={{
             borderRadius: "10px",
@@ -94,7 +105,8 @@ const UserSettings: React.FC = () => {
             mt: 2,
             my: 2,
             mx: 5,
-            height: 650, //Password change form box
+            ml: 38,
+            height: 650,
           }}
         >
           <Typography sx={{ ml: 2, mb: 2 }}>
@@ -152,14 +164,17 @@ const UserSettings: React.FC = () => {
             />
           </Box>
         </Box>
+
+        {/*Add Currencies box */}
         <Box
           sx={{
             borderRadius: "10px",
             backgroundColor: "#FFFFFF",
             my: 2,
             mx: 5,
+            ml: 38,
             padding: 2,
-            height: 380, //Acount form box
+            height: 380,
           }}
         >
           <Typography sx={{ ml: 2, mb: 2 }}>
