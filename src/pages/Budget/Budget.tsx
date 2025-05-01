@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { Box, Typography, Stack } from '@mui/material';
-import HeaderCard from '../../components/Budget/Header-card';
+import HeaderCard from '../../components/Budget/Header-Card';
 import AddBudgetModal from '../../components/Budget/AddBudgetModal';
 import BudgetItem from '../../components/Budget/BudgetItem';
 import BudgetDetails from '../../components/Budget/BudgetDetails';
 import Footer from "../../components/footer/Footer";
-import Header from "../../components/Header/Header";
+import Header from "../../components/header/header";
 import { differenceInDays } from 'date-fns';
 import HeaderImage from '../../assets/images/Budget_Page_Image.png';
 
