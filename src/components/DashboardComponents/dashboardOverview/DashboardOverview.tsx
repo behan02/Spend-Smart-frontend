@@ -61,13 +61,16 @@ const DashboardOverview = () => {
   return (
     <ThemeProvider theme={theme}>
     <Box>
+      {/* Overview Title */}
       <Typography variant="h5" mb={3} sx={{
         [theme.breakpoints.between("mobile","tablet")]: {
-          fontSize: "20px",
+          fontSize: "20px", // Adjust font size for smaller screens
         },
       }}>
         Overview
       </Typography>
+
+      {/* Grid Container for Overview Cards */}
       <Grid container spacing={3}>
         {overviewList.map((item) => (
           <Grid size={{mobile:6, tablet:6, laptop:3, desktop:3}} key={item.name}>

@@ -9,22 +9,17 @@ interface TransactionFormProps {
 }
 
 const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, setAddTransaction}) => {
-
+    // State to manage the form inputs
     const [type, setType] = useState("");
     const [amount, setAmount] = useState('');
     const [categoryID, setCategoryID] = useState('');
     const [date, setDate] = useState('');
     const [description, setDescription] = useState('');
 
+    // State to store fetched categories
     const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
 
-
-    // function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    //     e.preventDefault();
-    //     setAddTransaction(false);
-    //     alert("Transaction added successfully!");
-    // }
-
+    // Fetch categories from the API when the component mounts
     useEffect(() => {
         async function fetchCategories() {
             try{
@@ -41,6 +36,7 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
         fetchCategories();
     },[]);
 
+    // Handle form submission to create a new transaction
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
@@ -67,20 +63,18 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
             const data = await response.json();
             console.log("Transaction added successfully:", data);
             alert("Transaction added successfully!");
-            setAddTransaction(false);
+            setAddTransaction(false); // Close the modal
         }catch(error){
             console.error("Error adding transaction:", error);
             alert("Failed to add transaction. Please try again.");
         }
 
-    }
-    
-      
+    }     
 
     return (
         <ThemeProvider theme={theme}>
             <Box>
-                {/* Add transaction form */}
+                {/* Modal for Add Transaction Form */}
                 <Modal
                     open={addTransaction}
                 >
@@ -103,6 +97,8 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
                             width: "50%",
                         },
                     }}>
+
+                        {/* Header Section */}
                         <Box sx={{
                             display: "flex",
                             justifyContent: "space-between",
@@ -113,6 +109,8 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
                                 <Close />
                             </IconButton>
                         </Box>
+
+                        {/* Form Section */}
                         <Box 
                             component="form" 
                             onSubmit={handleSubmit}
@@ -123,6 +121,7 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
                                 mt: "20px",
                             }}
                         >
+                            {/* Transaction Type Buttons */}
                             <Box sx={{
                                 margin: "auto",
                                 mb: "10px"
@@ -152,6 +151,8 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
                                     Expense
                                 </Button>
                             </Box>
+
+                            {/* Amount Input */}
                             <TextField 
                                 label="Amount" 
                                 variant="outlined" 
@@ -162,6 +163,8 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
                             />
+
+                            {/* Category Dropdown */}
                             <FormControl size="small" fullWidth required>
                                 <InputLabel id="select-category">Category</InputLabel>
                                 <Select
@@ -179,6 +182,8 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
                                     ))}
                                 </Select>
                             </FormControl>
+
+                            {/* Date Input */}
                             <TextField
                                 id="date-input"
                                 label="Date"
@@ -194,6 +199,8 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
                                 value={date}
                                 onChange={(e) => setDate(e.target.value)}
                             />
+
+                            {/* Description Input */}
                             <TextField 
                                 label="Description" 
                                 variant="outlined" 
@@ -203,6 +210,8 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                             />
+
+                            {/* Submit Button */}
                             <Button 
                                 type="submit"
                                 variant="contained"

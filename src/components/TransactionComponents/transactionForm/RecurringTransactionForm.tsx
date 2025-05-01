@@ -10,10 +10,9 @@ interface RecurringTransactionProps {
 }
 
 const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurringTransaction, setRecurringTransaction}) => {
-
+    // State variables to manage form inputs
     const [date, setDate] = useState("");
-    const [amount, setAmount] = useState("");
-    
+    const [amount, setAmount] = useState("");    
     const [frequency, setFrequency] = useState("Monthly");
     const [endDate, setEndDate] = useState("");
     const [occurrences, setOccurrences] = useState("");
@@ -21,15 +20,17 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
 
     const [type, setType] = useState("");
 
+    // Handle form submission
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        setRecurringTransaction(false);
+        setRecurringTransaction(false); // Close the modal
         alert("Transaction added successfully!");
     }
 
     return (
         <ThemeProvider theme={theme}>
         <Box>
+            {/* Modal for Recurring Transaction Form */}
             <Modal 
                 open={recurringTransaction}
             >
@@ -57,6 +58,8 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
                         }
                     }}
                 >
+
+                    {/* Header Section */}
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <Typography variant="h5" sx={{
                             [theme.breakpoints.between("mobile", "tablet")]: {
@@ -69,6 +72,8 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
                             <Close />
                         </IconButton>
                     </Box>
+
+                    {/* Form Section */}
                     <Box 
                         component="form"
                         onSubmit={handleSubmit}
@@ -79,6 +84,7 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
                             mt: "20px",
                         }}
                     >
+                        {/* Transaction Type Buttons */}
                         <Box sx={{
                             margin: "auto",
                             mb: "10px"
@@ -108,6 +114,8 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
                                 Expense
                             </Button>
                         </Box>
+
+                        {/* Amount Input */}
                         <TextField 
                             label="Amount" 
                             variant="outlined" 
@@ -118,6 +126,8 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
                             value={amount} 
                             onChange={(e) => setAmount(e.target.value)} 
                         />
+
+                        {/* Frequency Dropdown */}
                         <FormControl size="small" fullWidth required>
                             <InputLabel id="frequency-label">Frequency</InputLabel>
                             <Select labelId="frequency-label" value={frequency} onChange={(e) => setFrequency(e.target.value)} label="Frequency">
@@ -128,6 +138,8 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
                                 <MenuItem value="Yearly">Yearly</MenuItem>
                             </Select>
                         </FormControl>
+
+                        {/* Start Date Input */}
                         <TextField 
                             id="start-date" 
                             label="Start Date" 
@@ -140,6 +152,8 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
                             onChange={(e) => setDate(e.target.value)} 
                             InputLabelProps={{ shrink: true }} 
                         />
+
+                        {/* End Date Input */}
                         <TextField 
                             id="end-date" 
                             label="End Date (optional)" 
@@ -151,6 +165,8 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
                             onChange={(e) => setEndDate(e.target.value)} 
                             InputLabelProps={{ shrink: true }} 
                         />
+
+                        {/* Occurrences Input */}
                         <TextField 
                             label="Occurrences (optional)" 
                             variant="outlined" 
@@ -160,10 +176,14 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
                             value={occurrences} 
                             onChange={(e) => setOccurrences(e.target.value)} 
                         />
+
+                        {/* Auto-Deduction Checkbox */}
                         <FormControlLabel 
                             control={<Checkbox checked={autoDeduct} onChange={(e) => setAutoDeduct(e.target.checked)} />} 
                             label="Enable Auto-Deduction" 
                         />
+
+                        {/* Submit Button */}
                         <Button 
                             variant="contained"
                             type="submit" 

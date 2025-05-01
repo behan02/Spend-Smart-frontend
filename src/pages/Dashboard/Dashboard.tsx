@@ -15,7 +15,7 @@ const Dashboard = () => {
   return (
     <ThemeProvider theme={theme}>
       <Stack direction="row">
-        <Box flexGrow={1}>
+        <Box>
           <Sidebar />
         </Box>
 
@@ -27,7 +27,7 @@ const Dashboard = () => {
         //       margin: "30px auto",
         //     },
         // }}
-          flexGrow={2}
+          flexGrow={1}
         >
           <Box sx={{
             padding: "20px 60px"

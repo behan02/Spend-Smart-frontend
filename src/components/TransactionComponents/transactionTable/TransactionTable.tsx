@@ -15,11 +15,13 @@ interface Transaction {
 }
 
 const TransactionTable: React.FC = () => {
-
+  // Media query to check if the screen width is less than or equal to "laptop"
   const isTabletOrDesktop: boolean = useMediaQuery(theme.breakpoints.down("laptop"));
 
+  // State to store the list of transactions
   const [transactionList, setTransactionList] = useState<Transaction[]>([]);
 
+  // Fetch transactions from the API
   useEffect(() => {
     async function fetchTransactions(){
       try{
@@ -37,6 +39,7 @@ const TransactionTable: React.FC = () => {
     fetchTransactions();
   },[]);
 
+  // Function to delete a transaction by ID
   async function deleteTransaction(id: number) {
     try{
       console.log("Deleting transaction with ID:", id);
@@ -49,6 +52,7 @@ const TransactionTable: React.FC = () => {
       if(!response.ok){
         throw new Error("Failed to delete transaction");
       }
+      // Update the transaction list after deletion
       setTransactionList((prevList) => prevList.filter((transaction) => transaction.id !== id));
     }catch(error){
       console.error("Error deleting transaction:", error);
@@ -60,7 +64,7 @@ const TransactionTable: React.FC = () => {
       { /* Desktop and Tablet view */ }
       <Box mt="30px" sx={{
         [theme.breakpoints.between("mobile","tablet")]: {
-          display: "none",
+          display: "none", // Hide table for mobile view
         }
       }}>
         <TableContainer component={Paper} sx={{borderRadius: "15px"}}>
@@ -81,21 +85,27 @@ const TransactionTable: React.FC = () => {
                   key={index} 
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
+                  {/* Category Icon */}
                   <TableCell sx={{textAlign: "center"}}>{CategoryIcons.map((item: iconType, iconIndex: number) => (
                     list.category === item.category ? <item.icon key={iconIndex} sx={{color: item.color}}/> : null
                   ))}</TableCell>
+                  {/* Transaction Type */}
                   <TableCell>
                     <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.type}</Typography>
                   </TableCell>
+                  {/* Transaction Category */}
                   <TableCell>
                     <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.category}</Typography>
                   </TableCell>
+                  {/* Transaction Date */}
                   <TableCell>
                     <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.date}</Typography>
                   </TableCell>
+                  {/* Transaction Description */}
                   <TableCell sx={{wordBreak: "break-word", whiteSpace: "normal", maxWidth: "250px"}}>
                     <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.description}</Typography>
                   </TableCell>
+                  {/* Transaction Amount and Delete Button */}
                   <TableCell>
                     <Box sx={{
                       display: "flex",
