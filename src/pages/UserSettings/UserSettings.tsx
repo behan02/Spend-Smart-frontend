@@ -21,13 +21,14 @@ const UserSettings: React.FC = () => {
             sx={{
               position: "relative",
               height: 100,
-              backgroundImage: `url(${UserSettingsImage})`,
+              backgroundImage: `url(${UserSettingsImage})`,    //Header Image
               backgroundSize: "cover",
               backgroundposition: "center",
             }}
           >
+            
             <Avatar
-              src={ProfileImage}
+              src={ProfileImage}       //Profile Image
               alt="profile-picture"
               sx={{
                 width: 110,
@@ -171,7 +172,9 @@ const UserSettings: React.FC = () => {
         </Box>
       </Box>
     </div>
+
   );
 };
 
 export default UserSettings;
+
