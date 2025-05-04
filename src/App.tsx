@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, BrowserRouter } from "react-router-dom";
 import ReportDisplay from "./pages/Report/ReportDisplay";
 import ReportOverview from "./pages/Report/ReportOverview";
@@ -31,6 +32,7 @@ function App() {
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
+
   );
 }
 
