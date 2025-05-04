@@ -6,32 +6,37 @@ import Passwordchange from "../../components/UserSettings-Forms/Passwordchange";
 import PageButton from "../../components/Button/PageButton";
 import ResetPwdImage from "../../assets/images/Reset password-bro.png";
 import CurrencySelector from "../../components/UserSettings-Forms/Addcurencyform";
+import Sidebar from "../../components/sidebar/sidebar";
 
 const UserSettings: React.FC = () => {
   return (
+    
     <div>
+      <Sidebar/>
       <Box
         sx={{
           minHeight: "0",
           backgroundColor: "#F6F6F8",
+          ml: 34,
+          mt: -141,
+          mr: -1
+        
         }}
       >
         <Box>
-          {/*Header Image */}
           <Box
             sx={{
               position: "relative",
               height: 100,
-              mt: -141,
-              ml: 34,
-              backgroundImage: `url(${UserSettingsImage})`,
+              backgroundImage: `url(${UserSettingsImage})`,    //Header Image
               backgroundSize: "cover",
               backgroundposition: "center",
+              width: "100%",
             }}
           >
-            {/*Profile Picture */}
+            
             <Avatar
-              src={ProfileImage}
+              src={ProfileImage}       //Profile Image
               alt="profile-picture"
               sx={{
                 width: 110,
@@ -43,9 +48,7 @@ const UserSettings: React.FC = () => {
               }}
             />
           </Box>
-
-          {/*Change Picture and Delete Picture Button */}
-          <Box sx={{ mt: 2, ml: 60 }}>
+          <Box sx={{ mt: 2, ml: 25 }}>
             <Stack direction="row" spacing={5}>
               <Button
                 variant="contained"
@@ -65,23 +68,20 @@ const UserSettings: React.FC = () => {
               </Button>
             </Stack>
           </Box>
-          <Typography sx={{ ml: 38 }}>
+          <Typography>
             <h2>Lakshan Rajapaksha</h2>
           </Typography>
         </Box>
-        <Divider sx={{ mt: 2, ml: 35 }} />
-        <Typography sx={{ ml: 38, mt: 2 }}>
+        <Divider sx={{ mt: 2 }} />
+        <Typography>
           <h2>Profile Settings</h2>
         </Typography>
-
-        {/*Account Settings Box */}
         <Box
           sx={{
             borderRadius: "10px",
             backgroundColor: "#FFFFFF",
             my: 2,
             mx: 5,
-            ml: 38,
             padding: 2,
             height: 380, //Acount form box
           }}
@@ -96,8 +96,6 @@ const UserSettings: React.FC = () => {
             type={"button"}
           />
         </Box>
-
-        {/*Password Change Form Box */}
         <Box
           sx={{
             borderRadius: "10px",
@@ -105,8 +103,7 @@ const UserSettings: React.FC = () => {
             mt: 2,
             my: 2,
             mx: 5,
-            ml: 38,
-            height: 650,
+            height: 650, //Password change form box
           }}
         >
           <Typography sx={{ ml: 2, mb: 2 }}>
@@ -114,8 +111,35 @@ const UserSettings: React.FC = () => {
           </Typography>
           <Passwordchange />
 
-          <Box>
-        
+          <Box
+            sx={{
+              borderRadius: "10px",
+              backgroundColor: "#023E8A80",
+              width: 900,
+              height: 220,
+              alignContent: "center",
+              ml: 35,
+              mt: 3, //Pasword Requirements box
+            }}
+          >
+            <Typography sx={{ ml: 3, mt: 2, color: "white" }}>
+              Password Requirements Your Password needs to have
+            </Typography>
+            <Typography sx={{ ml: 3, mt: 1, color: "white" }}>
+              Your Password needs to have
+            </Typography>
+            <Typography sx={{ ml: 7, mt: 1, color: "white" }}>
+              At least 8 characters
+            </Typography>
+            <Typography sx={{ ml: 7, mt: 1, color: "white" }}>
+              At least 1 uppercase letter
+            </Typography>
+            <Typography sx={{ ml: 7, mt: 1, color: "white" }}>
+              At least one number
+            </Typography>
+            <Typography sx={{ ml: 7, mt: 1, color: "white" }}>
+              At least one special character
+            </Typography>
             <Box
               component="img"
               src={ResetPwdImage}
@@ -123,9 +147,8 @@ const UserSettings: React.FC = () => {
               sx={{
                 maxWidth: "250px",
                 height: "250px",
-                ml: 63,
-                mt: 2,
-                alignContent: "center",
+                ml: 82,
+                mt: -26.4,
               }}
             />
           </Box>
@@ -138,17 +161,14 @@ const UserSettings: React.FC = () => {
             />
           </Box>
         </Box>
-
-        {/*Add Currencies box */}
         <Box
           sx={{
             borderRadius: "10px",
             backgroundColor: "#FFFFFF",
             my: 2,
             mx: 5,
-            ml: 38,
             padding: 2,
-            height: 380,
+            height: 380, //Acount form box
           }}
         >
           <Typography sx={{ ml: 2, mb: 2 }}>
@@ -160,6 +180,8 @@ const UserSettings: React.FC = () => {
         </Box>
       </Box>
     </div>
+  
+
   );
 };
 
