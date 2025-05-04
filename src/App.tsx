@@ -1,6 +1,6 @@
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Dashboard } from "@mui/icons-material";
+import  Dashboard  from "./pages/Dashboard/Dashboard";
 import ReportOverview from "./pages/Report/ReportOverview";
 import Goals from "./pages/Goals";
 import Transaction from "./pages/Transaction/Transaction";
