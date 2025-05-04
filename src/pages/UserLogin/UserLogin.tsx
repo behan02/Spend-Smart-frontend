@@ -17,7 +17,6 @@ import LockIcon from "@mui/icons-material/LockOutlined";
 import { Link } from "react-router-dom";
 import Logo from "../../assets/images/logo/Logo.png";
 
-// Removed unused LoginRequest interface
 
 interface AuthResponse {
   id: string;

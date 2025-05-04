@@ -1,4 +1,5 @@
 import { createTheme, Theme } from "@mui/material/styles";
+import { max } from "date-fns";
 
 declare module '@mui/material/styles' {
     interface BreakpointOverrides {
@@ -41,10 +42,12 @@ const theme: Theme = createTheme({
                 },
                 body: {
                     backgroundColor: '#F6F6F8',
+                    maxWidth: '100%',
                 }
             }
         }
-    }
+    },
+    
 })
 
 export default theme;
