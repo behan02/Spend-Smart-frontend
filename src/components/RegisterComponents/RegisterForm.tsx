@@ -63,7 +63,7 @@ const RegisterForm: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      {/* Name */}
+    
       <Controller
         name="userName"
         control={control}
@@ -87,8 +87,10 @@ const RegisterForm: React.FC = () => {
           />
         )}
       />
+
       <br />
-      {/* Email */}
+
+   
       <Controller
         name="email"
         control={control}
@@ -119,8 +121,10 @@ const RegisterForm: React.FC = () => {
           />
         )}
       />
+
       <br />
-      {/* Password */}
+
+     
       <Controller
         name="password"
         control={control}
@@ -149,9 +153,11 @@ const RegisterForm: React.FC = () => {
           />
         )}
       />
+
       <br />
+      
       <PasswordStrengthIndicator password="" /> {/* update if needed */}
-      {/* Confirm Password */}
+    
       <Controller
         name="confirmPassword"
         control={control}
@@ -181,8 +187,9 @@ const RegisterForm: React.FC = () => {
           />
         )}
       />
+
       <br />
-      {/* Currency Dropdown */}
+      
       <Controller
         name="currency"
         control={control}
@@ -198,7 +205,7 @@ const RegisterForm: React.FC = () => {
         )}
       />
       <br />
-      {/* Submit Button */}
+    
       <Button
         type="submit"
         variant="contained"
