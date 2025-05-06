@@ -6,7 +6,8 @@ import Goals from "./pages/Goals";
 import Transaction from "./pages/Transaction/Transaction";
 import UserLogin from "./pages/UserLogin/UserLogin";
 import UserRegister from "./pages/UserRegister/UserRegister";
-import AdminLogin from "./pages/AdminLogin.tsx/AdminLogin";
+import AdminLogin from "./pages/AdminLogin/AdminLogin";
+import AdminRegister from "./pages/AdminRegister/AdminRegister";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
 
         {/* Add the route for Admin Site*/}
         <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/register" element={<AdminRegister/>}/>
         
       </Routes>
     </Router>
