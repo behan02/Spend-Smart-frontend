@@ -19,6 +19,9 @@ function App() {
         <Route path="/report" element={<ReportOverview />} />
         <Route path="/goals" element={<Goals />} />{/* Add the route for Goals page */}
         <Route path="/transaction" element={<Transaction />} />
+
+        {/* Add the route for Admin Site*/}
+        <Route path="/admin/login" element={<AdminLogin />} />
         
       </Routes>
     </Router>
