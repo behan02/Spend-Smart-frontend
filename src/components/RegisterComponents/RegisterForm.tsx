@@ -11,187 +11,201 @@ import {
 import User from "@mui/icons-material/PermIdentity";
 import MailIcon from "@mui/icons-material/MailOutline";
 import LockIcon from "@mui/icons-material/LockOutlined";
-import Currency from "./Currency";
 import { useNavigate, Link } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import PasswordStrengthIndicator from "./PasswordStrengthIndicator";
+import Currency from "./Currency"; // assumes your custom Currency dropdown
 
-interface FormErrors {
-  name: string;
+interface RegisterFormInputs {
+  userName: string;
   email: string;
   password: string;
   confirmPassword: string;
-  currency?: { message: string };
+  currency?: string;
 }
 
 const RegisterForm: React.FC = () => {
   const navigate = useNavigate();
-  const { control } = useForm();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [errors, setErrors] = useState<FormErrors>({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
   const [isLoading, setIsLoading] = useState(false);
 
-  const validateForm = (): boolean => {
-    let valid = true;
-    const newErrors: FormErrors = {
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    };
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormInputs>();
 
-    if (!name.trim()) {
-      newErrors.name = "Name is required";
-      valid = false;
-    }
-
-    if (!email.trim()) {
-      newErrors.email = "Email is required";
-      valid = false;
-    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
-      newErrors.email = "Email is invalid";
-      valid = false;
-    }
-
-    if (!password) {
-      newErrors.password = "Password is required";
-      valid = false;
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-      valid = false;
-    }
-
-    if (password !== confirmPassword) {
-      newErrors.confirmPassword = "Passwords don't match";
-      valid = false;
-    }
-
-    setErrors(newErrors);
-    return valid;
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+  const onSubmit = async (data: RegisterFormInputs) => {
     setIsLoading(true);
-
     try {
-      const response = await fetch(``, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, confirmPassword }),
-      });
+      const response = await fetch(
+        "https://localhost:7211/api/user/auth/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }
+      );
+
+      const result = await response.json();
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Registration failed");
+        throw new Error(result.message || "Registration failed");
       }
 
-      const data = await response.json();
-      localStorage.setItem("authToken", data.token);
-      localStorage.setItem("user", JSON.stringify(data));
-      alert("Registration successful!");
-      navigate("/dashboard");
+      alert(result.message); // e.g. "User registration successful."
+      navigate("/");
     } catch (err: any) {
-      alert(`Error: ${err.message}`);
+      alert(`Registration failed: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <TextField
-        label="Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        error={!!errors.name}
-        helperText={errors.name}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <User />
-              <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-            </InputAdornment>
-          ),
-        }}
-        sx={{ width: "300px" }}
-        margin="normal"
-      />
-      <br />
-      <TextField
-        label="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        error={!!errors.email}
-        helperText={errors.email}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <MailIcon />
-              <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-            </InputAdornment>
-          ),
-        }}
-        sx={{ width: "300px" }}
-        margin="normal"
-      />
-      <br />
-      <TextField
-        label="Password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        error={!!errors.password}
-        helperText={errors.password}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <LockIcon />
-              <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-            </InputAdornment>
-          ),
-        }}
-        sx={{ width: "300px" }}
-        margin="normal"
-      />
-      <br />
-      <PasswordStrengthIndicator password={password} />
-      <TextField
-        label="Confirm Password"
-        type="password"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        error={!!errors.confirmPassword}
-        helperText={errors.confirmPassword}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <LockIcon />
-              <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-            </InputAdornment>
-          ),
-        }}
-        sx={{ width: "300px" }}
-        margin="normal"
-      />
-      <br />
-      <Currency
+    <form onSubmit={handleSubmit(onSubmit)}>
+    
+      <Controller
+        name="userName"
         control={control}
+        defaultValue=""
+        rules={{ required: "Name is required" }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Name"
+            error={!!errors.userName}
+            helperText={errors.userName?.message}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <User />
+                  <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ width: "300px" }}
+          />
+        )}
+      />
+
+      <br />
+
+   
+      <Controller
+        name="email"
+        control={control}
+        defaultValue=""
+        rules={{
+          required: "Email is required",
+          pattern: {
+            value: /^\S+@\S+\.\S+$/,
+            message: "Invalid email format",
+          },
+        }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Email"
+            error={!!errors.email}
+            helperText={errors.email?.message}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <MailIcon />
+                  <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ width: "300px" }}
+            margin="normal"
+          />
+        )}
+      />
+
+      <br />
+
+     
+      <Controller
+        name="password"
+        control={control}
+        defaultValue=""
+        rules={{
+          required: "Password is required",
+          minLength: { value: 6, message: "Min 6 characters" },
+        }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Password"
+            type="password"
+            error={!!errors.password}
+            helperText={errors.password?.message}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LockIcon />
+                  <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ width: "300px" }}
+            margin="normal"
+          />
+        )}
+      />
+
+      <br />
+      
+      <PasswordStrengthIndicator password="" /> {/* update if needed */}
+    
+      <Controller
+        name="confirmPassword"
+        control={control}
+        defaultValue=""
+        rules={{
+          required: "Please confirm your password",
+          validate: (value, formValues) =>
+            value === formValues.password || "Passwords do not match",
+        }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Confirm Password"
+            type="password"
+            error={!!errors.confirmPassword}
+            helperText={errors.confirmPassword?.message}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LockIcon />
+                  <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ width: "300px" }}
+            margin="normal"
+          />
+        )}
+      />
+
+      <br />
+      
+      <Controller
         name="currency"
-        label="Preferred Currency"
-        error={!!errors.currency}
-        helperText={errors.currency?.message}
+        control={control}
+        defaultValue=""
+        render={({ field, fieldState }) => (
+          <Currency
+            value={field.value}
+            onChange={field.onChange}
+            label="Preferred Currency"
+            error={!!fieldState.error}
+            helperText={fieldState.error?.message}
+          />
+        )}
       />
       <br />
+    
       <Button
         type="submit"
         variant="contained"
