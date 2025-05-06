@@ -1,12 +1,12 @@
 import { Grid } from "@mui/material"
-import LoginLeftImage from "../../components/LoginComponents/LoginLeftImage";
-import LoginIntro from "../../components/LoginComponents/LoginIntro";
-import LoginForm from "../../components/LoginComponents/LoginForm";
+import AdminLoginLeftImage from "../../components/AdminLoginComponents/AdminLoginLeftImage";
+import AdminLoginHeader from "../../components/AdminLoginComponents/AdminLoginHeader";
+import AdminLoginForm from "../../components/AdminLoginComponents/AdminLoginForm";
 
-function UserLogin() {
+function AdminLogin() {
   return (
     <Grid container spacing={2} sx={{ height: "100vh" }}>
-      <LoginLeftImage />
+      <AdminLoginLeftImage />
       <Grid
         item
         xs={12}
@@ -21,8 +21,8 @@ function UserLogin() {
           flexGrow: 1,
         }}
         >
-          <LoginIntro/>
-          <LoginForm/>
+          <AdminLoginHeader/>
+          <AdminLoginForm/>
         </Grid>
 
 
@@ -30,4 +30,4 @@ function UserLogin() {
   )
 }
 
-export default UserLogin
+export default AdminLogin
