@@ -134,7 +134,7 @@ const LoginForm = () => {
         }}
       >
         Don't have an account yet?{" "}
-        <Link to="/register" style={{ textDecoration: "none" }}>
+        <Link to="/admin/register" style={{ textDecoration: "none" }}>
           <Typography component="span" sx={{ color: "#023E8A", opacity: 0.7, fontWeight: "bold", "&:hover": { opacity: 1 },fontSize: "0.85rem", }}>
             Sign up here
           </Typography>
