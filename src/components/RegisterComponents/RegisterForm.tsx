@@ -12,9 +12,9 @@ import User from "@mui/icons-material/PermIdentity";
 import MailIcon from "@mui/icons-material/MailOutline";
 import LockIcon from "@mui/icons-material/LockOutlined";
 import { useNavigate, Link } from "react-router-dom";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import PasswordStrengthIndicator from "./PasswordStrengthIndicator";
-import Currency from "./Currency"; // assumes your custom Currency dropdown
+import Currency from "./Currency";
 
 interface RegisterFormInputs {
   userName: string;
@@ -31,8 +31,17 @@ const RegisterForm: React.FC = () => {
   const {
     control,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<RegisterFormInputs>();
+
+  const password = useWatch({ control, name: "password" });
+
+  // Email validation function
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const onSubmit = async (data: RegisterFormInputs) => {
     setIsLoading(true);
@@ -46,13 +55,13 @@ const RegisterForm: React.FC = () => {
         }
       );
 
-      const result = await response.json();
+      const result = await response.text(); // Accept plain text or string response
 
       if (!response.ok) {
-        throw new Error(result.message || "Registration failed");
+        throw new Error(result || "Registration failed");
       }
 
-      alert(result.message); // e.g. "User registration successful."
+      alert(result); // e.g. "Registration successful"
       navigate("/");
     } catch (err: any) {
       alert(`Registration failed: ${err.message}`);
@@ -63,7 +72,7 @@ const RegisterForm: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-    
+      {/* Username */}
       <Controller
         name="userName"
         control={control}
@@ -87,20 +96,16 @@ const RegisterForm: React.FC = () => {
           />
         )}
       />
-
       <br />
 
-   
+      {/* Email */}
       <Controller
         name="email"
         control={control}
         defaultValue=""
         rules={{
           required: "Email is required",
-          pattern: {
-            value: /^\S+@\S+\.\S+$/,
-            message: "Invalid email format",
-          },
+          validate: (value) => isValidEmail(value) || "Invalid email address",
         }}
         render={({ field }) => (
           <TextField
@@ -121,10 +126,9 @@ const RegisterForm: React.FC = () => {
           />
         )}
       />
-
       <br />
 
-     
+      {/* Password */}
       <Controller
         name="password"
         control={control}
@@ -153,19 +157,20 @@ const RegisterForm: React.FC = () => {
           />
         )}
       />
-
       <br />
-      
-      <PasswordStrengthIndicator password="" /> {/* update if needed */}
-    
+
+      <PasswordStrengthIndicator password={password || ""} />
+      <br />
+
+      {/* Confirm Password */}
       <Controller
         name="confirmPassword"
         control={control}
         defaultValue=""
         rules={{
           required: "Please confirm your password",
-          validate: (value, formValues) =>
-            value === formValues.password || "Passwords do not match",
+          validate: (value) =>
+            value === getValues("password") || "Passwords do not match",
         }}
         render={({ field }) => (
           <TextField
@@ -187,9 +192,9 @@ const RegisterForm: React.FC = () => {
           />
         )}
       />
-
       <br />
-      
+
+      {/* Currency Dropdown */}
       <Controller
         name="currency"
         control={control}
@@ -205,7 +210,8 @@ const RegisterForm: React.FC = () => {
         )}
       />
       <br />
-    
+
+      {/* Submit Button */}
       <Button
         type="submit"
         variant="contained"
@@ -220,6 +226,7 @@ const RegisterForm: React.FC = () => {
       >
         {isLoading ? <CircularProgress size={24} color="inherit" /> : "Sign up"}
       </Button>
+
       <Box
         sx={{ display: "flex", justifyContent: "center", width: "100%", mt: 1 }}
       >
