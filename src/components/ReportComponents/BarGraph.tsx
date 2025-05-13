@@ -35,8 +35,9 @@ export default function BarsDataset() {
     <Box
       sx={{
         width: '100%',
-        maxWidth: 900,
-        margin: '0 auto',
+        maxWidth: 500,
+        ml: 105,
+        mt: -112,
         p: 2,
         boxShadow: 3,
         borderRadius: 2,
@@ -51,8 +52,8 @@ export default function BarsDataset() {
         { dataKey: 'Expenses', label: 'Expenses', valueFormatter,color:'red' },
       ]}
       {...chartSetting}
-      width={900}
-        height={300}
+      width={500}
+        height={350}
     />
 </Box>
   );
