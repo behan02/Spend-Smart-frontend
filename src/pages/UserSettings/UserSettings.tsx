@@ -56,7 +56,7 @@ const UserSettings: React.FC = () => {
                 size="small"
                 onClick={() => alert("Change picture clicked")}
               >
-                Change Picture
+                Upload Picture
               </Button>
               <Button
                 variant="outlined"

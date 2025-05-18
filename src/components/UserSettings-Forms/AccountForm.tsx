@@ -5,7 +5,7 @@ const AccountForm = () => {
     <form>
       <Stack direction="column" spacing={3} sx={{ ml: 15}}>
         <label>
-          <Typography sx={{ fontSize: 15 }}>First name</Typography>
+          <Typography sx={{ fontSize: 15 }}>Name</Typography>
           <TextField
             type="text"
             name="firstname"
@@ -19,21 +19,7 @@ const AccountForm = () => {
             }}
           />
         </label>
-        <label>
-          <Typography sx={{ fontSize: 15 }}>Last name</Typography>
-          <TextField
-            type="text"
-            name-="lastname"
-            sx={{ width: 500, mb: 2, ml: 24, mt: -2.5 }}
-            slotProps={{
-              input: {
-                sx: {
-                  height: 30,
-                },
-              },
-            }}
-          />
-        </label>
+        
         <label>
           <Typography sx={{ fontSize: 15 }}>Email</Typography>
           <TextField
