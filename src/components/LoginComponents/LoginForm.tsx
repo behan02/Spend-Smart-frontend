@@ -106,6 +106,8 @@ const LoginForm = () => {
       <Typography
         variant="body2"
         sx={{ width: "300px", textAlign: "right", color: "#FF0000", fontSize: "0.8rem", mb: 2, cursor: "pointer" }}
+        component={Link}
+        to="/forgetpassword"
       >
         Forgot password?
       </Typography>
