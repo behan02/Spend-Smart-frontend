@@ -1,12 +1,13 @@
 import { Grid } from "@mui/material"
-import LoginLeftImage from "../../components/LoginComponents/LoginLeftImage";
+import LoginImage from "../../assets/images/userLogin.png";
 import LoginIntro from "../../components/LoginComponents/LoginIntro";
 import LoginForm from "../../components/LoginComponents/LoginForm";
+import LoginLeftImage from "../../components/LoginComponents/LoginLeftImage";
 
 function UserLogin() {
   return (
     <Grid container spacing={2} sx={{ height: "100vh" }}>
-      <LoginLeftImage />
+      <LoginLeftImage imageSrc={LoginImage} altText="Login Page Image" />
       <Grid
         item
         xs={12}
