@@ -1,13 +1,13 @@
 import React from "react";
 import { Grid, ListItem } from "@mui/material";
-import RegisterLeftImage from "../../components/RegisterComponents/RegisterLeftImage";
-import RegisterHeader from "../../components/RegisterComponents/RegisterHeader";
-import RegisterForm from "../../components/RegisterComponents/RegisterForm";
+import AdminRegisterLeftImage from "../../components/AdminRegisterComponents/AdminRegisterLeftImage";
+import AdminRegisterHeader from "../../components/AdminRegisterComponents/AdminRegiserHeader";
+import AdminRegisterForm from "../../components/AdminRegisterComponents/AdminRegisterForm";
 
-const UserRegister: React.FC = () => (
-  <Grid container spacing={2} sx={{ height: "100%", width: "100%",margin: 0, padding: 0 }}>  
-    
-    <RegisterLeftImage />
+const AdminRegister: React.FC = () => (
+  <Grid container spacing={2} sx={{ height: "100vh", width: "100%",margin: 0, padding: 0 }}>  
+  
+    <AdminRegisterLeftImage />
  
     <Grid
       item
@@ -23,7 +23,7 @@ const UserRegister: React.FC = () => (
         
       }}
     >
-      <RegisterHeader />
+      <AdminRegisterHeader />
       <ListItem
         sx={{
           display: "flex",
@@ -32,13 +32,14 @@ const UserRegister: React.FC = () => (
           justifyContent: "center",
           alignContent: "center",
           justifyItems: "center",
+
        
         }}
       >
-        <RegisterForm />
+        <AdminRegisterForm />
       </ListItem>
     </Grid>
   </Grid>
 );
 
-export default UserRegister;
+export default AdminRegister;
