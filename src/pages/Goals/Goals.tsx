@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Stack, ThemeProvider, CssBaseline } from '@mui/material';
+import { Box, Typography, Stack, ThemeProvider, CssBaseline, Paper } from '@mui/material';
 import HeaderCard from '../../components/GoalsPageComponents/Header-card';
 import AddGoalModal from '../../components/GoalsPageComponents/AddGoalModal';
 import GoalItem from '../../components/GoalsPageComponents/GoalItem';
@@ -9,6 +9,8 @@ import Header from "../../components/header/header";
 import HeaderImage from '../../assets/images/goal_page_image.png';
 import Sidebar from '../../components/sidebar/sidebar';
 import theme from '../../assets/styles/theme';
+import { getGoals, createGoal, updateGoal, deleteGoal } from '../../api/goalApi';
+
 
 interface Goal {
   id: number;
@@ -24,56 +26,25 @@ interface Goal {
 const Goals: React.FC = () => {
   // State definitions
   const [modalOpen, setModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
-  const [nextId, setNextId] = useState(5);
-  const [goals, setGoals] = useState<Goal[]>([
-    { 
-      id: 1, 
-      name: 'Buying a guitar', 
-      savedAmount: 3458.30, 
-      targetAmount: 4580.85, 
-      progress: 75,
-      deadline: new Date('2025-03-08'),
-      description: 'Saving for a Fender Stratocaster guitar',
-      remainingDays: 2
-    },
-    { 
-      id: 2, 
-      name: 'Laptop', 
-      savedAmount: 1458.30, 
-      targetAmount: 4580.85, 
-      progress: 32,
-      deadline: new Date('2025-04-15'),
-      description: 'New MacBook Pro'
-    },
-    { 
-      id: 3, 
-      name: 'Vacation', 
-      savedAmount: 1458.30, 
-      targetAmount: 4580.85, 
-      progress: 32,
-      deadline: new Date('2025-06-01'),
-      description: 'Trip to Bali'
-    },
-    { 
-      id: 4, 
-      name: 'Phone', 
-      savedAmount: 1458.30, 
-      targetAmount: 4580.85, 
-      progress: 32,
-      deadline: new Date('2025-05-10')
-    }
-  ]);
+  const [goalToEdit, setGoalToEdit] = useState<Goal | null>(null);
+  const [nextId, setNextId] = useState(1);
+  const [goals, setGoals] = useState<Goal[]>([]);
 
   // Default goal selection
   useEffect(() => {
     if (goals.length > 0 && !selectedGoal) {
       setSelectedGoal(goals[0]);
+    } else if (goals.length === 0) {
+      setSelectedGoal(null);
     }
   }, [goals, selectedGoal]);
 
   // Calculate remaining days
   useEffect(() => {
+    if (goals.length === 0) return;
+    
     const updatedGoals = goals.map(goal => {
       if (goal.deadline) {
         const today = new Date();
@@ -91,14 +62,45 @@ const Goals: React.FC = () => {
   // Event handlers
   const handleOpenModal = () => setModalOpen(true);
   const handleCloseModal = () => setModalOpen(false);
+  
+  const handleOpenEditModal = (id: number) => {
+    const goalToEdit = goals.find(goal => goal.id === id) || null;
+    setGoalToEdit(goalToEdit);
+    setEditModalOpen(true);
+  };
+  
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false);
+    setGoalToEdit(null);
+  };
+
   const handleSaveGoal = (goalData: any) => {
     const newGoal = { ...goalData, id: nextId };
     setGoals([...goals, newGoal]);
     setNextId(nextId + 1);
     setSelectedGoal(newGoal);
   };
+
+  const handleUpdateGoal = (updatedGoalData: any) => {
+    if (!goalToEdit) return;
+    
+    const updatedGoals = goals.map(goal => 
+      goal.id === goalToEdit.id 
+        ? { ...goal, ...updatedGoalData, id: goal.id } 
+        : goal
+    );
+    
+    setGoals(updatedGoals);
+    setSelectedGoal(updatedGoals.find(g => g.id === goalToEdit.id) || null);
+    handleCloseEditModal();
+  };
+
   const handleSelectGoal = (goal: Goal) => setSelectedGoal(goal);
-  const handleEditGoal = (id: number) => console.log('Edit goal:', id);
+  
+  const handleEditGoal = (id: number) => {
+    handleOpenEditModal(id);
+  };
+  
   const handleDeleteGoal = (id: number) => {
     const updatedGoals = goals.filter(goal => goal.id !== id);
     setGoals(updatedGoals);
@@ -107,10 +109,36 @@ const Goals: React.FC = () => {
       setSelectedGoal(updatedGoals.length > 0 ? updatedGoals[0] : null);
     }
   };
+
   const handleViewGoalDetails = (id: number) => {
     console.log('View goal details:', id);
     // Implementation to be added
   };
+
+  // Empty state component
+  const EmptyGoalState = () => (
+    <Paper
+      elevation={0}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        p: 4,
+        height: '200px',
+        border: '1px dashed #ccc',
+        borderRadius: 2,
+        bgcolor: '#f9f9f9'
+      }}
+    >
+      <Typography variant="body1" color="textSecondary" sx={{ mb: 1, textAlign: 'center' }}>
+        You haven't added any goals yet.
+      </Typography>
+      <Typography variant="body2" color="textSecondary" sx={{ textAlign: 'center' }}>
+        Click on "Add New Goal" to create your first savings goal.
+      </Typography>
+    </Paper>
+  );
 
   return (
     <ThemeProvider theme={theme}>
@@ -182,16 +210,20 @@ const Goals: React.FC = () => {
                 <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
                   Your Goals
                 </Typography>
-                <Stack spacing={2}>
-                  {goals.map((goal) => (
-                    <GoalItem 
-                      key={goal.id}
-                      goal={goal}
-                      isSelected={selectedGoal?.id === goal.id}
-                      onClick={() => handleSelectGoal(goal)}
-                    />
-                  ))}
-                </Stack>
+                {goals.length > 0 ? (
+                  <Stack spacing={2}>
+                    {goals.map((goal) => (
+                      <GoalItem 
+                        key={goal.id}
+                        goal={goal}
+                        isSelected={selectedGoal?.id === goal.id}
+                        onClick={() => handleSelectGoal(goal)}
+                      />
+                    ))}
+                  </Stack>
+                ) : (
+                  <EmptyGoalState />
+                )}
               </Box>
               
               {/* Goal Details */}
@@ -201,21 +233,52 @@ const Goals: React.FC = () => {
                 <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
                   Goal Details
                 </Typography>
-                <GoalDetails 
-                  goal={selectedGoal} 
-                  onEdit={handleEditGoal} 
-                  onDelete={handleDeleteGoal} 
-                  onViewDetails={handleViewGoalDetails} 
-                />
+                
+                {selectedGoal ? (
+                  <GoalDetails 
+                    goal={selectedGoal} 
+                    onEdit={handleEditGoal} 
+                    onDelete={handleDeleteGoal} 
+                    onViewDetails={handleViewGoalDetails} 
+                  />
+                ) : (
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 4,
+                      border: '1px solid #eee',
+                      borderRadius: 2,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      height: '200px'
+                    }}
+                  >
+                    <Typography variant="body1" color="textSecondary">
+                      Select a goal to view details
+                    </Typography>
+                  </Paper>
+                )}
               </Box>
             </Box>
             
-            {/* Goal Modal */}
+            {/* Add Goal Modal */}
             <AddGoalModal
               open={modalOpen}
               onClose={handleCloseModal}
               onSave={handleSaveGoal}
             />
+
+            {/* Edit Goal Modal */}
+            {goalToEdit && (
+              <AddGoalModal
+                open={editModalOpen}
+                onClose={handleCloseEditModal}
+                onSave={handleUpdateGoal}
+                initialData={goalToEdit}
+                isEditMode={true}
+              />
+            )}
           </Box>
           
           {/* Footer */}

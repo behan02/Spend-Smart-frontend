@@ -59,6 +59,12 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
     setDeleteDialogOpen(false);
   };
 
+  const handleEdit = () => {
+    if (goal) {
+      onEdit(goal.id);
+    }
+  };
+
   return (
     <>
       <Paper elevation={1} sx={{ p: 4, borderRadius: '8px', bgcolor: 'white' }}>
@@ -137,10 +143,18 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
           </Button>
           
           <Box>
-            <IconButton size="medium" onClick={() => onEdit(goal.id)}>
+            <IconButton 
+              size="medium" 
+              onClick={handleEdit}
+              aria-label="edit goal"
+            >
               <EditIcon fontSize="medium" />
             </IconButton>
-            <IconButton size="medium" onClick={handleOpenDeleteDialog}>
+            <IconButton 
+              size="medium" 
+              onClick={handleOpenDeleteDialog}
+              aria-label="delete goal"
+            >
               <DeleteIcon fontSize="medium" />
             </IconButton>
           </Box>

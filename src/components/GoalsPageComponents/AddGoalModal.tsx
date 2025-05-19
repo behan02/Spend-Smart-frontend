@@ -9,11 +9,15 @@ import {
   IconButton
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { useGoalContext } from '../../context/GoalContext';
+import { Goal } from '../../services/goalService';
 
 interface AddGoalModalProps {
   open: boolean;
   onClose: () => void;
   onSave: (goal: any) => void;
+  initialData?: any;
+  isEditMode?: boolean;
 }
 
 const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave }) => {
@@ -87,32 +91,60 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave }) =>
             fullWidth
             variant="outlined"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              // Allow only letters, numbers, and spaces
+              if (e.target.value === '' || /^[a-zA-Z0-9 ]+$/.test(e.target.value)) {
+          setName(e.target.value);
+              }
+            }}
             size="small"
+            error={name !== '' && !/^[a-zA-Z0-9 ]+$/.test(name)}
+            helperText={name !== '' && !/^[a-zA-Z0-9 ]+$/.test(name) ? "Name should contain only letters and numbers" : ""}
           />
         </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ width: '48%' }}>
+            <Box sx={{ width: '48%' }}>
             <Typography variant="body2" sx={{ mb: 1 }}>Target amount</Typography>
             <TextField
               fullWidth
               variant="outlined"
               value={targetAmount}
-              onChange={(e) => setTargetAmount(e.target.value)}
+              onChange={(e) => {
+              const value = e.target.value;
+              if (value === '' || /^\d*\.?\d*$/.test(value)) {
+          setTargetAmount(value);
+              }
+              }}
               type="number"
               size="small"
+              error={targetAmount !== '' && !/^\d*\.?\d*$/.test(targetAmount)}
+              helperText={targetAmount !== '' && !/^\d*\.?\d*$/.test(targetAmount) 
+              ? "Target amount should be a valid number" 
+              : ""}
             />
-          </Box>
+            </Box>
           <Box sx={{ width: '48%' }}>
             <Typography variant="body2" sx={{ mb: 1 }}>Current amount</Typography>
             <TextField
               fullWidth
               variant="outlined"
               value={currentAmount}
-              onChange={(e) => setCurrentAmount(e.target.value)}
+              onChange={(e) => {
+          const value = e.target.value;
+          if (value === '' || (/^\d*\.?\d*$/.test(value) && (targetAmount === '' || parseFloat(value) <= parseFloat(targetAmount)))) {
+            setCurrentAmount(value);
+          }
+              }}
               type="number"
               size="small"
+              error={currentAmount !== '' && (!/^\d*\.?\d*$/.test(currentAmount) || 
+          (targetAmount !== '' && parseFloat(currentAmount) > parseFloat(targetAmount)))}
+              helperText={currentAmount !== '' && (!/^\d*\.?\d*$/.test(currentAmount) 
+          ? "Current amount should be a valid number" 
+          : (targetAmount !== '' && parseFloat(currentAmount) > parseFloat(targetAmount))
+            ? "Current amount cannot exceed target amount"
+            : "")}
             />
           </Box>
         </Box>
@@ -129,6 +161,13 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave }) =>
             InputLabelProps={{
               shrink: true,
             }}
+            inputProps={{
+              min: new Date().toISOString().split('T')[0]
+            }}
+            error={deadlineDate !== '' && new Date(deadlineDate) <= new Date(new Date().setHours(0, 0, 0, 0))}
+            helperText={deadlineDate !== '' && new Date(deadlineDate) <= new Date(new Date().setHours(0, 0, 0, 0)) 
+              ? "Deadline must be a future date" 
+              : ""}
           />
         </Box>
 
