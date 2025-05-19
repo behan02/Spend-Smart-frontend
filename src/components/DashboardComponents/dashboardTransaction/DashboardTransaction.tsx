@@ -1,6 +1,7 @@
 import { Box, Button, Card, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography, useMediaQuery } from "@mui/material";
 import theme from "../../../assets/styles/theme";
 import { DeleteOutline } from "@mui/icons-material";
+import CategoryIcons, { iconType } from "../../../assets/categoryIcons/CategoryIcons";
 
 interface Transaction {
     type: string;
@@ -8,47 +9,13 @@ interface Transaction {
     date: string;
     description: string;
     amount: number;
-  }
-  
-let tablelist: Transaction[] = [
-    {
-      type: "Expense",
-      category: "Transport",
-      date: "20/11/2024",
-      description: "Travelling expenses",
-      amount: 670,
-    },
-    {
-      type: "Income",
-      category: "Salary",
-      date: "22/11/2024",
-      description: "Salary income",
-      amount: 180000,
-    },
-    {
-      type: "Income",
-      category: "Sales",
-      date: "29/11/2024",
-      description: "Sales",
-      amount: 18000,
-    },
-    {
-      type: "Expense",
-      category: "Food",
-      date: "16/11/2024",
-      description: "For my lunch",
-      amount: 450,
-    },
-    {
-      type: "Income",
-      category: "Salary",
-      date: "30/11/2024",
-      description: "Salary income",
-      amount: 180000,
-    }
-];
+}
 
-const DashboardTransaction: React.FC = () => {
+interface DashboardTransactionProps {
+    data: Transaction[];
+}
+
+const DashboardTransaction: React.FC<DashboardTransactionProps> = ({data}) => {
 
     const isTabletOrDesktop: boolean = useMediaQuery(theme.breakpoints.down("laptop"));
 
@@ -83,12 +50,15 @@ const DashboardTransaction: React.FC = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                {tablelist.map((list: Transaction, index: number) => (
+                                {data.map((list: Transaction, index: number) => (
                                     <TableRow 
                                         key={index} 
                                         // sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                     >
-                                        <TableCell>##</TableCell>
+                                        <TableCell sx={{textAlign: "center"}}>{CategoryIcons.map((item: iconType, iconIndex: number) => (
+                                                list.category === item.category ? <item.icon key={iconIndex} sx={{color: item.color}}/> : null
+                                            ))}
+                                        </TableCell>
                                         <TableCell>
                                             <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.type}</Typography>
                                         </TableCell>
@@ -140,9 +110,12 @@ const DashboardTransaction: React.FC = () => {
                         <TableContainer sx={{borderRadius: "15px"}}>
                             <Table aria-label="simple table">
                                 <TableBody>
-                                {tablelist.map((list: Transaction, index: number) => (
+                                {data.map((list: Transaction, index: number) => (
                                     <TableRow key={index}>
-                                        <TableCell>##</TableCell>
+                                        <TableCell sx={{textAlign: "center"}}>{CategoryIcons.map((item: iconType, iconIndex: number) => (
+                                                        list.category === item.category ? <item.icon key={iconIndex} sx={{color: item.color}}/> : null
+                                                    ))}
+                                        </TableCell>
                                         <TableCell>
                                             <Typography variant="body2" component="p">{list.category}</Typography>
                                             <Typography variant="body2" component="p">{list.type}</Typography>
