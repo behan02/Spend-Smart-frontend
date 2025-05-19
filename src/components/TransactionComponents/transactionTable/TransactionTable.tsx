@@ -25,7 +25,7 @@ const TransactionTable: React.FC = () => {
   useEffect(() => {
     async function fetchTransactions(){
       try{
-        const response = await fetch("http://localhost:5110/api/Transaction/GetTransaction");
+        const response = await fetch("https://localhost:7211/api/Transaction/GetTransaction");
         if(!response.ok){
           throw new Error("Failed to fetch transactions");
         }
@@ -37,13 +37,13 @@ const TransactionTable: React.FC = () => {
     }
 
     fetchTransactions();
-  },[]);
+  },[transactionList]);
 
   // Function to delete a transaction by ID
   async function deleteTransaction(id: number) {
     try{
       console.log("Deleting transaction with ID:", id);
-      const response = await fetch(`http://localhost:5110/api/Transaction/DeleteTransaction/${id}`, {
+      const response = await fetch(`https://localhost:7211/api/Transaction/DeleteTransaction/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -145,7 +145,10 @@ const TransactionTable: React.FC = () => {
             <TableBody>
               {transactionList.map((list: Transaction, index: number) => (
                 <TableRow key={index}>
-                  <TableCell>##</TableCell>
+                  <TableCell sx={{textAlign: "center"}}>{CategoryIcons.map((item: iconType, iconIndex: number) => (
+                    list.category === item.category ? <item.icon key={iconIndex} sx={{color: item.color}}/> : null
+                  ))}
+                  </TableCell>
                   <TableCell>
                     <Typography variant="body2" component="p">{list.category}</Typography>
                     <Typography variant="body2" component="p">{list.type}</Typography>
