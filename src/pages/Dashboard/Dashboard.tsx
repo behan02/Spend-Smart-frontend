@@ -34,7 +34,7 @@ const Dashboard = () => {
       }
     }
     fetchDashboardData();
-  },[dashboardData])
+  },[])
 
   if(loading){
     return(

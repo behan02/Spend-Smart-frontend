@@ -37,7 +37,7 @@ const TransactionTable: React.FC = () => {
     }
 
     fetchTransactions();
-  },[transactionList]);
+  },[]);
 
   // Function to delete a transaction by ID
   async function deleteTransaction(id: number) {
