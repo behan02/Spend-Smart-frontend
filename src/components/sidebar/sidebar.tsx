@@ -52,7 +52,7 @@ const Sidebar: React.FC = () => {
         [`& .MuiDrawer-paper`]: {
           width: 280,
           boxSizing: "border-box",
-          background: "#023e8a",
+          background: "#fff",
           color: "#fff",
         },
       }}
@@ -68,20 +68,20 @@ const Sidebar: React.FC = () => {
           <ListItemButton
             key={item.text}
             sx={{
-              color: "white",
-              backgroundColor: "#023e8a",
+              color: "#023e8a",
+              backgroundColor: "#fff",  //buttons color
               borderRadius: 30,
               "&:hover": {
-                backgroundColor: "white",
+                backgroundColor: "gray",
                 borderRadius: 30,
-                color: "#023e8a",
+                color: "#fff",    //when hover text color
               },
               "&:hover .icon": {
-                color: "#023e8a",
+                color: "#fff",   //when hover Icon color
               },
             }}
           >
-            <ListItemIcon className="icon" sx={{ color: "#fff" }}>
+            <ListItemIcon className="icon" sx={{ color: "#023e8a" }}>
               {item.icon}
             </ListItemIcon>
             <ListItemText primary={item.text} />
