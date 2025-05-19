@@ -1,5 +1,5 @@
 import { Close } from "@mui/icons-material";
-import { Box, Button, FormControl, IconButton, InputLabel, MenuItem, Modal, Paper, Select, TextField, ThemeProvider, Typography } from "@mui/material";
+import { Box, Button, FormControl, IconButton, InputLabel, MenuItem, Modal, Paper, Select, TextareaAutosize, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../../../assets/styles/theme";
 import { useEffect, useState } from "react";
 
@@ -23,7 +23,7 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
     useEffect(() => {
         async function fetchCategories() {
             try{
-                const response = await fetch("http://localhost:5110/api/Category/GetCategories");
+                const response = await fetch(`https://localhost:7211/api/Category/GetCategories/${type}`);
                 if(!response.ok){
                     throw new Error("Failed to fetch categories");
                 }
@@ -34,7 +34,7 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
             }
         }
         fetchCategories();
-    },[]);
+    },[type]);
 
     // Handle form submission to create a new transaction
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -50,7 +50,7 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
         };
 
         try{
-            const response = await fetch("http://localhost:5110/api/Transaction/CreateTransaction", {
+            const response = await fetch("https://localhost:7211/api/Transaction/CreateTransaction", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -195,7 +195,7 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
                                 InputLabelProps={{
                                     shrink: true
                                 }}
-                                placeholder="Date"
+                                // placeholder="Date"
                                 value={date}
                                 onChange={(e) => setDate(e.target.value)}
                             />
