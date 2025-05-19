@@ -30,7 +30,7 @@ const DashboardBudget = () => {
                         <Typography variant="h6" component="p" fontSize="12px">{set.status}</Typography>
                     </Box>
                     {/* Progress bar */}
-                    <LinearProgress variant="buffer" value={set.progress} sx={{
+                    <LinearProgress variant="buffer" value={set.progress} valueBuffer={100} sx={{
                             height: "12px", 
                             borderRadius: "5px",
                             '& .MuiLinearProgress-bar': {

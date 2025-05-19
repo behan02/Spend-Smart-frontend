@@ -23,7 +23,7 @@ const DashboardGoal = () => {
                 <Typography variant="h6" component="p" fontSize="14px" color="rgba(0,0,0,0.6)">Target date {item.date.toLocaleDateString()}</Typography>
                 
                 {/* Progress bar */}
-                <LinearProgress variant="buffer" value={item.progress} sx={{
+                <LinearProgress variant="buffer" value={item.progress} valueBuffer={100} sx={{
                         height: "12px", 
                         borderRadius: "5px",
                         '& .MuiLinearProgress-bar': {
