@@ -24,7 +24,7 @@ const Transaction: React.FC = () => {
             
                 <Box flexGrow={1} minHeight="100vh" display="flex" flexDirection="column">
                     <Box sx={{
-                        padding: "20px 60px",
+                        padding: "30px 40px",
                         flexGrow: 1,
                     }}>
                         <Box>
