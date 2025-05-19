@@ -10,6 +10,7 @@ import AdminLogin from "./pages/AdminLogin/AdminLogin";
 import AdminRegister from "./pages/AdminRegister/AdminRegister";
 import ForgetPassword from "./pages/ForgetPassword";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import ReportGenerate from "./pages/Report/ReportGenerate";
 
 function App() {
   return (
@@ -24,11 +25,13 @@ function App() {
         <Route path="/transaction" element={<Transaction />} />
         <Route path="/forgetpassword" element={<ForgetPassword />} />
         <Route path="/resetpassword" element={<ResetPasswordPage />} />
+        <Route path="/reportGenerate" element={<ReportGenerate />} />
+        
 
         {/* Add the route for Admin Site*/}
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/register" element={<AdminRegister/>}/>
-        
+        <Route path="/admin/register" element={<AdminRegister />} />
+
       </Routes>
     </Router>
   );
