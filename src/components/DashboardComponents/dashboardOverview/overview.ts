@@ -6,30 +6,30 @@ import SavingsIcon from '@mui/icons-material/Savings';
 export const overviewList = [
     {
         name: "Balance",
-        amount: 7400,
         color: "#CFCBF3",
-        difference: 2000,
         icon: AccountBalanceWalletIcon,
+        difference: 0,
+        key: "balance"
     },
     {
         name: "Income",
-        amount: 20000,
         color: "#CAE5D2",
-        difference: 2000,
         icon: AttachMoneyIcon,
+        difference: 0,
+        key: "income"
     },
     {
         name: "Expense",
-        amount: 12600,
         color: "#F5D0D1",
-        difference: 2000,
         icon: ShoppingCartIcon,
+        difference: 0,
+        key: "expense"
     },
     {
         name: "Savings",
-        amount: 2000,
         color: "#F3DAF4",
-        difference: -2000,
         icon: SavingsIcon,
+        difference: 0,
+        key: "savings"
     }
 ]
