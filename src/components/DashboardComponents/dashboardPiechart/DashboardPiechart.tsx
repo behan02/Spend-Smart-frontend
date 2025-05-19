@@ -16,23 +16,23 @@ const DashboardPiechart = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            flexDirection: "row",
-            // margin: "auto",
-            height: "100%"
+            flexDirection: "column",
+            height: "100%",
         }}>
             <PieChart 
                 series={[
                     {
                         data: dataset,
                         innerRadius: 50,
+                        outerRadius: 120,
                         paddingAngle: 0.5,
                         cornerRadius: 2,
                     }
                 ]}
                 width={400}
-                height={270}
+                height={400}
                 slotProps={{
-                    legend: {direction: "column", position: {horizontal: "right", vertical: "top"}}
+                    legend: {direction: "column", position: {horizontal: "right", vertical: "middle"}}
                 }}
             />
         </Box>
