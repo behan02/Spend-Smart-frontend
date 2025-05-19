@@ -56,8 +56,18 @@
 import { Box, Typography, Grid, ThemeProvider } from "@mui/material";
 import { overviewList } from "./overview";
 import theme from "../../../assets/styles/theme";
+import React from "react";
 
-const DashboardOverview = () => {
+interface DashboardOverviewProps {
+  data: {
+    income: number;
+    expense: number;
+    balance: number;
+  };
+}
+
+const DashboardOverview: React.FC<DashboardOverviewProps> = ({data}) => {
+
   return (
     <ThemeProvider theme={theme}>
     <Box>
@@ -111,7 +121,7 @@ const DashboardOverview = () => {
                 },
               }}
               >
-                LKR {item.amount}
+                LKR {data[item.key as keyof typeof data] ?? 0}
               </Typography>
               <Box sx={{
                 display: "flex",
