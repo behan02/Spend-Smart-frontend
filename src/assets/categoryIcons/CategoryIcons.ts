@@ -25,7 +25,7 @@ const CategoryIcons: iconType[] = [
     {
         category: "Salary",
         icon: PaidIcon,
-        color: "yellow",
+        color: "teal",
     },
     {
         category: "Business",
@@ -65,12 +65,12 @@ const CategoryIcons: iconType[] = [
     {
         category: "Shopping",
         icon: ShoppingCartIcon,
-        color: "teal",
+        color: "#D50B8B",
     },
     {
-        category: "Bills",
+        category: "Bill",
         icon: ReceiptIcon,
-        color: "cyan",
+        color: "crimson",
     },
     {
         category: "Other",
