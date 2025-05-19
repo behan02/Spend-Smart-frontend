@@ -1,4 +1,4 @@
-import { Box, Stack, ThemeProvider } from "@mui/material";
+import { Box, Stack, ThemeProvider, Typography } from "@mui/material";
 import DashboardOverview from "../../components/DashboardComponents/dashboardOverview/DashboardOverview";
 import DashboardBargraph from "../../components/DashboardComponents/dashboardBargraph/DashboardBargraph";
 import DashboardPiechart from "../../components/DashboardComponents/dashboardPiechart/DashboardPiechart";
@@ -10,8 +10,38 @@ import Header from "../../components/header/header";
 import DashboardTransaction from "../../components/DashboardComponents/dashboardTransaction/DashboardTransaction";
 import Grid from '@mui/material/Grid';
 import Sidebar from "../../components/sidebar/sidebar";
+import { useEffect, useState } from "react";
 
 const Dashboard = () => {
+
+  const [dashboardData, setDashboardData] = useState<any>();
+  const [loading, setLoading] = useState<boolean>(true);
+  let userId: Number = 1;
+
+  useEffect(() => {
+    async function fetchDashboardData(){
+      try{
+        const response = await fetch(`https://localhost:7211/api/Dashboard/${userId}`);
+        if(!response.ok){
+          throw new Error("Failed to fetch dashboard data");
+        }
+        const data = await response.json();
+        setDashboardData(data);
+      }catch(error: any){
+        console.error(error);
+      }finally{
+        setLoading(false);
+      }
+    }
+    fetchDashboardData();
+  },[dashboardData])
+
+  if(loading){
+    return(
+      <Typography variant="h6">Loading Dashboard...</Typography>
+    )
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <Stack direction="row">
@@ -30,15 +60,17 @@ const Dashboard = () => {
           flexGrow={1}
         >
           <Box sx={{
-            padding: "20px 60px"
+            padding: "20px 40px"
           }}>
             <Box>
               <Header pageName="Dashboard" />
             </Box>
 
             <Grid container rowSpacing={{mobile: 3, tablet: 4, laptop: 4, desktop: 4}} columnSpacing={3} direction="row" sx={{mt: 5}}>
+              {dashboardData && (
+                <>
               <Grid size={{mobile:12, laptop:12, desktop:12}}>
-                <DashboardOverview />
+                <DashboardOverview data={dashboardData}/>
               </Grid>
               <Grid size={{mobile:12, desktop:8, laptop:7}}>
                 <DashboardBargraph />
@@ -53,8 +85,11 @@ const Dashboard = () => {
                 <DashboardGoal />
               </Grid>
               <Grid size={{mobile:12, desktop:12}}>
-                <DashboardTransaction />
+                <DashboardTransaction data={dashboardData.recentTransactions}/>
               </Grid>
+                </>
+              )}
+
             </Grid>
           </Box>
             <Box>
