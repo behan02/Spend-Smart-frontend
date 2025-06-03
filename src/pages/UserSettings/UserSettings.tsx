@@ -7,8 +7,17 @@ import PageButton from "../../components/Button/PageButton";
 import ResetPwdImage from "../../assets/images/Reset password-bro.png";
 import CurrencySelector from "../../components/UserSettings-Forms/Addcurencyform";
 import Sidebar from "../../components/sidebar/sidebar";
+import React from "react";
+import ProfilePictureUpload from "../../components/UserSettings-Forms/ProfilepictureUpload";
+
 
 const UserSettings: React.FC = () => {
+ // const [profileImage, setProfileImage] = useState<string | undefined>(ProfileImage); 
+  //const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const [profileImage, setProfileImage] = React.useState<string | undefined>(ProfileImage);
+
+
   return (
     
     <div>
@@ -24,50 +33,76 @@ const UserSettings: React.FC = () => {
         }}
       >
         <Box>
+          
+        
           <Box
-            sx={{
-              position: "relative",
-              height: 100,
-              backgroundImage: `url(${UserSettingsImage})`,    //Header Image
-              backgroundSize: "cover",
-              backgroundposition: "center",
-              width: "100%",
-            }}
-          >
-            
-            <Avatar
-              src={ProfileImage}       //Profile Image
-              alt="profile-picture"
-              sx={{
-                width: 110,
-                height: 110,
-                position: "absolute",
-                bottom: -50,
-                left: 30,
-                border: "4px solid white",
-              }}
-            />
-          </Box>
-          <Box sx={{ mt: 2, ml: 25 }}>
-            <Stack direction="row" spacing={5}>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() => alert("Change picture clicked")}    //upload picture Button
-              >
-                Upload Picture
-              </Button>
-              <Button
-                variant="outlined"
-                color="error"
-                size="small"
-                onClick={() => alert("Picture Deleted")}   //delete picture Button
-              >
-                Delete Picture
-              </Button>
-            </Stack>
-          </Box>
+  sx={{
+    position: "relative",
+    height: 100,
+    backgroundImage: `url(${UserSettingsImage})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    width: "100%",
+  }}
+>
+  <Avatar
+    
+    ref={fileInputRef}       // profile Picture
+    alt="profile-picture"
+    sx={{
+      width: 110,
+      height: 110,
+      position: "absolute",
+      bottom: -50,
+      left: 30,
+      border: "4px solid white",
+    }}
+  />
+  
+</Box>
+
+<ProfilePictureUpload />
+
+{/*<Box sx={{ mt: 2, ml: 25 }}>
+  <Stack direction="row" spacing={5}>
+    <Button
+      variant="contained"
+      color="primary"
+      size="small"
+      onClick={() => fileInputRef.current?.click()}    // Upload picture Button
+    >
+      Upload Picture
+    </Button>
+    <Button
+      variant="outlined"
+      color="error"
+      size="small"
+      onClick={() => {
+        setProfileImage(undefined);   // Reset to no image or default
+        // TODO: call delete API here if you want
+      }}
+    >
+      Delete Picture
+    </Button>
+  </Stack>
+</Box> */}
+
+{/* Hidden file input */}
+{/*<input
+  type="file"
+  accept="image/*"
+  ref={fileInputRef}
+  style={{ display: "none" }}
+  onChange={(e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setProfileImage(imageUrl);
+      // TODO: call upload API here with 'file'
+    }
+  }}
+/> */}
+
           <Typography>
             <h2>Lakshan Rajapaksha</h2>
           </Typography>

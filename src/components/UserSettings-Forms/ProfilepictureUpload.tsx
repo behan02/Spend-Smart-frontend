@@ -1,0 +1,88 @@
+import React, { useState } from "react";
+import { storage } from "../../pages/UserSettings/firebaseconfig";  // import the initialized Firebase storage
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import axios from "axios";  // For making API requests to your backend
+import ProfileImage from "../../assets/images/profile-photo.jpg";  // default image
+
+const ProfilePictureUpload: React.FC = () => {
+  const [profileImage, setProfileImage] = useState<string | undefined>(ProfileImage);  // state for storing image URL
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);  // Ref for file input
+  const [uploading, setUploading] = useState(false);  // State for uploading status
+
+  // Handle file change and upload it
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+
+    const file = e.target.files[0];
+    const imageUrl = URL.createObjectURL(file);  // Create a local URL for the image preview
+    setProfileImage(imageUrl);  // Update preview
+
+    setUploading(true);  // Set uploading to true while processing
+
+    try {
+      // Create a reference in Firebase Storage for the file upload
+      const storageRef = ref(storage, `profile_pictures/${file.name}`);
+      
+      // Upload file to Firebase Storage
+      await uploadBytes(storageRef, file);
+      
+      // Get the download URL after upload
+      const downloadUrl = await getDownloadURL(storageRef);
+
+      // Optionally, call an API to save the URL to the backend (DB)
+      await saveProfilePictureUrlToBackend(downloadUrl);
+
+      setProfileImage(downloadUrl);  // Update state with the Firebase URL
+    } catch (error) {
+      console.error("Upload failed:", error);
+    } finally {
+      setUploading(false);  // Set uploading to false after process
+    }
+  };
+
+  // Save the profile picture URL to backend
+  const saveProfilePictureUrlToBackend = async (url: string) => {
+    try {
+      await axios.put("/api/user/profile-picture-url", { profilePictureUrl: url });
+      console.log("Profile picture URL saved to backend.");
+    } catch (error) {
+      console.error("Error saving profile picture URL to backend:", error);
+    }
+  };
+
+  return (
+    <div>
+      {/* File input - triggers file selection */}
+      {/*<input
+        type="file"
+        accept="image/*"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        onChange={handleFileChange}  // Handle the file selection
+      />*/}
+      
+
+      {/* Upload Button */}
+      <button onClick={() => fileInputRef.current?.click()}>
+        {uploading ? "Uploading..." : "Upload Picture"}
+      </button>
+
+      {/* Display the uploaded profile picture */}
+      {/*<img src={profileImage} alt="Profile" width="100" height="100" />*/}
+
+      {/* Optionally, you can add a Delete button to remove the profile image */}
+      <button
+        onClick={async () => {
+          // Call backend to delete the image (optional)
+          await axios.delete("/api/user/profile-picture-url");
+
+            // Reset to default image
+        }}
+      >
+        Delete Picture
+      </button>
+    </div>
+  );
+};
+
+export default ProfilePictureUpload;
