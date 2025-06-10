@@ -50,16 +50,28 @@ const ProfilePictureUpload: React.FC = () => {
     }
   };
 
+  //new constant
+
+  const handleDelete = async () => {
+    try {
+      await axios.delete("/api/user/profile-picture-url");
+      setProfileImage(ProfileImage);  // Reset to default
+      console.log("Profile picture deleted.");
+    } catch (error) {
+      console.error("Error deleting profile picture:", error);
+    }
+  };
+
   return (
     <div>
       {/* File input - triggers file selection */}
-      {/*<input
+      <input
         type="file"
         accept="image/*"
         ref={fileInputRef}
         style={{ display: "none" }}
         onChange={handleFileChange}  // Handle the file selection
-      />*/}
+      />
       
 
       {/* Upload Button */}
