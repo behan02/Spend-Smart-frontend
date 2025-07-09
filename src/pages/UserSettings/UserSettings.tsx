@@ -1,194 +1,163 @@
+import React from "react";
+import {
+  Box,
+  Avatar,
+  Typography,
+  Divider,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+
 import UserSettingsImage from "../../assets/images/settings-header.jpg";
-import { Box, Avatar, Button, Stack, Typography, Divider } from "@mui/material";
 import ProfileImage from "../../assets/images/profile-photo.jpg";
+import ResetPwdImage from "../../assets/images/Reset password-bro.png";
+
+import Sidebar from "../../components/sidebar/sidebar";
+import ProfilePictureUpload from "../../components/UserSettings-Forms/ProfilepictureUpload";
 import AccountForm from "../../components/UserSettings-Forms/AccountForm";
 import Passwordchange from "../../components/UserSettings-Forms/Passwordchange";
-import PageButton from "../../components/Button/PageButton";
-import ResetPwdImage from "../../assets/images/Reset password-bro.png";
 import CurrencySelector from "../../components/UserSettings-Forms/Addcurencyform";
-import Sidebar from "../../components/sidebar/sidebar";
-import React from "react";
-import ProfilePictureUpload from "../../components/UserSettings-Forms/ProfilepictureUpload";
-
+import PageButton from "../../components/Button/PageButton";
 
 const UserSettings: React.FC = () => {
- // const [profileImage, setProfileImage] = useState<string | undefined>(ProfileImage); 
-  //const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
-  const [profileImage, setProfileImage] = React.useState<string | undefined>(ProfileImage);
-
+  const [profileImage, setProfileImage] = React.useState<string | undefined>(
+    ProfileImage
+  );
 
   return (
-    
-    <div>
-      <Sidebar/>
+    <Box display="flex">
+      {/* Sidebar */}
+      {!isSmallScreen && <Sidebar />}
+
+      {/* Main content */}
       <Box
+        flex={1}
         sx={{
-          minHeight: "0",
           backgroundColor: "#F6F6F8",
-          ml: 34,
-          mt: -141,
-          mr: -1
-        
+          p: { xs: 2, sm: 3, md: 4 },
         }}
       >
-        <Box>
-          
-        
-          <Box
-  sx={{
-    position: "relative",
-    height: 100,
-    backgroundImage: `url(${UserSettingsImage})`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    width: "100%",
-  }}
->
-  <Avatar
-    
-    ref={fileInputRef}       // profile Picture
-    alt="profile-picture"
-    sx={{
-      width: 110,
-      height: 110,
-      position: "absolute",
-      bottom: -50,
-      left: 30,
-      border: "4px solid white",
-    }}
-  />
-  
-</Box>
-
-<ProfilePictureUpload />
-
-{/*<Box sx={{ mt: 2, ml: 25 }}>
-  <Stack direction="row" spacing={5}>
-    <Button
-      variant="contained"
-      color="primary"
-      size="small"
-      onClick={() => fileInputRef.current?.click()}    // Upload picture Button
-    >
-      Upload Picture
-    </Button>
-    <Button
-      variant="outlined"
-      color="error"
-      size="small"
-      onClick={() => {
-        setProfileImage(undefined);   // Reset to no image or default
-        // TODO: call delete API here if you want
-      }}
-    >
-      Delete Picture
-    </Button>
-  </Stack>
-</Box> */}
-
-{/* Hidden file input */}
-{/*<input
-  type="file"
-  accept="image/*"
-  ref={fileInputRef}
-  style={{ display: "none" }}
-  onChange={(e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setProfileImage(imageUrl);
-      // TODO: call upload API here with 'file'
-    }
-  }}
-/> */}
-
-          <Typography>
-            <h2>Lakshan Rajapaksha</h2>
-          </Typography>
-        </Box>
-        <Divider sx={{ mt: 2 }} />
-        <Typography>
-          <h2>Profile Settings</h2>
-        </Typography>
+        {/* Header with Background Image */}
         <Box
           sx={{
-            borderRadius: "10px",
-            backgroundColor: "#FFFFFF",
-            my: 2,
-            mx: 5,
-            padding: 2,
-            height: 380, //Acount form box
+            position: "relative",
+            height: 120,
+            backgroundImage: `url(${UserSettingsImage})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            borderRadius: 2,
           }}
         >
-          <Typography sx={{ mb: 2 }}>
-            <h3>Account</h3>
+          <Avatar
+            ref={fileInputRef}
+            alt="profile-picture"
+            src={profileImage}
+            sx={{
+              width: 100,
+              height: 100,
+              position: "absolute",
+              bottom: -40,
+              left: 24,
+              border: "4px solid white",
+            }}
+          />
+        </Box>
+
+        {/* Profile Upload */}
+        <Box sx={{ mt: 6 }}>
+          <ProfilePictureUpload />
+        </Box>
+
+        {/* User name */}
+        <Typography variant="h6" mt={2} ml={1}>
+          Lakshan Rajapaksha
+        </Typography>
+
+        {/* Divider */}
+        <Divider sx={{ my: 2 }} />
+
+        {/* Profile Settings Heading */}
+        <Typography variant="h6" mb={2}>
+          Profile Settings
+        </Typography>
+
+        {/* Account Section */}
+        <Box
+          sx={{
+            borderRadius: 2,
+            backgroundColor: "#FFFFFF",
+            mb: 3,
+            p: 2,
+          }}
+        >
+          <Typography variant="subtitle1" mb={2}>
+            Account
           </Typography>
           <AccountForm />
           <PageButton
             text="Save Changes"
             onClick={() => alert("Changes saved!")}
-            type={"button"}
+            type="button"
           />
         </Box>
+
+        {/* Password Section */}
         <Box
           sx={{
-            borderRadius: "10px",
+            borderRadius: 2,
             backgroundColor: "#FFFFFF",
-            mt: 2,
-            my: 2,
-            mx: 5,
-            height: 650, //Password change form box
+            mb: 3,
+            p: 2,
           }}
         >
-          <Typography sx={{ ml: 2, mb: 2 }}>
-            <h3>Password</h3>
+          <Typography variant="subtitle1" mb={2}>
+            Password
           </Typography>
           <Passwordchange />
-           
-            <Box
-              component="img"
-              src={ResetPwdImage}
-              alt="pwd Reset"
-              sx={{
-                maxWidth: "250px",
-                height: "250px",
-                alignContent: "center",
-                ml: 50,
-                mt: 10,
-              }}
-            />
-        
 
-          <Box sx={{ mt: -3 }}>
-            <PageButton
-              text="Save Changes"
-              onClick={() => alert("Changes saved!")}
-              type={"button"}
-            />
-          </Box>
+          <Box
+            component="img"
+            src={ResetPwdImage}
+            alt="pwd Reset"
+            sx={{
+              width: "100%",
+              maxWidth: 250,
+              height: "auto",
+              mx: "auto",
+              my: 4,
+              display: "block",
+            }}
+          />
+
+          <PageButton
+            text="Save Changes"
+            onClick={() => alert("Password updated!")}
+            type="button"
+          />
         </Box>
+
+        {/* Currency Section */}
         <Box
           sx={{
-            borderRadius: "10px",
+            borderRadius: 2,
             backgroundColor: "#FFFFFF",
-            my: 2,
-            mx: 5,
-            padding: 2,
-            height: 380, //Acount form box
+            p: 2,
+            mb: 4,
           }}
         >
-          <Typography sx={{ ml: 2, mb: 2 }}>
-            <h3>Currencies</h3>
+          <Typography variant="subtitle1" mb={1}>
+            Currencies
           </Typography>
-          <Typography>Add a new currency</Typography>
-
+          <Typography variant="body2" mb={2}>
+            Add a new currency
+          </Typography>
           <CurrencySelector />
         </Box>
       </Box>
-    </div>
-  
-
+    </Box>
   );
 };
 
