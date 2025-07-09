@@ -9,65 +9,98 @@ import Header from "../../components/header/header";
 import HeaderImage from '../../assets/images/goal_page_image.png';
 import Sidebar from '../../components/sidebar/sidebar';
 import theme from '../../assets/styles/theme';
-//import { getGoals, createGoal, updateGoal, deleteGoal } from '../../api/goalApi';
+import { goalService, Goal as GoalType, GoalFormData } from '../../services/goalService';
 
 
 interface Goal {
   id: number;
   name: string;
-  savedAmount: number;
+  currentAmount: number;
+  savedAmount: number; // Keep for compatibility with GoalItem component
   targetAmount: number;
   progress: number;
-  deadline?: Date;
+  startDate?: string;
+  endDate?: string;
   description?: string;
   remainingDays?: number;
 }
 
 const Goals: React.FC = () => {
-  const [modalOpen, setModalOpen] = useState(false);// Controls Add Goal modal visibility
-  const [editModalOpen, setEditModalOpen] = useState(false);// Controls Edit Goal modal visibility
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [goalToEdit, setGoalToEdit] = useState<Goal | null>(null);
-  const [nextId, setNextId] = useState(5);// ID for the next new goal
-  const [goals, setGoals] = useState<Goal[]>([
-    {
-      id: 1,
-      name: "Buying a guitar",
-      savedAmount: 1458.30,
-      targetAmount: 1500.00,
-      progress: 97,
-      deadline: new Date('2025-07-11'),
-      description: "Saving for a new guitar",
-      remainingDays: 2
-    },
-    {
-      id: 2,
-      name: "Laptop",
-      savedAmount: 1458.30,
-      targetAmount: 1458.85,
-      progress: 76,
-      deadline: new Date('2025-08-15'),
-      description: "New laptop for work"
-    },
-    {
-      id: 3,
-      name: "Vacation",
-      savedAmount: 1458.30,
-      targetAmount: 3500.85,
-      progress: 42,
-      deadline: new Date('2025-12-31'),
-      description: "Trip to Europe"
-    },
-    {
-      id: 4,
-      name: "Phone",
-      savedAmount: 1458.30,
-      targetAmount: 950.00,
-      progress: 78,
-      deadline: new Date('2025-09-01'),
-      description: "New smartphone"
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Helper function to calculate remaining days
+  const calculateRemainingDays = (endDate?: string): number => {
+    if (!endDate) return 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day
+    
+    const deadline = new Date(endDate);
+    deadline.setHours(0, 0, 0, 0); // Reset time to start of day
+    
+    const diffTime = deadline.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  };
+
+  // Load goals from API
+  useEffect(() => {
+    loadGoals();
+  }, []);
+
+  const loadGoals = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await goalService.getAll();
+      
+      // Transform API data to match component interface
+      const transformedGoals: Goal[] = data.map(goal => ({
+        id: goal.id,
+        name: goal.name,
+        currentAmount: goal.currentAmount,
+        savedAmount: goal.currentAmount, // Use currentAmount as savedAmount for compatibility
+        targetAmount: goal.targetAmount,
+        progress: Math.round((goal.currentAmount / goal.targetAmount) * 100),
+        startDate: goal.startDate,
+        endDate: goal.endDate,
+        description: goal.description,
+        remainingDays: calculateRemainingDays(goal.endDate)
+      }));
+      
+      setGoals(transformedGoals);
+      
+      if (transformedGoals.length > 0 && !selectedGoal) {
+        setSelectedGoal(transformedGoals[0]);
+      }
+    } catch (err) {
+      console.error('Error loading goals:', err);
+      setError('Failed to load goals');
+      // Fallback to sample data if API fails
+      const fallbackGoals: Goal[] = [
+        {
+          id: 1,
+          name: "Buying a guitar",
+          currentAmount: 1458.30,
+          savedAmount: 1458.30,
+          targetAmount: 1500.00,
+          progress: 97,
+          endDate: '2025-07-11',
+          description: "Saving for a new guitar",
+          remainingDays: 2
+        }
+      ];
+      setGoals(fallbackGoals);
+      setSelectedGoal(fallbackGoals[0]);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
 
   useEffect(() => {
     if (goals.length > 0 && !selectedGoal) {
@@ -77,23 +110,23 @@ const Goals: React.FC = () => {
     }
   }, [goals, selectedGoal]);
 
-  // Calculate remaining days
-  useEffect(() => {
-    if (goals.length === 0) return;
+  // Calculate remaining days - Remove this since we now calculate on load
+  // useEffect(() => {
+  //   if (goals.length === 0) return;
     
-    const updatedGoals = goals.map(goal => {
-      if (goal.deadline) {
-        const today = new Date();
-        const deadlineDate = new Date(goal.deadline);
-        const diffTime = deadlineDate.getTime() - today.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return { ...goal, remainingDays: diffDays > 0 ? diffDays : 0 };
-      }
-      return goal;
-    });
+  //   const updatedGoals = goals.map(goal => {
+  //     if (goal.endDate) {
+  //       const today = new Date();
+  //       const deadlineDate = new Date(goal.endDate);
+  //       const diffTime = deadlineDate.getTime() - today.getTime();
+  //       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  //       return { ...goal, remainingDays: diffDays > 0 ? diffDays : 0 };
+  //     }
+  //     return goal;
+  //   });
     
-    setGoals(updatedGoals);
-  }, []);
+  //   setGoals(updatedGoals);
+  // }, []);
 
   // Event handlers
   const handleOpenModal = () => setModalOpen(true);
@@ -110,25 +143,173 @@ const Goals: React.FC = () => {
     setGoalToEdit(null);
   };
 
-  const handleSaveGoal = (goalData: any) => {
-    const newGoal = { ...goalData, id: nextId };
-    setGoals([...goals, newGoal]);
-    setNextId(nextId + 1);
-    setSelectedGoal(newGoal);
+  const handleSaveGoal = async (goalData: any) => {
+    console.log('=== STARTING GOAL CREATION ===');
+    console.log('Raw goal data received:', goalData);
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Create goal data for API
+      const startDate = new Date();
+      startDate.setHours(0, 0, 0, 0); // Set to start of day
+      
+      let endDate: Date;
+      if (goalData.endDate) {
+        endDate = new Date(goalData.endDate);
+        endDate.setHours(23, 59, 59, 999); // Set to end of day
+      } else {
+        endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Default to 30 days from now
+        endDate.setHours(23, 59, 59, 999); // Set to end of day
+      }
+      
+      // Ensure end date is after start date
+      if (endDate <= startDate) {
+        endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 1); // Set to at least 1 day after start
+        endDate.setHours(23, 59, 59, 999); // Set to end of day
+      }
+      
+      const createGoalData: GoalFormData = {
+        name: goalData.name,
+        targetAmount: Number(goalData.targetAmount),
+        currentAmount: Number(goalData.currentAmount) || 0,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        description: goalData.description || '',
+        userId: 1 // Using test user ID, replace with actual user ID when auth is implemented
+      };
+
+      console.log('Formatted API data:', createGoalData);
+      console.log('Making API call to create goal...');
+
+      const newGoal = await goalService.create(createGoalData);
+      
+      console.log('✅ Goal created successfully:', newGoal);
+      
+      // Transform API response to match component interface
+      const transformedGoal: Goal = {
+        id: newGoal.id,
+        name: newGoal.name,
+        currentAmount: newGoal.currentAmount,
+        savedAmount: newGoal.currentAmount,
+        targetAmount: newGoal.targetAmount,
+        progress: Math.round((newGoal.currentAmount / newGoal.targetAmount) * 100),
+        startDate: newGoal.startDate,
+        endDate: newGoal.endDate,
+        description: newGoal.description,
+        remainingDays: calculateRemainingDays(newGoal.endDate)
+      };
+      
+      console.log('Transformed goal for frontend:', transformedGoal);
+      
+      setGoals([...goals, transformedGoal]);
+      setSelectedGoal(transformedGoal);
+      
+      console.log('✅ Goal added to frontend state');
+      
+      // Close the modal
+      handleCloseModal();
+      
+    } catch (err: any) {
+      console.error('❌ Error creating goal:', err);
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
+      setError(`Failed to create goal: ${err.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleUpdateGoal = (updatedGoalData: any) => {
+  const handleUpdateGoal = async (updatedGoalData: any) => {
     if (!goalToEdit) return;
     
-    const updatedGoals = goals.map(goal => 
-      goal.id === goalToEdit.id 
-        ? { ...goal, ...updatedGoalData, id: goal.id } 
-        : goal
-    );
-    
-    setGoals(updatedGoals);
-    setSelectedGoal(updatedGoals.find(g => g.id === goalToEdit.id) || null);
-    handleCloseEditModal();
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('=== UPDATING GOAL ===');
+      console.log('Goal to edit:', goalToEdit);
+      console.log('Updated data:', updatedGoalData);
+      
+      // Prepare start date - either from existing goal or current date
+      let startDate: Date;
+      if (goalToEdit.startDate) {
+        startDate = new Date(goalToEdit.startDate);
+      } else {
+        startDate = new Date();
+        startDate.setHours(0, 0, 0, 0);
+      }
+      
+      // Prepare end date
+      let endDate: Date;
+      if (updatedGoalData.endDate) {
+        endDate = new Date(updatedGoalData.endDate);
+        endDate.setHours(23, 59, 59, 999);
+      } else {
+        // Default to 30 days from start if no end date provided
+        endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 30);
+        endDate.setHours(23, 59, 59, 999);
+      }
+      
+      // Ensure end date is after start date
+      if (endDate <= startDate) {
+        endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 1);
+        endDate.setHours(23, 59, 59, 999);
+      }
+      
+      // Prepare data for API call
+      const updateData: GoalFormData = {
+        name: updatedGoalData.name,
+        targetAmount: Number(updatedGoalData.targetAmount),
+        currentAmount: Number(updatedGoalData.currentAmount) || 0,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        description: updatedGoalData.description || '',
+        userId: 1 // Using test user ID
+      };
+      
+      console.log('Formatted update data:', updateData);
+      
+      // Call backend API to update the goal
+      const updatedGoal = await goalService.update(goalToEdit.id, updateData);
+      console.log('✅ Goal updated successfully:', updatedGoal);
+      
+      // Transform API response to match component interface
+      const transformedGoal: Goal = {
+        id: updatedGoal.id,
+        name: updatedGoal.name,
+        currentAmount: updatedGoal.currentAmount,
+        savedAmount: updatedGoal.currentAmount,
+        targetAmount: updatedGoal.targetAmount,
+        progress: Math.round((updatedGoal.currentAmount / updatedGoal.targetAmount) * 100),
+        endDate: updatedGoal.endDate,
+        description: updatedGoal.description,
+        remainingDays: calculateRemainingDays(updatedGoal.endDate),
+        startDate: updatedGoal.startDate // Add startDate to preserve it
+      };
+      
+      // Update local state with the updated goal
+      const updatedGoals = goals.map(goal => 
+        goal.id === goalToEdit.id ? transformedGoal : goal
+      );
+      
+      setGoals(updatedGoals);
+      setSelectedGoal(transformedGoal);
+      handleCloseEditModal();
+      
+    } catch (err: any) {
+      console.error('Error updating goal:', err);
+      setError(`Failed to update goal: ${err.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSelectGoal = (goal: Goal) => setSelectedGoal(goal);
@@ -137,12 +318,27 @@ const Goals: React.FC = () => {
     handleOpenEditModal(id);
   };
   
-  const handleDeleteGoal = (id: number) => {
-    const updatedGoals = goals.filter(goal => goal.id !== id);
-    setGoals(updatedGoals);
-    
-    if (selectedGoal && selectedGoal.id === id) {
-      setSelectedGoal(updatedGoals.length > 0 ? updatedGoals[0] : null);
+  const handleDeleteGoal = async (id: number) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Call the backend API to delete the goal
+      await goalService.delete(id);
+      console.log(`Goal ${id} deleted successfully from backend`);
+      
+      // Update local state only after successful backend deletion
+      const updatedGoals = goals.filter(goal => goal.id !== id);
+      setGoals(updatedGoals);
+      
+      if (selectedGoal && selectedGoal.id === id) {
+        setSelectedGoal(updatedGoals.length > 0 ? updatedGoals[0] : null);
+      }
+    } catch (err: any) {
+      console.error('Error deleting goal:', err);
+      setError(`Failed to delete goal: ${err.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -220,6 +416,24 @@ const Goals: React.FC = () => {
           }}>
             {/* Header */}
             <Header pageName="Goals" />
+            
+            {/* Error Display */}
+            {error && (
+              <Box sx={{ mb: 2, p: 2, bgcolor: '#ffebee', borderRadius: 1, border: '1px solid #f44336' }}>
+                <Typography color="error" variant="body2">
+                  {error}
+                </Typography>
+              </Box>
+            )}
+            
+            {/* Loading Display */}
+            {loading && (
+              <Box sx={{ mb: 2, p: 2, bgcolor: '#e3f2fd', borderRadius: 1, border: '1px solid #2196f3' }}>
+                <Typography color="primary" variant="body2">
+                  Loading...
+                </Typography>
+              </Box>
+            )}
             
             {/* Header Card */}
             <Box sx={{ mb: 4 }}>
