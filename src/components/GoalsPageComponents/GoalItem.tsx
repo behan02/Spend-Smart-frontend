@@ -18,44 +18,45 @@ const GoalItem: React.FC<GoalItemProps> = ({ goal, isSelected, onClick }) => {
     <Box 
       onClick={onClick}
       sx={{ 
-        p: 2,
-        borderRadius: 1,
+        p: 3,
+        borderRadius: 2,
         cursor: 'pointer',
         border: '1px solid #e0e0e0',
         bgcolor: isSelected ? '#2952CC' : 'background.paper',
         color: isSelected ? 'white' : 'text.primary',
         '&:hover': {
-          bgcolor: isSelected ? '#2952cc' : 'rgba(13, 31, 223, 0.04)',
+          bgcolor: isSelected ? '#2952cc' : 'rgba(41, 82, 204, 0.04)',
+          transform: 'translateY(-2px)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
         },
-        transition: 'background-color 0.3s'
+        transition: 'all 0.3s ease',
+        boxShadow: isSelected ? '0 4px 12px rgba(41, 82, 204, 0.2)' : '0 2px 4px rgba(0,0,0,0.05)'
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-        <Box sx={{ position: 'relative', mr: 20,ml:2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {/* CircularProgress component for the progress indicator */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        {/* Progress Circle */}
+        <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <CircularProgress 
             variant="determinate" 
             value={goal.progress} 
-            size={40} 
-            thickness={3.6}
+            size={50} 
+            thickness={4}
             sx={{ 
-              color: isSelected ? '#4ADE80' : '#4ADE80', // Green color for progress
+              color: isSelected ? '#4ADE80' : '#4ADE80',
               position: 'absolute',
               zIndex: 1
             }} 
           />
-          {/* Background circle */}
           <CircularProgress 
             variant="determinate" 
             value={100} 
-            size={40} 
-            thickness={3.6}
+            size={50} 
+            thickness={4}
             sx={{ 
-              color: isSelected ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.1)', 
+              color: isSelected ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)', 
               position: 'absolute',
             }} 
           />
-          {/* Percentage text */}
           <Typography 
             variant="caption" 
             component="div" 
@@ -63,28 +64,30 @@ const GoalItem: React.FC<GoalItemProps> = ({ goal, isSelected, onClick }) => {
               position: 'relative', 
               zIndex: 2,
               fontWeight: 'bold', 
-              fontSize: '0.7rem',
-              color: isSelected ? 'white' : '#3366FF'
+              fontSize: '0.75rem',
+              color: isSelected ? 'white' : '#2952CC'
             }}
           >
             {`${Math.round(goal.progress)}%`}
           </Typography>
         </Box>
-        <Box>
+        
+        {/* Goal Info */}
+        <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h6" sx={{ 
             fontWeight: 'bold', 
             color: isSelected ? 'white' : 'inherit',
-            fontSize: '1rem' 
+            fontSize: '1.1rem',
+            mb: 0.5
           }}>
             {goal.name}
           </Typography>
           <Typography variant="body2" sx={{ 
-            color: isSelected ? 'white' : 'text.secondary',
-            '& span': {
-              color: isSelected ? 'white' : 'text.disabled'
-            }
+            color: isSelected ? 'rgba(255,255,255,0.8)' : 'text.secondary',
+            fontSize: '0.9rem'
           }}>
-            ${goal.savedAmount.toFixed(2)} <span>/ ${goal.targetAmount.toFixed(2)}</span>
+            <span style={{ fontWeight: 'bold' }}>${goal.savedAmount.toFixed(2)}</span>
+            <span style={{ opacity: 0.7 }}> / ${goal.targetAmount.toFixed(2)}</span>
           </Typography>
         </Box>
       </Box>

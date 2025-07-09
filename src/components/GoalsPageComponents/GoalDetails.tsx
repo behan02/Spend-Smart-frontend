@@ -67,75 +67,100 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
 
   return (
     <>
-      <Paper elevation={1} sx={{ p: 4, borderRadius: '8px', bgcolor: 'white' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        {/* Top Section with Spend and Goals amounts */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'flex-start',
+          mb: 4
+        }}>
           <Box>
-            <Typography variant="subtitle2" color="textSecondary">
+            <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
               Spend
             </Typography>
-            <Typography variant="h5" color="primary" fontWeight="bold">
+            <Typography variant="h4" sx={{ 
+              fontWeight: 'bold',
+              color: '#000',
+              fontSize: '2.5rem'
+            }}>
               ${goal.savedAmount.toFixed(2)}
             </Typography>
           </Box>
           <Box sx={{ textAlign: 'right' }}>
-            <Typography variant="subtitle2" color="textSecondary">
-              Goal
+            <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+              Goals
             </Typography>
-            <Typography variant="h5" color="primary" fontWeight="bold">
+            <Typography variant="h4" sx={{ 
+              fontWeight: 'bold',
+              color: '#000',
+              fontSize: '2.5rem'
+            }}>
               ${goal.targetAmount.toFixed(2)}
             </Typography>
           </Box>
         </Box>
 
-        <Box sx={{ my: 2 }}>
+        {/* Progress Bar */}
+        <Box sx={{ mb: 3 }}>
           <LinearProgress 
             variant="determinate" 
             value={goal.progress} 
             sx={{ 
-              height: 8, 
-              borderRadius: 5,
-              backgroundColor: '#e0e0e0',
+              height: 12, 
+              borderRadius: 6,
+              backgroundColor: '#e8e8e8',
               '& .MuiLinearProgress-bar': {
-                backgroundColor: '#2952CC'
+                backgroundColor: '#2952CC',
+                borderRadius: 6
               }
             }} 
           />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
-            <Typography variant="caption" color="textSecondary">
-              {goal.progress}%
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+            <Typography variant="body2" color="textSecondary">
+              {Math.round(goal.progress)}%
             </Typography>
-            <Typography variant="caption" color="textSecondary">
-              {100 - goal.progress}%
+            <Typography variant="body2" color="textSecondary">
+              {Math.round(100 - goal.progress)}%
             </Typography>
           </Box>
         </Box>
 
+        {/* Days Left */}
         <Box sx={{ 
           display: 'flex', 
           justifyContent: 'center', 
-          my: 3
+          mb: 4
         }}>
-          <Typography variant="subtitle1" color="primary" fontWeight="medium">
+          <Typography variant="h6" sx={{ 
+            color: '#2952CC',
+            fontWeight: 'bold',
+            fontSize: '1.25rem'
+          }}>
             {goal.remainingDays !== undefined ? `${goal.remainingDays} days left` : ''}
           </Typography>
         </Box>
 
+        {/* Action Buttons */}
         <Box sx={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
-          mt: 2
+          mt: 'auto'
         }}>
           <Button 
             variant="contained" 
-            color="primary"
             sx={{ 
-              borderRadius: '50px', 
+              borderRadius: '25px', 
               textTransform: 'none', 
-              px: 6,
-              py: 1,
+              px: 4,
+              py: 1.5,
               backgroundColor: '#2952CC',
-              height: '30px',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              '&:hover': {
+                backgroundColor: '#1e3a8a'
+              }
             }}
             onClick={() => onViewDetails(goal.id)}
           >
@@ -144,22 +169,30 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
           
           <Box>
             <IconButton 
-              size="medium" 
+              size="large" 
               onClick={handleEdit}
               aria-label="edit goal"
+              sx={{ 
+                color: '#666',
+                '&:hover': { color: '#2952CC' }
+              }}
             >
-              <EditIcon fontSize="medium" />
+              <EditIcon />
             </IconButton>
             <IconButton 
-              size="medium" 
+              size="large" 
               onClick={handleOpenDeleteDialog}
               aria-label="delete goal"
+              sx={{ 
+                color: '#666',
+                '&:hover': { color: '#f44336' }
+              }}
             >
-              <DeleteIcon fontSize="medium" />
+              <DeleteIcon />
             </IconButton>
           </Box>
         </Box>
-      </Paper>
+      </Box>
 
       {/* Delete Confirmation Dialog */}
       <Dialog

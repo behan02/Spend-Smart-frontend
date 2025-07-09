@@ -9,7 +9,7 @@ import Header from "../../components/header/header";
 import HeaderImage from '../../assets/images/goal_page_image.png';
 import Sidebar from '../../components/sidebar/sidebar';
 import theme from '../../assets/styles/theme';
-import { getGoals, createGoal, updateGoal, deleteGoal } from '../../api/goalApi';
+//import { getGoals, createGoal, updateGoal, deleteGoal } from '../../api/goalApi';
 
 
 interface Goal {
@@ -24,15 +24,51 @@ interface Goal {
 }
 
 const Goals: React.FC = () => {
-  // State definitions
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);// Controls Add Goal modal visibility
+  const [editModalOpen, setEditModalOpen] = useState(false);// Controls Edit Goal modal visibility
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [goalToEdit, setGoalToEdit] = useState<Goal | null>(null);
-  const [nextId, setNextId] = useState(1);
-  const [goals, setGoals] = useState<Goal[]>([]);
+  const [nextId, setNextId] = useState(5);// ID for the next new goal
+  const [goals, setGoals] = useState<Goal[]>([
+    {
+      id: 1,
+      name: "Buying a guitar",
+      savedAmount: 1458.30,
+      targetAmount: 1500.00,
+      progress: 97,
+      deadline: new Date('2025-07-11'),
+      description: "Saving for a new guitar",
+      remainingDays: 2
+    },
+    {
+      id: 2,
+      name: "Laptop",
+      savedAmount: 1458.30,
+      targetAmount: 1458.85,
+      progress: 76,
+      deadline: new Date('2025-08-15'),
+      description: "New laptop for work"
+    },
+    {
+      id: 3,
+      name: "Vacation",
+      savedAmount: 1458.30,
+      targetAmount: 3500.85,
+      progress: 42,
+      deadline: new Date('2025-12-31'),
+      description: "Trip to Europe"
+    },
+    {
+      id: 4,
+      name: "Phone",
+      savedAmount: 1458.30,
+      targetAmount: 950.00,
+      progress: 78,
+      deadline: new Date('2025-09-01'),
+      description: "New smartphone"
+    }
+  ]);
 
-  // Default goal selection
   useEffect(() => {
     if (goals.length > 0 && !selectedGoal) {
       setSelectedGoal(goals[0]);
@@ -199,17 +235,15 @@ const Goals: React.FC = () => {
             {/* Main Content Area */}
             <Box sx={{ 
               display: 'flex',
-              flexDirection: { xs: 'column', md: 'row' },
-              gap: 3,
-              mb: 4
+              gap: 4,
+              mb: 4,
+              minHeight: '500px'
             }}>
-              {/* Goals List */}
+              {/* Goals List - Left Side */}
               <Box sx={{ 
-                width: { xs: '100%', md: '45%' },
+                width: '400px',
+                flexShrink: 0
               }}>
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-                  Your Goals
-                </Typography>
                 {goals.length > 0 ? (
                   <Stack spacing={2}>
                     {goals.map((goal) => (
@@ -226,14 +260,12 @@ const Goals: React.FC = () => {
                 )}
               </Box>
               
-              {/* Goal Details */}
+              {/* Goal Details - Right Side */}
               <Box sx={{ 
-                flexGrow: 1
+                flexGrow: 1,
+                display: 'flex',
+                flexDirection: 'column'
               }}>
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-                  Goal Details
-                </Typography>
-                
                 {selectedGoal ? (
                   <GoalDetails 
                     goal={selectedGoal} 
@@ -251,7 +283,8 @@ const Goals: React.FC = () => {
                       display: 'flex',
                       justifyContent: 'center',
                       alignItems: 'center',
-                      height: '200px'
+                      height: '300px',
+                      bgcolor: '#f8f9fa'
                     }}
                   >
                     <Typography variant="body1" color="textSecondary">
