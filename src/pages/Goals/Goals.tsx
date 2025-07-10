@@ -20,6 +20,7 @@ interface Goal {
   targetAmount: number;
   progress: number;
   endDate?: string;
+  startDate?: string;
   description?: string;
   remainingDays?: number;
 }
@@ -149,9 +150,11 @@ const Goals: React.FC = () => {
       const createGoalData: GoalFormData = {
         name: goalData.name,
         targetAmount: Number(goalData.targetAmount),
-        currentAmount: Number(goalData.currentAmount) || 0,
+        currentAmount: Number(goalData.currentAmount) || 0, // Make sure this is used
         startDate: new Date().toISOString(),
-        endDate: goalData.endDate ? new Date(goalData.endDate).toISOString() : new Date().toISOString(),
+        endDate: goalData.endDate 
+          ? new Date(goalData.endDate).toISOString() 
+          : new Date(new Date().setMonth(new Date().getMonth() + 3)).toISOString(), // Default 3 months from now
         description: goalData.description || '',
         userId: 1 // Using test user ID, replace with actual user ID when auth is implemented
       };
@@ -199,18 +202,59 @@ const Goals: React.FC = () => {
     }
   };
 
-  const handleUpdateGoal = (updatedGoalData: any) => {
+  const handleUpdateGoal = async (updatedGoalData: any) => {
     if (!goalToEdit) return;
     
-    const updatedGoals = goals.map(goal => 
-      goal.id === goalToEdit.id 
-        ? { ...goal, ...updatedGoalData, id: goal.id } 
-        : goal
-    );
-    
-    setGoals(updatedGoals);
-    setSelectedGoal(updatedGoals.find(g => g.id === goalToEdit.id) || null);
-    handleCloseEditModal();
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('Updating goal:', goalToEdit.id, updatedGoalData);
+      
+      // Create goal data for API - only include what's in UpdateGoalDto
+      // The backend only expects properties that could change, not the full goal
+      const updateGoalData = {
+        name: updatedGoalData.name,
+        targetAmount: Number(updatedGoalData.targetAmount),
+        currentAmount: Number(updatedGoalData.currentAmount) || 0,
+        description: updatedGoalData.description || '',
+        // Include dates properly
+        startDate: goalToEdit.startDate || undefined,
+        endDate: updatedGoalData.endDate ? new Date(updatedGoalData.endDate).toISOString() : undefined
+      };
+      
+      console.log('API update data:', updateGoalData);
+      
+      // Update goal in API
+      const updatedGoal = await goalService.update(goalToEdit.id, updateGoalData);
+      
+      console.log('✅ Goal updated successfully in API:', updatedGoal);
+      
+      // Update local state
+      const updatedGoals = goals.map(goal => 
+        goal.id === goalToEdit.id 
+          ? { 
+              ...goal, 
+              ...updatedGoalData, 
+              id: goal.id,
+              currentAmount: Number(updatedGoalData.currentAmount) || 0,
+              savedAmount: Number(updatedGoalData.currentAmount) || 0,
+              progress: Math.round((Number(updatedGoalData.currentAmount) / Number(updatedGoalData.targetAmount)) * 100),
+              remainingDays: calculateRemainingDays(updatedGoalData.endDate)
+            } 
+          : goal
+      );
+      
+      setGoals(updatedGoals);
+      setSelectedGoal(updatedGoals.find(g => g.id === goalToEdit.id) || null);
+      handleCloseEditModal();
+      
+    } catch (err: any) {
+      console.error('❌ Error updating goal:', err);
+      setError(`Failed to update goal: ${err.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSelectGoal = (goal: Goal) => setSelectedGoal(goal);
@@ -219,12 +263,30 @@ const Goals: React.FC = () => {
     handleOpenEditModal(id);
   };
   
-  const handleDeleteGoal = (id: number) => {
-    const updatedGoals = goals.filter(goal => goal.id !== id);
-    setGoals(updatedGoals);
-    
-    if (selectedGoal && selectedGoal.id === id) {
-      setSelectedGoal(updatedGoals.length > 0 ? updatedGoals[0] : null);
+  const handleDeleteGoal = async (id: number) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('Deleting goal with ID:', id);
+      
+      // Delete goal from API
+      await goalService.delete(id);
+      
+      console.log('✅ Goal deleted successfully from API');
+      
+      // Update local state
+      const updatedGoals = goals.filter(goal => goal.id !== id);
+      setGoals(updatedGoals);
+      
+      if (selectedGoal && selectedGoal.id === id) {
+        setSelectedGoal(updatedGoals.length > 0 ? updatedGoals[0] : null);
+      }
+    } catch (err: any) {
+      console.error('❌ Error deleting goal:', err);
+      setError(`Failed to delete goal: ${err.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
     }
   };
 

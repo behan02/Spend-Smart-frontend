@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -20,31 +20,58 @@ interface AddGoalModalProps {
   isEditMode?: boolean;
 }
 
-const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave }) => {
+const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave, initialData, isEditMode = false }) => {
   const [name, setName] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
   const [currentAmount, setCurrentAmount] = useState('');
   const [deadlineDate, setDeadlineDate] = useState('');
   const [description, setDescription] = useState('');
+  
+  // Set initial values when editing
+  useEffect(() => {
+    if (isEditMode && initialData) {
+      setName(initialData.name || '');
+      setTargetAmount(initialData.targetAmount?.toString() || '');
+      setCurrentAmount(initialData.currentAmount?.toString() || '');
+      setDeadlineDate(initialData.endDate ? initialData.endDate.split('T')[0] : '');
+      setDescription(initialData.description || '');
+      console.log('Editing goal with data:', initialData);
+    } else {
+      // Reset form when opening for new goal
+      setName('');
+      setTargetAmount('');
+      setCurrentAmount('');
+      setDeadlineDate('');
+      setDescription('');
+    }
+  }, [isEditMode, initialData, open]);
 
   const handleSave = () => {
-    if (!name || !targetAmount || !currentAmount) {
+    if (!name || !targetAmount) {
       return;
     }
 
-    // Convert the date string to a Date object if it exists
-    const deadline = deadlineDate ? new Date(deadlineDate) : null;
-
-    const newGoal = {
+    const currentAmountValue = currentAmount ? parseFloat(currentAmount) : 0;
+    
+    // Prepare the goal data with field names that match the API
+    const goalData = {
       name,
       targetAmount: parseFloat(targetAmount),
-      savedAmount: parseFloat(currentAmount),
-      progress: Math.round((parseFloat(currentAmount) / parseFloat(targetAmount)) * 100),
-      deadline: deadline,
+      currentAmount: currentAmountValue,
+      // Also include savedAmount for backwards compatibility with frontend
+      savedAmount: currentAmountValue,
+      progress: parseFloat(targetAmount) > 0 
+        ? Math.round((currentAmountValue / parseFloat(targetAmount)) * 100) 
+        : 0,
+      // Use endDate to match backend model
+      endDate: deadlineDate || new Date().toISOString().split('T')[0],
       description,
+      // Include the ID if in edit mode
+      ...(isEditMode && initialData?.id && { id: initialData.id }),
     };
 
-    onSave(newGoal);
+    console.log('Saving goal data:', goalData);
+    onSave(goalData);
     handleClose();
   };
 

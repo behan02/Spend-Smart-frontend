@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:7211/api/goals';
+const API_BASE_URL = 'http://localhost:5110/api';
+const API_URL = `${API_BASE_URL}/goals`;
 
 export const getGoals = () => axios.get(API_URL);
 export const createGoal = (goal: any) => axios.post(API_URL, goal);

@@ -8,11 +8,12 @@ import BasicTable from "../../components/ReportComponents/Reporttable/transactio
 
 function ReportDisplay() {
   return (
+    
     <Box
       sx={{
         display: "flex",
         flexDirection: "column",
-        p: 3,
+        
       }}
     >
       <Cards />

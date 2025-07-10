@@ -1,0 +1,227 @@
+import React, { useState } from "react";
+import {
+  TextField,
+  InputAdornment,
+  Divider,
+  Button,
+  Typography,
+  CircularProgress,
+  Box,
+} from "@mui/material";
+import User from "@mui/icons-material/PermIdentity";
+import MailIcon from "@mui/icons-material/MailOutline";
+import LockIcon from "@mui/icons-material/LockOutlined";
+import { useNavigate, Link } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import PasswordStrengthIndicator from "../RegisterComponents/PasswordStrengthIndicator";
+
+
+interface RegisterFormInputs {
+  userName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  
+}
+
+const RegisterForm: React.FC = () => {
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormInputs>();
+
+  const onSubmit = async (data: RegisterFormInputs) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        "https://localhost:7211/api/admin/auth/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data), 
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Registration failed");
+      }
+
+      alert(result.message); // e.g. "User registration successful."
+      navigate("/admin/login");
+    } catch (err: any) {
+      alert(`Registration failed: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+    
+      <Controller
+        name="userName"
+        control={control}
+        defaultValue=""
+        rules={{ required: "Name is required" }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Name"
+            error={!!errors.userName}
+            helperText={errors.userName?.message}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <User />
+                  <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ width: "300px" }}
+          />
+        )}
+      />
+
+      <br />
+
+   
+      <Controller
+        name="email"
+        control={control}
+        defaultValue=""
+        rules={{
+          required: "Email is required",
+          pattern: {
+            value: /^\S+@\S+\.\S+$/,
+            message: "Invalid email format",
+          },
+        }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Email"
+            error={!!errors.email}
+            helperText={errors.email?.message}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <MailIcon />
+                  <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ width: "300px" }}
+            margin="normal"
+          />
+        )}
+      />
+
+      <br />
+
+     
+      <Controller
+        name="password"
+        control={control}
+        defaultValue=""
+        rules={{
+          required: "Password is required",
+          minLength: { value: 6, message: "Min 6 characters" },
+        }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Password"
+            type="password"
+            error={!!errors.password}
+            helperText={errors.password?.message}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LockIcon />
+                  <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ width: "300px" }}
+            margin="normal"
+          />
+        )}
+      />
+
+      <br />
+      
+      <PasswordStrengthIndicator password="" /> {/* update if needed */}
+    
+      <Controller
+        name="confirmPassword"
+        control={control}
+        defaultValue=""
+        rules={{
+          required: "Please confirm your password",
+          validate: (value, formValues) =>
+            value === formValues.password || "Passwords do not match",
+        }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Confirm Password"
+            type="password"
+            error={!!errors.confirmPassword}
+            helperText={errors.confirmPassword?.message}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LockIcon />
+                  <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ width: "300px" }}
+            margin="normal"
+          />
+        )}
+      />
+
+    
+      <br />
+    
+      <Button
+        type="submit"
+        variant="contained"
+        disabled={isLoading}
+        sx={{
+          height: "45px",
+          width: "300px",
+          backgroundColor: "#023E8A",
+          mt: 2,
+          "&:hover": { backgroundColor: "#022E6A" },
+        }}
+      >
+        {isLoading ? <CircularProgress size={24} color="inherit" /> : "Sign up"}
+      </Button>
+      <Box
+        sx={{ display: "flex", justifyContent: "center", width: "100%", mt: 1 }}
+      >
+        <Typography sx={{ fontSize: "0.85rem" }}>
+          Already registered?{" "}
+          <Link
+            to="/admin/login"
+            style={{ color: "#023E8A", fontWeight: "bold", opacity: 0.5 }}
+            onMouseOver={(e) => (e.currentTarget.style.opacity = "1")}
+            onMouseOut={(e) => (e.currentTarget.style.opacity = "0.5")}
+          >
+            Login here
+          </Link>
+        </Typography>
+      </Box>
+    </form>
+  );
+};
+
+export default RegisterForm;
