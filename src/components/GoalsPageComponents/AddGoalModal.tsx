@@ -20,73 +20,38 @@ interface AddGoalModalProps {
   isEditMode?: boolean;
 }
 
-const AddGoalModal: React.FC<AddGoalModalProps> = ({ 
-  open, 
-  onClose, 
-  onSave, 
-  initialData, 
-  isEditMode = false 
-}) => {
+const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave }) => {
   const [name, setName] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
-  const [currentAmount, setCurrentAmount] = useState('0');
+  const [currentAmount, setCurrentAmount] = useState('');
   const [deadlineDate, setDeadlineDate] = useState('');
   const [description, setDescription] = useState('');
 
-  // Populate form with initial data when in edit mode
-  React.useEffect(() => {
-    if (isEditMode && initialData) {
-      setName(initialData.name || '');
-      setTargetAmount(initialData.targetAmount?.toString() || '');
-      setCurrentAmount(initialData.currentAmount?.toString() || '0');
-      
-      // Handle date formatting - convert from ISO string to YYYY-MM-DD
-      if (initialData.endDate) {
-        const date = new Date(initialData.endDate);
-        const formattedDate = date.toISOString().split('T')[0];
-        setDeadlineDate(formattedDate);
-      } else {
-        setDeadlineDate('');
-      }
-      
-      setDescription(initialData.description || '');
-    } else {
-      // Reset form for new goal
-      setName('');
-      setTargetAmount('');
-      setCurrentAmount('0');
-      setDeadlineDate('');
-      setDescription('');
-    }
-  }, [isEditMode, initialData, open]);
-
   const handleSave = () => {
-    if (!name || !targetAmount) {
+    if (!name || !targetAmount || !currentAmount) {
       return;
     }
 
     // Convert the date string to a Date object if it exists
-    const endDate = deadlineDate ? new Date(deadlineDate) : null;
+    const deadline = deadlineDate ? new Date(deadlineDate) : null;
 
-    const goalData = {
+    const newGoal = {
       name,
       targetAmount: parseFloat(targetAmount),
-      currentAmount: parseFloat(currentAmount) || 0, // Default to 0 if empty
-      progress: Math.round(((parseFloat(currentAmount) || 0) / parseFloat(targetAmount)) * 100),
-      endDate: endDate ? endDate.toISOString().split('T')[0] : '', // Convert to YYYY-MM-DD format
+      savedAmount: parseFloat(currentAmount),
+      progress: Math.round((parseFloat(currentAmount) / parseFloat(targetAmount)) * 100),
+      deadline: deadline,
       description,
-      // Include the ID if we're editing
-      ...(isEditMode && initialData?.id && { id: initialData.id })
     };
 
-    onSave(goalData);
+    onSave(newGoal);
     handleClose();
   };
 
   const handleClose = () => {
     setName('');
     setTargetAmount('');
-    setCurrentAmount('0');
+    setCurrentAmount('');
     setDeadlineDate('');
     setDescription('');
     onClose();
@@ -113,7 +78,7 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Typography variant="h6" component="h2" fontWeight="bold">
-            {isEditMode ? 'Edit Goal' : 'Add New Goal'}
+            Add New Goal
           </Typography>
           <IconButton onClick={handleClose} size="small">
             <CloseIcon />
@@ -167,18 +132,17 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({
               value={currentAmount}
               onChange={(e) => {
           const value = e.target.value;
-          if (value === '' || (/^\d*\.?\d*$/.test(value) && (targetAmount === '' || parseFloat(value || '0') <= parseFloat(targetAmount)))) {
+          if (value === '' || (/^\d*\.?\d*$/.test(value) && (targetAmount === '' || parseFloat(value) <= parseFloat(targetAmount)))) {
             setCurrentAmount(value);
           }
               }}
               type="number"
               size="small"
-              placeholder="0"
               error={currentAmount !== '' && (!/^\d*\.?\d*$/.test(currentAmount) || 
-          (targetAmount !== '' && parseFloat(currentAmount || '0') > parseFloat(targetAmount)))}
+          (targetAmount !== '' && parseFloat(currentAmount) > parseFloat(targetAmount)))}
               helperText={currentAmount !== '' && (!/^\d*\.?\d*$/.test(currentAmount) 
           ? "Current amount should be a valid number" 
-          : (targetAmount !== '' && parseFloat(currentAmount || '0') > parseFloat(targetAmount))
+          : (targetAmount !== '' && parseFloat(currentAmount) > parseFloat(targetAmount))
             ? "Current amount cannot exceed target amount"
             : "")}
             />
@@ -235,7 +199,7 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({
             onClick={handleSave}
             sx={{ borderRadius: 2, textTransform: 'none' }}
           >
-            {isEditMode ? 'Update' : 'Save'}
+            Save
           </Button>
         </Box>
       </Paper>

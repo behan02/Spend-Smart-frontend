@@ -19,7 +19,6 @@ interface Goal {
   savedAmount: number; // Keep for compatibility with GoalItem component
   targetAmount: number;
   progress: number;
-  startDate?: string;
   endDate?: string;
   description?: string;
   remainingDays?: number;
@@ -38,11 +37,7 @@ const Goals: React.FC = () => {
   const calculateRemainingDays = (endDate?: string): number => {
     if (!endDate) return 0;
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset time to start of day
-    
     const deadline = new Date(endDate);
-    deadline.setHours(0, 0, 0, 0); // Reset time to start of day
-    
     const diffTime = deadline.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays > 0 ? diffDays : 0;
@@ -67,7 +62,6 @@ const Goals: React.FC = () => {
         savedAmount: goal.currentAmount, // Use currentAmount as savedAmount for compatibility
         targetAmount: goal.targetAmount,
         progress: Math.round((goal.currentAmount / goal.targetAmount) * 100),
-        startDate: goal.startDate,
         endDate: goal.endDate,
         description: goal.description,
         remainingDays: calculateRemainingDays(goal.endDate)
@@ -152,31 +146,12 @@ const Goals: React.FC = () => {
       setError(null);
       
       // Create goal data for API
-      const startDate = new Date();
-      startDate.setHours(0, 0, 0, 0); // Set to start of day
-      
-      let endDate: Date;
-      if (goalData.endDate) {
-        endDate = new Date(goalData.endDate);
-        endDate.setHours(23, 59, 59, 999); // Set to end of day
-      } else {
-        endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Default to 30 days from now
-        endDate.setHours(23, 59, 59, 999); // Set to end of day
-      }
-      
-      // Ensure end date is after start date
-      if (endDate <= startDate) {
-        endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 1); // Set to at least 1 day after start
-        endDate.setHours(23, 59, 59, 999); // Set to end of day
-      }
-      
       const createGoalData: GoalFormData = {
         name: goalData.name,
         targetAmount: Number(goalData.targetAmount),
         currentAmount: Number(goalData.currentAmount) || 0,
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
+        startDate: new Date().toISOString(),
+        endDate: goalData.endDate ? new Date(goalData.endDate).toISOString() : new Date().toISOString(),
         description: goalData.description || '',
         userId: 1 // Using test user ID, replace with actual user ID when auth is implemented
       };
@@ -196,7 +171,6 @@ const Goals: React.FC = () => {
         savedAmount: newGoal.currentAmount,
         targetAmount: newGoal.targetAmount,
         progress: Math.round((newGoal.currentAmount / newGoal.targetAmount) * 100),
-        startDate: newGoal.startDate,
         endDate: newGoal.endDate,
         description: newGoal.description,
         remainingDays: calculateRemainingDays(newGoal.endDate)
@@ -225,91 +199,18 @@ const Goals: React.FC = () => {
     }
   };
 
-  const handleUpdateGoal = async (updatedGoalData: any) => {
+  const handleUpdateGoal = (updatedGoalData: any) => {
     if (!goalToEdit) return;
     
-    try {
-      setLoading(true);
-      setError(null);
-      
-      console.log('=== UPDATING GOAL ===');
-      console.log('Goal to edit:', goalToEdit);
-      console.log('Updated data:', updatedGoalData);
-      
-      // Prepare start date - either from existing goal or current date
-      let startDate: Date;
-      if (goalToEdit.startDate) {
-        startDate = new Date(goalToEdit.startDate);
-      } else {
-        startDate = new Date();
-        startDate.setHours(0, 0, 0, 0);
-      }
-      
-      // Prepare end date
-      let endDate: Date;
-      if (updatedGoalData.endDate) {
-        endDate = new Date(updatedGoalData.endDate);
-        endDate.setHours(23, 59, 59, 999);
-      } else {
-        // Default to 30 days from start if no end date provided
-        endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 30);
-        endDate.setHours(23, 59, 59, 999);
-      }
-      
-      // Ensure end date is after start date
-      if (endDate <= startDate) {
-        endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 1);
-        endDate.setHours(23, 59, 59, 999);
-      }
-      
-      // Prepare data for API call
-      const updateData: GoalFormData = {
-        name: updatedGoalData.name,
-        targetAmount: Number(updatedGoalData.targetAmount),
-        currentAmount: Number(updatedGoalData.currentAmount) || 0,
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-        description: updatedGoalData.description || '',
-        userId: 1 // Using test user ID
-      };
-      
-      console.log('Formatted update data:', updateData);
-      
-      // Call backend API to update the goal
-      const updatedGoal = await goalService.update(goalToEdit.id, updateData);
-      console.log('✅ Goal updated successfully:', updatedGoal);
-      
-      // Transform API response to match component interface
-      const transformedGoal: Goal = {
-        id: updatedGoal.id,
-        name: updatedGoal.name,
-        currentAmount: updatedGoal.currentAmount,
-        savedAmount: updatedGoal.currentAmount,
-        targetAmount: updatedGoal.targetAmount,
-        progress: Math.round((updatedGoal.currentAmount / updatedGoal.targetAmount) * 100),
-        endDate: updatedGoal.endDate,
-        description: updatedGoal.description,
-        remainingDays: calculateRemainingDays(updatedGoal.endDate),
-        startDate: updatedGoal.startDate // Add startDate to preserve it
-      };
-      
-      // Update local state with the updated goal
-      const updatedGoals = goals.map(goal => 
-        goal.id === goalToEdit.id ? transformedGoal : goal
-      );
-      
-      setGoals(updatedGoals);
-      setSelectedGoal(transformedGoal);
-      handleCloseEditModal();
-      
-    } catch (err: any) {
-      console.error('Error updating goal:', err);
-      setError(`Failed to update goal: ${err.message || 'Unknown error'}`);
-    } finally {
-      setLoading(false);
-    }
+    const updatedGoals = goals.map(goal => 
+      goal.id === goalToEdit.id 
+        ? { ...goal, ...updatedGoalData, id: goal.id } 
+        : goal
+    );
+    
+    setGoals(updatedGoals);
+    setSelectedGoal(updatedGoals.find(g => g.id === goalToEdit.id) || null);
+    handleCloseEditModal();
   };
 
   const handleSelectGoal = (goal: Goal) => setSelectedGoal(goal);
@@ -318,27 +219,12 @@ const Goals: React.FC = () => {
     handleOpenEditModal(id);
   };
   
-  const handleDeleteGoal = async (id: number) => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Call the backend API to delete the goal
-      await goalService.delete(id);
-      console.log(`Goal ${id} deleted successfully from backend`);
-      
-      // Update local state only after successful backend deletion
-      const updatedGoals = goals.filter(goal => goal.id !== id);
-      setGoals(updatedGoals);
-      
-      if (selectedGoal && selectedGoal.id === id) {
-        setSelectedGoal(updatedGoals.length > 0 ? updatedGoals[0] : null);
-      }
-    } catch (err: any) {
-      console.error('Error deleting goal:', err);
-      setError(`Failed to delete goal: ${err.message || 'Unknown error'}`);
-    } finally {
-      setLoading(false);
+  const handleDeleteGoal = (id: number) => {
+    const updatedGoals = goals.filter(goal => goal.id !== id);
+    setGoals(updatedGoals);
+    
+    if (selectedGoal && selectedGoal.id === id) {
+      setSelectedGoal(updatedGoals.length > 0 ? updatedGoals[0] : null);
     }
   };
 
