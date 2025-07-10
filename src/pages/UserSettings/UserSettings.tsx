@@ -21,11 +21,25 @@ import PageButton from "../../components/Button/PageButton";
 
 const UserSettings: React.FC = () => {
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md" as import("@mui/material/styles").Breakpoint));
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const [profileImage, setProfileImage] = React.useState<string | undefined>(
     ProfileImage
   );
+
+  // User data - You should get this from your authentication context, state management, or API
+  const [userData, setUserData] = React.useState({
+    userId: 1, // Replace with actual user ID from your auth system
+    name: "Lakshan Rajapaksha",
+    email: "lakshan@example.com", // Replace with actual user email
+  });
+
+  // Handle successful updates
+  const handleUpdateSuccess = () => {
+    // You can refresh user data here if needed
+    console.log("User data updated successfully!");
+    // Optionally refresh the page or update local state
+  };
 
   return (
     <Box display="flex">
@@ -73,7 +87,7 @@ const UserSettings: React.FC = () => {
 
         {/* User name */}
         <Typography variant="h6" mt={2} ml={1}>
-          Lakshan Rajapaksha
+          {userData.name}
         </Typography>
 
         {/* Divider */}
@@ -96,11 +110,11 @@ const UserSettings: React.FC = () => {
           <Typography variant="subtitle1" mb={2}>
             Account
           </Typography>
-          <AccountForm />
-          <PageButton
-            text="Save Changes"
-            onClick={() => alert("Changes saved!")}
-            type="button"
+          <AccountForm
+            userId={userData.userId}
+            initialName={userData.name}
+            initialEmail={userData.email}
+            onUpdateSuccess={handleUpdateSuccess}
           />
         </Box>
 
