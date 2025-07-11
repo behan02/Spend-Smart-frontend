@@ -9,8 +9,6 @@ import {
   IconButton
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { useGoalContext } from '../../context/GoalContext';
-import { Goal } from '../../services/goalService';
 
 interface AddGoalModalProps {
   open: boolean;

@@ -10,6 +10,7 @@ import HeaderImage from '../../assets/images/goal_page_image.png';
 import Sidebar from '../../components/sidebar/sidebar';
 import theme from '../../assets/styles/theme';
 import { goalService, Goal as GoalType, GoalFormData } from '../../services/goalService';
+import { useNavigate } from 'react-router-dom';
 
 
 interface Goal {
@@ -33,6 +34,7 @@ const Goals: React.FC = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   // Helper function to calculate remaining days
   const calculateRemainingDays = (endDate?: string): number => {
@@ -291,8 +293,13 @@ const Goals: React.FC = () => {
   };
 
   const handleViewGoalDetails = (id: number) => {
-    console.log('View goal details:', id);
-    // Implementation to be added
+    const goalToView = goals.find(goal => goal.id === id);
+    if (goalToView) {
+      // Navigate to goal details page with goal data
+      navigate(`/goals/${id}`, { 
+        state: { goal: goalToView } 
+      });
+    }
   };
 
   // Empty state component
