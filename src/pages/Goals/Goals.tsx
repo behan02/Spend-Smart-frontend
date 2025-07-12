@@ -329,24 +329,11 @@ const Goals: React.FC = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box sx={{ display: 'flex', minHeight: '100vh'}}>
+     
+      <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8f9fa', overflowX: 'hidden' }}>
         {/* Sidebar */}
-        <Box 
-          component="nav" 
-          sx={{ 
-            width: 260,
-            flexShrink: 0,
-            position: { xs: 'fixed', md: 'sticky' },
-            top: 0,
-            height: '100vh',
-            zIndex: 1000,
-            overflowY: 'auto',
-            borderRight: `1px solid ${theme.palette.divider}`
-          }}
-        >
-          <Sidebar />
-        </Box>
+         <Sidebar />
+        
         
         {/* Main content */}
         <Box 
@@ -489,7 +476,7 @@ const Goals: React.FC = () => {
             mt: 'auto', 
             borderTop: `1px solid ${theme.palette.divider}` 
           }}>
-            <Footer />
+            
           </Box>
         </Box>
       </Box>

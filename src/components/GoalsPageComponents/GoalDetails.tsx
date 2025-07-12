@@ -176,6 +176,7 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
               cursor: 'pointer',
               fontWeight: 600,
               fontSize: '16px',
+               fontFamily: '"Inter", "Roboto", "Arial", sans-serif',
               transition: 'all 0.2s ease',
               '&:hover': {
                 backgroundColor: '#1E40AF',

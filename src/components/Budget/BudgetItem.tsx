@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, LinearProgress, Chip } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 
 interface BudgetItemProps {
   budget: {
@@ -16,102 +16,131 @@ interface BudgetItemProps {
 }
 
 const BudgetItem: React.FC<BudgetItemProps> = ({ budget, isSelected, onClick }) => {
-  const getStatusColor = () => {
-    if (budget.progress >= 90) return '#f44336'; // Red
-    if (budget.progress >= 70) return '#ff9800'; // Orange
-    return '#4caf50'; // Green
-  };
+  // Custom circular progress component
+  const CircularProgress = ({ percentage, size = 50, strokeWidth = 4 }: {
+    percentage: number;
+    size?: number;
+    strokeWidth?: number;
+  }) => {
+    const radius = (size - strokeWidth) / 2;
+    const circumference = radius * 2 * Math.PI;
+    const offset = circumference - (percentage / 100) * circumference;
 
-  const getStatusText = () => {
-    if (budget.progress >= 100) return 'Overbudget';
-    if (budget.progress >= 90) return 'High';
-    if (budget.progress >= 70) return 'Medium';
-    return 'Low';
+    // Determine color based on progress
+    const getProgressColor = () => {
+      if (percentage >= 90) return '#DC2626'; // Red for overspending
+      if (percentage >= 70) return '#F59E0B'; // Orange for warning
+      return '#22C55E'; // Green for good
+    };
+
+    return (
+      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+        <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+          {/* Background circle */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={isSelected ? "rgba(255,255,255,0.3)" : "#E5E7EB"}
+            strokeWidth={strokeWidth}
+            fill="none"
+          />
+          {/* Progress circle */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={getProgressColor()}
+            strokeWidth={strokeWidth}
+            fill="none"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            style={{
+              transition: 'stroke-dashoffset 0.5s ease-in-out',
+            }}
+          />
+        </svg>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Typography
+            variant="body2"
+            sx={{
+              fontSize: '12px',
+              fontWeight: 'bold',
+              color: isSelected ? getProgressColor() : getProgressColor(),
+            }}
+          >
+            {percentage}%
+          </Typography>
+        </Box>
+      </Box>
+    );
   };
 
   return (
     <Box 
       onClick={onClick}
       sx={{ 
-        p: 3,
+        p: 2.5,
         borderRadius: 2,
         cursor: 'pointer',
-        border: '1px solid #e0e0e0',
-        bgcolor: isSelected ? '#2952CC' : 'background.paper',
-        color: isSelected ? 'white' : 'text.primary',
+        backgroundColor: isSelected ? 'rgb(11, 0, 221)' : '#fff',
+        color: isSelected ? '#fff' : '#000',
+        border: '1px solid #E5E7EB',
+        transition: 'all 0.2s ease',
         '&:hover': {
-          bgcolor: isSelected ? '#2952cc' : 'rgba(41, 82, 204, 0.04)',
-          transform: 'translateY(-2px)',
+          backgroundColor: isSelected ? 'rgb(11, 0, 221)' : '#F9FAFB',
+          transform: 'translateY(-1px)',
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
         },
-        transition: 'all 0.3s ease',
-        boxShadow: isSelected ? '0 4px 12px rgba(41, 82, 204, 0.2)' : '0 2px 4px rgba(0,0,0,0.05)'
+        boxShadow: isSelected ? '0 4px 12px rgba(27, 16, 235, 0.2)' : '0 1px 3px rgba(0,0,0,0.1)'
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        {/* Progress Circle */}
+        <CircularProgress 
+          percentage={budget.progress} 
+          size={50} 
+          strokeWidth={4}
+        />
+        
+        {/* Budget Info */}
         <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h6" sx={{ 
-            fontWeight: 'bold', 
-            color: isSelected ? 'white' : 'inherit',
-            fontSize: '1.1rem',
-            mb: 0.5
+            fontWeight: 600, 
+            fontSize: '16px',
+            mb: 0.5,
+            color: 'inherit'
           }}>
             {budget.name}
           </Typography>
-          <Chip
-            label={budget.type.charAt(0).toUpperCase() + budget.type.slice(1)}
-            size="small"
-            sx={{
-              backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : '#e3f2fd',
-              color: isSelected ? 'white' : '#1976d2',
-              fontSize: '0.75rem'
-            }}
-          />
+          <Typography variant="body2" sx={{ 
+            fontSize: '14px',
+            opacity: 0.8,
+            color: 'inherit'
+          }}>
+            ${budget.spentAmount.toFixed(2)} / ${budget.totalAmount.toFixed(2)}
+          </Typography>
+          <Typography variant="body2" sx={{ 
+            fontSize: '12px',
+            opacity: 0.6,
+            color: 'inherit'
+          }}>
+            {budget.type.charAt(0).toUpperCase() + budget.type.slice(1)}
+          </Typography>
         </Box>
-        <Chip
-          label={getStatusText()}
-          size="small"
-          sx={{
-            backgroundColor: getStatusColor(),
-            color: 'white',
-            fontSize: '0.75rem',
-            fontWeight: 'bold'
-          }}
-        />
       </Box>
-
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" sx={{ 
-          color: isSelected ? 'rgba(255,255,255,0.8)' : 'text.secondary',
-          mb: 1
-        }}>
-          <span style={{ fontWeight: 'bold' }}>${budget.spentAmount.toFixed(2)}</span>
-          <span style={{ opacity: 0.7 }}> / ${budget.totalAmount.toFixed(2)}</span>
-        </Typography>
-        <LinearProgress 
-          variant="determinate" 
-          value={Math.min(budget.progress, 100)} 
-          sx={{ 
-            height: 8, 
-            borderRadius: 4,
-            backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : '#e8e8e8',
-            '& .MuiLinearProgress-bar': {
-              backgroundColor: getStatusColor(),
-              borderRadius: 4
-            }
-          }} 
-        />
-      </Box>
-
-      {budget.remainingDays && (
-        <Typography variant="body2" sx={{ 
-          color: isSelected ? 'rgba(255,255,255,0.8)' : '#2952CC',
-          fontWeight: 'bold',
-          fontSize: '0.8rem'
-        }}>
-          {budget.remainingDays} days left
-        </Typography>
-      )}
     </Box>
   );
 };

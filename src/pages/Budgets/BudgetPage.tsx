@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Box, 
-  Typography, 
-  Button, 
-  Grid, 
-  Container,
   Paper
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import BudgetItem from '../../components/Budget/BudgetItem';
 import BudgetDetails from '../../components/Budget/BudgetDetails';
 import AddBudgetModal from '../../components/Budget/AddBudgetModal';
+import BudgetHeaderCard from '../../components/Budget/BudgetHeaderCard';
 import { budgetCategories } from '../../components/Budget/types/budgetCategories';
 import { Budget, BudgetFormData } from '../../components/Budget/types/budget';
-import Sidebar from '../../components/sidebar/sidebar';
-import Header from '../../components/header/header'; 
+import Sidebar from '../../components/sidebar/sidebar'; 
 
 const BudgetPage: React.FC = () => {
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
@@ -203,90 +198,30 @@ const BudgetPage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8f9fa', overflowX: 'hidden' }}>
       {/* Sidebar */}
       <Sidebar />
       
       {/* Main Content */}
-      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         {/* Header */}
         <header />
         
         {/* Page Content */}
-        <Container maxWidth="xl" sx={{ mt: 4, mb: 4, flexGrow: 1 }}>
+        <Box sx={{ mt: 4, mb: 4, flexGrow: 1, px: 4, maxWidth: '1200px', mx: 'auto', overflowX: 'hidden' }}>
           {/* Hero Section */}
-          <Paper 
-            elevation={0}
-            sx={{ 
-              p: 4,
-              mb: 4,
-              borderRadius: 3,
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              position: 'relative',
-              overflow: 'hidden'
-            }}
-          >
-            <Box sx={{ position: 'relative', zIndex: 1 }}>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>
-                Budget
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 3, opacity: 0.9, maxWidth: '60%' }}>
-                Take control of your finances with our easy-to-use Budget Manager. Create personalized budgets, categorize your spending, and track your expenses in real time.
-              </Typography>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleAddBudget}
-                sx={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  color: 'white',
-                  fontWeight: 'bold',
-                  textTransform: 'none',
-                  px: 3,
-                  py: 1.5,
-                  borderRadius: 2,
-                  backdropFilter: 'blur(10px)',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                  }
-                }}
-              >
-                Add Budget
-              </Button>
-            </Box>
-            
-            {/* Decorative Elements */}
-            <Box
-              sx={{
-                position: 'absolute',
-                top: -50,
-                right: -50,
-                width: 200,
-                height: 200,
-                borderRadius: '50%',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                zIndex: 0
-              }}
-            />
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: -30,
-                right: 100,
-                width: 100,
-                height: 100,
-                borderRadius: '50%',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                zIndex: 0
-              }}
-            />
-          </Paper>
+          <BudgetHeaderCard
+            title="Budget"
+            description="Take control of your finances with our easy-to-use Budget Manager. Create personalized budgets, categorize your spending, and track your expenses in real time."
+            buttonText="Add Budget"
+            onButtonClick={handleAddBudget}
+            imagePath="/src/assets/images/Finance-pana1.png"
+          />
 
           {/* Budget Content */}
-          <Grid container spacing={3}>
+          <Box sx={{ display: 'flex', gap: 3, mt: 4 }}>
             {/* Budget List */}
-            <Grid item xs={12} md={4}>
+            <Box sx={{ flex: '1 1 400px', maxWidth: '400px' }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {budgets.map(budget => (
                   <BudgetItem
@@ -297,10 +232,10 @@ const BudgetPage: React.FC = () => {
                   />
                 ))}
               </Box>
-            </Grid>
+            </Box>
 
             {/* Budget Details */}
-            <Grid item xs={12} md={8}>
+            <Box sx={{ flex: '1 1 auto' }}>
               <Paper 
                 elevation={1} 
                 sx={{ 
@@ -317,9 +252,9 @@ const BudgetPage: React.FC = () => {
                   onViewDetails={handleViewDetails}
                 />
               </Paper>
-            </Grid>
-          </Grid>
-        </Container>
+            </Box>
+          </Box>
+        </Box>
       </Box>
 
       {/* Add/Edit Budget Modal */}
@@ -330,7 +265,11 @@ const BudgetPage: React.FC = () => {
         initialData={editingBudget}
         isEditMode={isEditMode}
       />
+
+        {/* Footer */}
     </Box>
+
+                
   );
 };
 
