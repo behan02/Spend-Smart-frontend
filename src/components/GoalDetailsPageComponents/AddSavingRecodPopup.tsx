@@ -32,12 +32,13 @@ const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
   const handleSave = () => {
     if (!amount || !date || !time) return;
 
-    // Combine date and time into a single Date object
+    // Combine date and time into a single Date object and convert to ISO string for API
     const combinedDateTime = new Date(`${date}T${time}`);
+    const isoDateString = combinedDateTime.toISOString();
 
     const newRecord = {
       amount: parseFloat(amount),
-      date: combinedDateTime,
+      date: isoDateString,
       description: description || 'Necessities',
       goalId: goalId
     };

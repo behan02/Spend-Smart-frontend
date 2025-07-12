@@ -404,6 +404,7 @@ const Goals: React.FC = () => {
             {/* Main Content Area */}
             <Box sx={{ 
               display: 'flex',
+              mt:10,
               gap: 4,
               mb: 4,
               minHeight: '500px'
