@@ -10,6 +10,8 @@ import UserRegister from "./pages/UserRegister/UserRegister";
 import AdminRegister from "./pages/AdminRegister/AdminRegister";
 import ForgetPassword from "./pages/ForgetPassword";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import BudgetPage from "./pages/Budgets/BudgetPage";
+
 
 function App() {
   return (
@@ -24,6 +26,7 @@ function App() {
         <Route path="/transaction" element={<Transaction />} />
         <Route path="/forgetpassword" element={<ForgetPassword />} />
         <Route path="/resetpassword" element={<ResetPasswordPage />} />
+        <Route path="/budgets" element={<BudgetPage />} />
 
         
         <Route path="/admin/register" element={<AdminRegister/>}/>
