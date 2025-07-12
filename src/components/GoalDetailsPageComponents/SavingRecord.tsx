@@ -4,9 +4,12 @@ import { TableRow, TableCell, Typography } from '@mui/material';
 export interface SavingRecord {
   id: number;
   amount: number;
-  date: Date;
+  date: string; // ISO string format for API compatibility
   description?: string;
   goalId: number;
+  userId?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface SavingRecordProps {
@@ -14,7 +17,8 @@ interface SavingRecordProps {
 }
 
 const SavingRecord: React.FC<SavingRecordProps> = ({ record }) => {
-  const formatDate = (date: Date) => {
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       day: 'numeric',
       month: 'short',
@@ -22,7 +26,8 @@ const SavingRecord: React.FC<SavingRecordProps> = ({ record }) => {
     });
   };
 
-  const formatTime = (date: Date) => {
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
     return date.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',

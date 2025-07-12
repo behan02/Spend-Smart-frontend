@@ -3,8 +3,6 @@ import {
   Box, 
   Typography, 
   Paper, 
-  LinearProgress, 
-  IconButton, 
   Dialog, 
   DialogTitle, 
   DialogContent, 
@@ -12,8 +10,6 @@ import {
   DialogActions, 
   Button
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 
 interface Goal {
   id: number;
@@ -38,7 +34,16 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
 
   if (!goal) {
     return (
-      <Paper elevation={1} sx={{ p: 3, borderRadius: '8px', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Paper elevation={0} sx={{ 
+        p: 4,
+        border: '1px solid #E5E7EB',
+        borderRadius: 2,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '400px',
+        backgroundColor: '#F9FAFB'
+      }}>
         <Typography variant="body1" color="textSecondary">
           Select a goal to view details
         </Typography>
@@ -60,15 +65,24 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
   };
 
   const handleEdit = () => {
-    if (goal) {
-      onEdit(goal.id);
-    }
+    onEdit(goal.id);
+  };
+
+  const handleViewDetails = () => {
+    onViewDetails(goal.id);
   };
 
   return (
     <>
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        {/* Top Section with Spend and Goals amounts */}
+      <Paper elevation={0} sx={{ 
+        p: 4,
+        border: '1px solid #E5E7EB',
+        borderRadius: 2,
+        height: 'fit-content',
+        minHeight: '400px',
+        backgroundColor: '#fff'
+      }}>
+        {/* Header Section with Spend and Goals */}
         <Box sx={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
@@ -76,25 +90,26 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
           mb: 4
         }}>
           <Box>
-            <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+            <Typography variant="body2" color="textSecondary" sx={{ mb: 1, fontSize: '14px' }}>
               Spend
             </Typography>
             <Typography variant="h4" sx={{ 
               fontWeight: 'bold',
-              color: '#000',
-              fontSize: '2.5rem'
+              color: '#1F2937',
+              fontSize: '32px'
             }}>
               ${goal.savedAmount.toFixed(2)}
             </Typography>
           </Box>
+          
           <Box sx={{ textAlign: 'right' }}>
-            <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+            <Typography variant="body2" color="textSecondary" sx={{ mb: 1, fontSize: '14px' }}>
               Goals
             </Typography>
             <Typography variant="h4" sx={{ 
               fontWeight: 'bold',
-              color: '#000',
-              fontSize: '2.5rem'
+              color: '#1F2937',
+              fontSize: '32px'
             }}>
               ${goal.targetAmount.toFixed(2)}
             </Typography>
@@ -102,40 +117,39 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
         </Box>
 
         {/* Progress Bar */}
-        <Box sx={{ mb: 3 }}>
-          <LinearProgress 
-            variant="determinate" 
-            value={goal.progress} 
-            sx={{ 
-              height: 12, 
-              borderRadius: 6,
-              backgroundColor: '#e8e8e8',
-              '& .MuiLinearProgress-bar': {
-                backgroundColor: '#2952CC',
-                borderRadius: 6
-              }
-            }} 
-          />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-            <Typography variant="body2" color="textSecondary">
-              {Math.round(goal.progress)}%
+        <Box sx={{ mb: 4 }}>
+          <Box sx={{ 
+            width: '100%', 
+            height: 8, 
+            backgroundColor: '#E5E7EB',
+            borderRadius: 4,
+            overflow: 'hidden',
+            mb: 2
+          }}>
+            <Box sx={{ 
+              width: `${goal.progress}%`, 
+              height: '100%',
+              backgroundColor: 'rgb(11, 0, 221)',
+              transition: 'width 0.3s ease'
+            }} />
+          </Box>
+          
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="body2" color="textSecondary" sx={{ fontSize: '14px' }}>
+              {goal.progress}%
             </Typography>
-            <Typography variant="body2" color="textSecondary">
-              {Math.round(100 - goal.progress)}%
+            <Typography variant="body2" color="textSecondary" sx={{ fontSize: '14px' }}>
+              {100 - goal.progress}%
             </Typography>
           </Box>
         </Box>
 
         {/* Days Left */}
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          mb: 4
-        }}>
-          <Typography variant="h6" sx={{ 
-            color: '#2952CC',
+        <Box sx={{ textAlign: 'center', mb: 4,mr:12 }}>
+          <Typography variant="h5" sx={{ 
+            color: ' rgb(11, 0, 221)', 
             fontWeight: 'bold',
-            fontSize: '1.25rem'
+            fontSize: '22px'
           }}>
             {goal.remainingDays !== undefined ? `${goal.remainingDays} days left` : ''}
           </Typography>
@@ -144,72 +158,138 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
         {/* Action Buttons */}
         <Box sx={{ 
           display: 'flex', 
-          justifyContent: 'space-between', 
+          justifyContent: 'space-between',
           alignItems: 'center',
           mt: 'auto'
         }}>
-          <Button 
-            variant="contained" 
-            sx={{ 
-              borderRadius: '25px', 
-              textTransform: 'none', 
-              px: 4,
+          <Box /> {/* Spacer */}
+          
+          {/* View Details Button */}
+          <Box
+            onClick={handleViewDetails}
+            sx={{
+              px: 8,
               py: 1.5,
-              backgroundColor: '#2952CC',
-              fontSize: '1rem',
-              fontWeight: 'bold',
+              backgroundColor: 'rgb(11, 0, 221)',
+              color: '#fff',
+              borderRadius: '25px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '16px',
+              transition: 'all 0.2s ease',
               '&:hover': {
-                backgroundColor: '#1e3a8a'
+                backgroundColor: '#1E40AF',
+                transform: 'translateY(-1px)',
+                boxShadow: '0 4px 12px rgba(29, 78, 216, 0.3)'
               }
             }}
-            onClick={() => onViewDetails(goal.id)}
           >
             View Details
-          </Button>
-          
-          <Box>
-            <IconButton 
-              size="large" 
+          </Box>
+
+          {/* Action Icons */}
+          <Box sx={{ 
+            display: 'flex',
+            gap: 1,
+            alignItems: 'center'
+          }}>
+            {/* Edit Icon */}
+            <Box
               onClick={handleEdit}
-              aria-label="edit goal"
-              sx={{ 
-                color: '#666',
-                '&:hover': { color: '#2952CC' }
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: '8px',
+                backgroundColor: '#F3F4F6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  backgroundColor: '#E5E7EB',
+                  transform: 'translateY(-1px)'
+                }
               }}
             >
-              <EditIcon />
-            </IconButton>
-            <IconButton 
-              size="large" 
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </Box>
+            
+            {/* Delete Icon */}
+            <Box
               onClick={handleOpenDeleteDialog}
-              aria-label="delete goal"
-              sx={{ 
-                color: '#666',
-                '&:hover': { color: '#f44336' }
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: '8px',
+                backgroundColor: '#F3F4F6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  backgroundColor: '#FEE2E2',
+                  transform: 'translateY(-1px)'
+                }
               }}
             >
-              <DeleteIcon />
-            </IconButton>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 6h18" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </Box>
           </Box>
         </Box>
-      </Box>
+      </Paper>
 
       {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteDialogOpen}
         onClose={handleCloseDeleteDialog}
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            p: 1
+          }
+        }}
       >
-        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 600, color: '#1F2937' }}>
+          Confirm Delete
+        </DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete the goal "{goal.name}"?
+          <DialogContentText sx={{ color: '#6B7280' }}>
+            Are you sure you want to delete the goal "{goal.name}"? This action cannot be undone.
           </DialogContentText>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="primary">
+        <DialogActions sx={{ p: 3, pt: 1 }}>
+          <Button 
+            onClick={handleCloseDeleteDialog} 
+            sx={{ 
+              color: '#6B7280',
+              fontWeight: 600,
+              textTransform: 'none',
+              px: 3
+            }}
+          >
             Cancel
           </Button>
-          <Button onClick={handleConfirmDelete} color="error">
+          <Button 
+            onClick={handleConfirmDelete} 
+            sx={{ 
+              backgroundColor: '#DC2626',
+              color: '#fff',
+              fontWeight: 600,
+              textTransform: 'none',
+              px: 3,
+              '&:hover': {
+                backgroundColor: '#B91C1C'
+              }
+            }}
+          >
             Delete
           </Button>
         </DialogActions>
