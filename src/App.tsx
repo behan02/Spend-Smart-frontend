@@ -26,7 +26,7 @@ function App() {
         <Route path="/transaction" element={<Transaction />} />
         <Route path="/forgetpassword" element={<ForgetPassword />} />
         <Route path="/resetpassword" element={<ResetPasswordPage />} />
-        <Route path="/budgets" element={<BudgetPage />} />
+        <Route path="/budget" element={<BudgetPage />} />
 
         
         <Route path="/admin/register" element={<AdminRegister/>}/>
