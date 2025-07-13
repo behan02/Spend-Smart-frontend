@@ -11,6 +11,7 @@ import AdminRegister from "./pages/AdminRegister/AdminRegister";
 import ForgetPassword from "./pages/ForgetPassword";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ReportGenerate from "./pages/Report/ReportGenerate";
+import VerifyEmail  from "./pages/VerifyEmail";
 
 function App() {
   return (
@@ -26,7 +27,7 @@ function App() {
         <Route path="/forgetpassword" element={<ForgetPassword />} />
         <Route path="/resetpassword" element={<ResetPasswordPage />} />
         <Route path="/reportGenerate" element={<ReportGenerate />} />
-        
+        <Route path="/verify-email" element={<VerifyEmail />} />
 
         {/* Add the route for Admin Site*/}
         <Route path="/admin/login" element={<AdminLogin />} />

@@ -15,6 +15,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import PasswordStrengthIndicator from "./PasswordStrengthIndicator";
 import Currency from "./Currency";
+import axios from "axios"; // make sure this is imported at the top
+
 
 interface RegisterFormInputs {
   userName: string;
@@ -44,31 +46,25 @@ const RegisterForm: React.FC = () => {
   };
 
   const onSubmit = async (data: RegisterFormInputs) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(
-        "https://localhost:7211/api/user/auth/register",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        }
-      );
+  setIsLoading(true);
+  try {
+    const response = await axios.post(
+      "https://localhost:7211/api/user/auth/register",
+      data
+    );
 
-      const result = await response.text(); // Accept plain text or string response
+    alert(response.data); // success message from backend
 
-      if (!response.ok) {
-        throw new Error(result || "Registration failed");
-      }
-
-      alert(result); // e.g. "Registration successful"
-      navigate("/");
-    } catch (err: any) {
-      alert(`Registration failed: ${err.message}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    // ✅ Redirect to email verification page with email as query param
+    navigate(`/verify-email?email=${encodeURIComponent(data.email)}`);
+  } catch (err: any) {
+    const errorMessage =
+      err.response?.data || err.message || "Registration failed";
+    alert(`Registration failed: ${errorMessage}`);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
