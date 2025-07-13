@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
+import { getAuth, signInAnonymously } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB-ItJ9PDLjY0T_2SgzOru56RZI6XzCOd4",
@@ -13,5 +14,20 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
+const auth = getAuth(app);
 
-export { storage };
+// Function to ensure user is authenticated
+export const ensureAuthenticated = async () => {
+  if (!auth.currentUser) {
+    try {
+      await signInAnonymously(auth);
+      console.log("Signed in anonymously");
+    } catch (error) {
+      console.error("Authentication failed:", error);
+      throw error;
+    }
+  }
+  return auth.currentUser; // Return the authenticated user
+};
+
+export { storage, auth };

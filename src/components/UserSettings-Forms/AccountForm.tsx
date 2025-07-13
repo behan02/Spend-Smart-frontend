@@ -1,6 +1,16 @@
 import React, { useState } from "react";
-import { TextField, Stack, Typography, Alert, CircularProgress } from "@mui/material";
-import { userService, UpdateUserNameDto, UpdateUserEmailDto } from "../../Services/userService";
+import {
+  TextField,
+  Stack,
+  Typography,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
+import {
+  userService,
+  UpdateUserNameDto,
+  UpdateUserEmailDto,
+} from "../../Services/userService";
 
 interface AccountFormProps {
   userId: number; // Pass this from parent component
@@ -33,25 +43,25 @@ const AccountForm: React.FC<AccountFormProps> = ({
   });
 
   // Handle input changes
-  const handleInputChange = (field: 'name' | 'email') => (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = event.target.value;
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
-    
-    // Clear previous errors and success messages
-    setErrors(prev => ({
-      ...prev,
-      [field]: "",
-    }));
-    setSuccess(prev => ({
-      ...prev,
-      [field]: "",
-    }));
-  };
+  const handleInputChange =
+    (field: "name" | "email") =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+
+      // Clear previous errors and success messages
+      setErrors((prev) => ({
+        ...prev,
+        [field]: "",
+      }));
+      setSuccess((prev) => ({
+        ...prev,
+        [field]: "",
+      }));
+    };
 
   // Validate email format
   const validateEmail = (email: string): boolean => {
@@ -62,15 +72,15 @@ const AccountForm: React.FC<AccountFormProps> = ({
   // Update user name
   const handleUpdateName = async () => {
     if (!formData.name.trim()) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
         name: "Name is required",
       }));
       return;
     }
 
-    setLoading(prev => ({ ...prev, name: true }));
-    
+    setLoading((prev) => ({ ...prev, name: true }));
+
     try {
       const dto: UpdateUserNameDto = {
         userId: userId,
@@ -78,18 +88,18 @@ const AccountForm: React.FC<AccountFormProps> = ({
       };
 
       const response = await userService.updateUserName(dto);
-      
-      setSuccess(prev => ({
+
+      setSuccess((prev) => ({
         ...prev,
         name: response.message || "Name updated successfully",
       }));
-      
+
       if (onUpdateSuccess) {
         onUpdateSuccess();
       }
     } catch (error: any) {
       let errorMessage = "Failed to update name";
-      
+
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.response?.status === 404) {
@@ -97,20 +107,20 @@ const AccountForm: React.FC<AccountFormProps> = ({
       } else if (error.response?.status >= 500) {
         errorMessage = "Server error. Please try again later.";
       }
-      
-      setErrors(prev => ({
+
+      setErrors((prev) => ({
         ...prev,
         name: errorMessage,
       }));
     } finally {
-      setLoading(prev => ({ ...prev, name: false }));
+      setLoading((prev) => ({ ...prev, name: false }));
     }
   };
 
   // Update user email
   const handleUpdateEmail = async () => {
     if (!formData.email.trim()) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
         email: "Email is required",
       }));
@@ -118,15 +128,15 @@ const AccountForm: React.FC<AccountFormProps> = ({
     }
 
     if (!validateEmail(formData.email)) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
         email: "Please enter a valid email address",
       }));
       return;
     }
 
-    setLoading(prev => ({ ...prev, email: true }));
-    
+    setLoading((prev) => ({ ...prev, email: true }));
+
     try {
       const dto: UpdateUserEmailDto = {
         userId: userId,
@@ -134,18 +144,18 @@ const AccountForm: React.FC<AccountFormProps> = ({
       };
 
       const response = await userService.updateUserEmail(dto);
-      
-      setSuccess(prev => ({
+
+      setSuccess((prev) => ({
         ...prev,
         email: response.message || "Email updated successfully",
       }));
-      
+
       if (onUpdateSuccess) {
         onUpdateSuccess();
       }
     } catch (error: any) {
       let errorMessage = "Failed to update email";
-      
+
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.response?.status === 404) {
@@ -155,36 +165,65 @@ const AccountForm: React.FC<AccountFormProps> = ({
       } else if (error.response?.status >= 500) {
         errorMessage = "Server error. Please try again later.";
       }
-      
-      setErrors(prev => ({
+
+      setErrors((prev) => ({
         ...prev,
         email: errorMessage,
       }));
     } finally {
-      setLoading(prev => ({ ...prev, email: false }));
+      setLoading((prev) => ({ ...prev, email: false }));
     }
   };
 
   return (
     <form>
-      <Stack direction="column" spacing={3} sx={{ ml: 15 }}>
+      <Stack direction="column" spacing={4} sx={{ ml: 15 }}>
         {/* Name Field */}
         <div>
           <label>
-            <Typography sx={{ fontSize: 15 }}>Name</Typography>
+            <Typography sx={{ fontSize: 15, mb: 1 }}>Name</Typography>
             <Stack direction="row" alignItems="center" spacing={2}>
               <TextField
                 type="text"
                 name="firstname"
                 value={formData.name}
-                onChange={handleInputChange('name')}
+                onChange={handleInputChange("name")}
                 error={!!errors.name}
                 helperText={errors.name}
-                sx={{ width: 500, mb: 2, ml: 24, mt: -2.5 }}
-                slotProps={{
-                  input: {
-                    sx: {
-                      height: 30,
+                variant="outlined"
+                placeholder="Enter your name"
+                sx={{
+                  width: 500,
+                  mb: 2,
+                  ml: 0,
+                  "& .MuiOutlinedInput-root": {
+                    height: 48,
+                    borderRadius: "8px",
+                    backgroundColor: "#f8f9fa",
+                    "& fieldset": {
+                      borderColor: "#e0e0e0",
+                      borderWidth: "1px",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#1976d2",
+                      borderWidth: "2px",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#1976d2",
+                      borderWidth: "2px",
+                      boxShadow: "0 0 0 3px rgba(25, 118, 210, 0.1)",
+                    },
+                    "&.Mui-error fieldset": {
+                      borderColor: "#d32f2f",
+                    },
+                  },
+                  "& .MuiInputBase-input": {
+                    padding: "12px 14px",
+                    fontSize: "14px",
+                    color: "#333",
+                    "&::placeholder": {
+                      color: "#999",
+                      opacity: 1,
                     },
                   },
                 }}
@@ -194,22 +233,26 @@ const AccountForm: React.FC<AccountFormProps> = ({
                 onClick={handleUpdateName}
                 disabled={loading.name}
                 style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#1976d2',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: loading.name ? 'not-allowed' : 'pointer',
+                  padding: "8px 16px",
+                  backgroundColor: "#1976d2",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: loading.name ? "not-allowed" : "pointer",
                   opacity: loading.name ? 0.6 : 1,
                 }}
               >
-                {loading.name ? <CircularProgress size={16} color="inherit" /> : 'Update'}
+                {loading.name ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : (
+                  "Update"
+                )}
               </button>
             </Stack>
           </label>
-          
+
           {success.name && (
-            <Alert severity="success" sx={{ mt: 1, ml: 24 }}>
+            <Alert severity="success" sx={{ mt: 1, ml: 0 }}>
               {success.name}
             </Alert>
           )}
@@ -218,20 +261,49 @@ const AccountForm: React.FC<AccountFormProps> = ({
         {/* Email Field */}
         <div>
           <label>
-            <Typography sx={{ fontSize: 15 }}>Email</Typography>
+            <Typography sx={{ fontSize: 15, mb: 1 }}>Email</Typography>
             <Stack direction="row" alignItems="center" spacing={2}>
               <TextField
                 type="email"
                 name="email"
                 value={formData.email}
-                onChange={handleInputChange('email')}
+                onChange={handleInputChange("email")}
                 error={!!errors.email}
                 helperText={errors.email}
-                sx={{ width: 500, mb: 2, ml: 24, mt: -2.5 }}
-                slotProps={{
-                  input: {
-                    sx: {
-                      height: 30,
+                variant="outlined"
+                placeholder="Enter your email address"
+                sx={{
+                  width: 500,
+                  mb: 2,
+                  ml: 0,
+                  "& .MuiOutlinedInput-root": {
+                    height: 48,
+                    borderRadius: "8px",
+                    backgroundColor: "#f8f9fa",
+                    "& fieldset": {
+                      borderColor: "#e0e0e0",
+                      borderWidth: "1px",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#1976d2",
+                      borderWidth: "2px",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#1976d2",
+                      borderWidth: "2px",
+                      boxShadow: "0 0 0 3px rgba(25, 118, 210, 0.1)",
+                    },
+                    "&.Mui-error fieldset": {
+                      borderColor: "#d32f2f",
+                    },
+                  },
+                  "& .MuiInputBase-input": {
+                    padding: "12px 14px",
+                    fontSize: "14px",
+                    color: "#333",
+                    "&::placeholder": {
+                      color: "#999",
+                      opacity: 1,
                     },
                   },
                 }}
@@ -241,22 +313,26 @@ const AccountForm: React.FC<AccountFormProps> = ({
                 onClick={handleUpdateEmail}
                 disabled={loading.email}
                 style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#1976d2',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: loading.email ? 'not-allowed' : 'pointer',
+                  padding: "8px 16px",
+                  backgroundColor: "#1976d2",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: loading.email ? "not-allowed" : "pointer",
                   opacity: loading.email ? 0.6 : 1,
                 }}
               >
-                {loading.email ? <CircularProgress size={16} color="inherit" /> : 'Update'}
+                {loading.email ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : (
+                  "Update"
+                )}
               </button>
             </Stack>
           </label>
-          
+
           {success.email && (
-            <Alert severity="success" sx={{ mt: 1, ml: 24 }}>
+            <Alert severity="success" sx={{ mt: 1, ml: 0 }}>
               {success.email}
             </Alert>
           )}

@@ -13,15 +13,17 @@ import ProfileImage from "../../assets/images/profile-photo.jpg";
 import ResetPwdImage from "../../assets/images/Reset password-bro.png";
 
 import Sidebar from "../../components/sidebar/sidebar";
+import Footer from "../../components/footer/Footer";
 import ProfilePictureUpload from "../../components/UserSettings-Forms/ProfilepictureUpload";
 import AccountForm from "../../components/UserSettings-Forms/AccountForm";
 import Passwordchange from "../../components/UserSettings-Forms/Passwordchange";
-import CurrencySelector from "../../components/UserSettings-Forms/Addcurencyform";
 import PageButton from "../../components/Button/PageButton";
 
 const UserSettings: React.FC = () => {
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md" as import("@mui/material/styles").Breakpoint));
+  const isSmallScreen = useMediaQuery(
+    theme.breakpoints.down("md" as import("@mui/material/styles").Breakpoint)
+  );
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const [profileImage, setProfileImage] = React.useState<string | undefined>(
     ProfileImage
@@ -30,8 +32,8 @@ const UserSettings: React.FC = () => {
   // User data - You should get this from your authentication context, state management, or API
   const [userData, setUserData] = React.useState({
     userId: 1, // Replace with actual user ID from your auth system
-    name: "Lakshan Rajapaksha",
-    email: "lakshan@example.com", // Replace with actual user email
+    //name: "Lakshan Rajapaksha",
+    // email: "lakshan@example.com", // Replace with actual user email
   });
 
   // Handle successful updates
@@ -42,7 +44,7 @@ const UserSettings: React.FC = () => {
   };
 
   return (
-    <Box display="flex">
+    <Box display="flex" sx={{ margin: 0, padding: 0 }}>
       {/* Sidebar */}
       {!isSmallScreen && <Sidebar />}
 
@@ -51,7 +53,7 @@ const UserSettings: React.FC = () => {
         flex={1}
         sx={{
           backgroundColor: "#F6F6F8",
-          p: { xs: 2, sm: 3, md: 4 },
+          p: 0, // Remove all padding
         }}
       >
         {/* Header with Background Image */}
@@ -62,7 +64,7 @@ const UserSettings: React.FC = () => {
             backgroundImage: `url(${UserSettingsImage})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
-            borderRadius: 2,
+            borderRadius: 0, // Remove border radius to make it flush
           }}
         >
           <Avatar
@@ -80,96 +82,119 @@ const UserSettings: React.FC = () => {
           />
         </Box>
 
-        {/* Profile Upload */}
-        <Box sx={{ mt: 6 }}>
-          <ProfilePictureUpload />
-        </Box>
+        {/* Content with internal padding */}
+        <Box sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
+          {/* Profile Upload */}
+          <Box sx={{ mt: 6 }}>
+            <ProfilePictureUpload />
+          </Box>
 
-        {/* User name */}
-        <Typography variant="h6" mt={2} ml={1}>
-          {userData.name}
-        </Typography>
-
-        {/* Divider */}
-        <Divider sx={{ my: 2 }} />
-
-        {/* Profile Settings Heading */}
-        <Typography variant="h6" mb={2}>
-          Profile Settings
-        </Typography>
-
-        {/* Account Section */}
-        <Box
-          sx={{
-            borderRadius: 2,
-            backgroundColor: "#FFFFFF",
-            mb: 3,
-            p: 2,
-          }}
-        >
-          <Typography variant="subtitle1" mb={2}>
-            Account
+          {/* User name */}
+          <Typography variant="h6" mt={2} ml={1}>
+            {userData.name}
           </Typography>
-          <AccountForm
-            userId={userData.userId}
-            initialName={userData.name}
-            initialEmail={userData.email}
-            onUpdateSuccess={handleUpdateSuccess}
-          />
-        </Box>
 
-        {/* Password Section */}
-        <Box
-          sx={{
-            borderRadius: 2,
-            backgroundColor: "#FFFFFF",
-            mb: 3,
-            p: 2,
-          }}
-        >
-          <Typography variant="subtitle1" mb={2}>
-            Password
+          {/* Divider */}
+          <Divider sx={{ my: 2 }} />
+
+          {/* Profile Settings Heading */}
+          <Typography variant="h6" mb={2}>
+            Profile Settings
           </Typography>
-          <Passwordchange />
 
+          {/* Account Section */}
           <Box
-            component="img"
-            src={ResetPwdImage}
-            alt="pwd Reset"
             sx={{
-              width: "100%",
-              maxWidth: 250,
-              height: "auto",
-              mx: "auto",
-              my: 4,
-              display: "block",
+              borderRadius: 2,
+              backgroundColor: "#FFFFFF",
+              mb: 3,
+              p: 2,
             }}
-          />
+          >
+            <Typography variant="subtitle1" mb={2}>
+              Account
+            </Typography>
+            <AccountForm
+              userId={userData.userId}
+              initialName={userData.name}
+              initialEmail={userData.email}
+              onUpdateSuccess={handleUpdateSuccess}
+            />
+          </Box>
 
-          <PageButton
-            text="Save Changes"
-            onClick={() => alert("Password updated!")}
-            type="button"
-          />
+          {/* Password Section */}
+          <Box
+            sx={{
+              borderRadius: 2,
+              backgroundColor: "#FFFFFF",
+              mb: 3,
+              p: 2,
+            }}
+          >
+            <Typography variant="subtitle1" mb={2}>
+              Password
+            </Typography>
+
+            {/* Password form and image side by side */}
+            <Box
+              sx={{
+                display: "flex",
+                gap: 3,
+                alignItems: "flex-start",
+                flexDirection: { xs: "column", lg: "row" },
+                minHeight: { lg: "350px" },
+              }}
+            >
+              {/* Password fields on the left */}
+              <Box
+                sx={{
+                  flex: { xs: 1, lg: "1 1 60%" },
+                  minWidth: { lg: "400px" },
+                }}
+              >
+                <Passwordchange />
+              </Box>
+
+              {/* Image on the right - larger and covering more space */}
+              <Box
+                sx={{
+                  flex: { xs: 1, lg: "1 1 40%" },
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  minHeight: {
+                    xs: "200px",
+                    sm: "250px",
+                    md: "300px",
+                    lg: "350px",
+                  },
+                  width: "100%",
+                }}
+              >
+                <Box
+                  component="img"
+                  src={ResetPwdImage}
+                  alt="pwd Reset"
+                  sx={{
+                    width: "100%",
+                    maxWidth: { xs: 250, sm: 300, md: 350, lg: 400 },
+                    height: "auto",
+                    objectFit: "contain",
+                  }}
+                />
+              </Box>
+            </Box>
+
+            <PageButton
+              text="Save Changes"
+              onClick={() => alert("Password updated!")}
+              type="button"
+            />
+          </Box>
         </Box>
 
-        {/* Currency Section */}
-        <Box
-          sx={{
-            borderRadius: 2,
-            backgroundColor: "#FFFFFF",
-            p: 2,
-            mb: 4,
-          }}
-        >
-          <Typography variant="subtitle1" mb={1}>
-            Currencies
-          </Typography>
-          <Typography variant="body2" mb={2}>
-            Add a new currency
-          </Typography>
-          <CurrencySelector />
-        </Box>
+        {/* Footer */}
+        <Footer />
       </Box>
     </Box>
   );
