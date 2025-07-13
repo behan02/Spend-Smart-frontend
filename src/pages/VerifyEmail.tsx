@@ -14,7 +14,6 @@ import VerifyEmailImage from "../assets/images/verifyEmail.svg";
 const VerifyEmail: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("");
 
@@ -23,37 +22,45 @@ const VerifyEmail: React.FC = () => {
 
   useEffect(() => {
     const verify = async () => {
-  try {
-   const res= await axios.get("https://localhost:7211/api/user/auth/verify-email", {
-  params: {
-    email,
-    token,
-  },
+      try {
+        // Try with POST instead of GET since it's modifying the isVerified status
+        const response = await axios.post(
+          "https://localhost:7211/api/user/auth/verify-email",
+          { email, token }
+        );
 
-    });
-    setMessage(res.data || "Email verified successfully!");
-    setStatus("success");
-  } catch (error) {
-    console.error("Verification error:", error);
-    let errMsg = "Email verification failed.";
-    if (axios.isAxiosError(error)) {
-      errMsg = error.response?.data?.message || error.message || errMsg;
-    } else if (error instanceof Error) {
-      errMsg = error.message || errMsg;
-    }
-    setMessage(errMsg);
-    setStatus("error");
-  }
-};
+        if (response.data) {
+          setMessage("Email verified successfully!");
+          setStatus("success");
+          // Optionally add a delay before redirecting
+          setTimeout(() => {
+            navigate("/");
+          }, 2000);
+        }
+      } catch (error) {
+        console.error("Verification error:", error);
+        let errMsg = "Email verification failed.";
+        
+        if (axios.isAxiosError(error)) {
+          // Get the specific error message from the backend
+          errMsg = error.response?.data?.message || 
+                  error.response?.data || 
+                  error.message || 
+                  "Verification failed. Please try again.";
+        }
+        
+        setMessage(errMsg);
+        setStatus("error");
+      }
+    };
 
-
-    if (email && token) {
-      verify();
-    } else {
-      setMessage("Invalid verification link.");
+    if (!email || !token) {
+      setMessage("Invalid verification link. Please check your email for the correct link.");
       setStatus("error");
+    } else {
+      verify();
     }
-  }, [email, token]);
+  }, [email, token, navigate]);
 
   return (
     <Grid container sx={{ minHeight: "100vh", width: "100vw", m: 0, p: 0 }}>

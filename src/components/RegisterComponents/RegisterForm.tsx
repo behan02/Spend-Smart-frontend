@@ -7,15 +7,17 @@ import {
   Typography,
   CircularProgress,
   Box,
+  Alert,
 } from "@mui/material";
 import User from "@mui/icons-material/PermIdentity";
 import MailIcon from "@mui/icons-material/MailOutline";
 import LockIcon from "@mui/icons-material/LockOutlined";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import PasswordStrengthIndicator from "./PasswordStrengthIndicator";
 import Currency from "./Currency";
 import axios from "axios"; // make sure this is imported at the top
+import { useSnackbar } from "notistack";
 
 
 interface RegisterFormInputs {
@@ -26,9 +28,12 @@ interface RegisterFormInputs {
   currency?: string;
 }
 
+
+
 const RegisterForm: React.FC = () => {
-  const navigate = useNavigate();
+ 
   const [isLoading, setIsLoading] = useState(false);
+  const [alert, setAlert] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const {
     control,
@@ -44,29 +49,42 @@ const RegisterForm: React.FC = () => {
     const emailRegex = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*$/;
     return emailRegex.test(email);
   };
+const { enqueueSnackbar } = useSnackbar();
 
   const onSubmit = async (data: RegisterFormInputs) => {
-  setIsLoading(true);
-  try {
-    const response = await axios.post(
-      "https://localhost:7211/api/user/auth/register",
-      data
-    );
-
-    alert(response.data); // success message from backend
-
-    // ✅ Redirect to email verification page with email as query param
-    navigate(`/verify-email?email=${encodeURIComponent(data.email)}`);
-  } catch (err: any) {
-    const errorMessage =
-      err.response?.data || err.message || "Registration failed";
-    alert(`Registration failed: ${errorMessage}`);
-  } finally {
-    setIsLoading(false);
-  }
-};
+    setIsLoading(true);
+    try {
+      const response = await axios.post(
+        "https://localhost:7211/api/user/auth/register",
+        data
+      );
+      setAlert({
+        type: "success",
+        message: "Registration successful! Please check your email to verify.",
+      });
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data || err.message || "Registration failed";
+      setAlert({
+        type: "error",
+        message: `Registration failed: ${errorMessage}`,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
+    <>
+      {alert && (
+        <Alert
+          severity={alert.type}
+          onClose={() => setAlert(null)}
+          sx={{ mb: 2, width: "300px", mx: "auto" }}
+        >
+          {alert.message}
+        </Alert>
+      )}
     <form onSubmit={handleSubmit(onSubmit)}>
       {/* Username */}
       <Controller
@@ -239,7 +257,11 @@ const RegisterForm: React.FC = () => {
         </Typography>
       </Box>
     </form>
+     </>
   );
+ 
 };
 
 export default RegisterForm;
+
+
