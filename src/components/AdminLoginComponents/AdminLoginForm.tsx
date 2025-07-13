@@ -40,7 +40,7 @@ const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("https://localhost:7211/api/user/auth/login", {
+      const response = await fetch("https://localhost:7211/api/admin/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -106,8 +106,6 @@ const LoginForm = () => {
       <Typography
         variant="body2"
         sx={{ width: "300px", textAlign: "right", color: "#FF0000", fontSize: "0.8rem", mb: 2, cursor: "pointer" }}
-        component={Link}
-        to="/forgetpassword"
       >
         Forgot password?
       </Typography>
@@ -136,7 +134,7 @@ const LoginForm = () => {
         }}
       >
         Don't have an account yet?{" "}
-        <Link to="/register" style={{ textDecoration: "none" }}>
+        <Link to="/admin/register" style={{ textDecoration: "none" }}>
           <Typography component="span" sx={{ color: "#023E8A", opacity: 0.7, fontWeight: "bold", "&:hover": { opacity: 1 },fontSize: "0.85rem", }}>
             Sign up here
           </Typography>

@@ -1,8 +1,19 @@
 import React from "react";
 import { Box, Grid } from "@mui/material";
-import Image from "../../assets/images/userLogin.png";
 
-const UserLeftImage: React.FC = () => (
+interface UserLeftImageProps {
+  imageSrc: string;
+  altText?: string;
+  maxWidth?: string;
+  height?: string;
+}
+
+const LoginLeftImage: React.FC<UserLeftImageProps> = ({
+  imageSrc,
+  altText = "Image",
+  maxWidth = "500px",
+  height = "500px",
+}) => (
   <Grid
     item
     xs={false}
@@ -19,12 +30,12 @@ const UserLeftImage: React.FC = () => (
   >
     <Box>
       <img
-        src={Image}
-        alt="Register"
-        style={{ maxWidth: "500px", height: "500px" }}
+        src={imageSrc}
+        alt={altText}
+        style={{ maxWidth: maxWidth, height: height }}
       />
     </Box>
   </Grid>
 );
 
-export default UserLeftImage;
+export default LoginLeftImage;
