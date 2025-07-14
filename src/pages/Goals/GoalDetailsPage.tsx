@@ -109,29 +109,29 @@ const GoalDetailsPage: React.FC = () => {
         date: recordData.date instanceof Date ? recordData.date.toISOString() : recordData.date,
         description: recordData.description || '',
         goalId: goalData.id,
+        userId: 1 // Default user ID, update when you have authentication
       };
 
       // Call the service to create the record
       const newRecord = await savingRecordService.create(formData);
       
-      // Convert the date string to a Date object for component compatibility
+      // Convert the API response to match the component's expected format
       const adaptedRecord: SavingRecord = {
         ...newRecord,
-        date: new Date(newRecord.date)
+        date: new Date(newRecord.date) // Convert string back to Date object for the component
       };
       
       // Update local state with the new record
       setSavingRecords(prevRecords => [...prevRecords, adaptedRecord]);
       
-      // Update goal's current amount (if your API doesn't handle this automatically)
+      // Refresh the goal data to get updated current amount
+      // You might want to also update the goal's savedAmount in your state
       if (goalData) {
-        try {
-          await goalService.update(goalData.id, {
-            currentAmount: (goalData.savedAmount || 0) + recordData.amount,
-          });
-        } catch (err) {
-          console.error('Error updating goal amount:', err);
-        }
+        const updatedGoal = {
+          ...goalData,
+          savedAmount: (goalData.savedAmount || 0) + recordData.amount
+        };
+        // Update your goal state here if you have it
       }
 
       setSnackbar({
