@@ -1,11 +1,17 @@
-import { Box, useTheme, Alert, Snackbar } from "@mui/material";
+import {
+  Box,
+  useTheme,
+  Alert,
+  Snackbar,
+  Typography,
+  Button
+} from "@mui/material";
 import Header from "../../components/header/header";
 import CustomDatePicker from "../../components/ReportComponents/DatePicker";
 import ReportDisplay from "./ReportDisplay";
 import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import Sidebar from "../../components/sidebar/sidebar";
-import axios from "axios";
 
 const SIDEBAR_WIDTH = 240;
 
@@ -13,11 +19,14 @@ const ReportGenerate: React.FC = () => {
   const [startDate, setStartDate] = useState<Dayjs | null>(dayjs());
   const [endDate, setEndDate] = useState<Dayjs | null>(dayjs());
   const [isReportVisible, setIsReportVisible] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const theme = useTheme();
 
-  const handleGenerate = (): void => {
+  const handleGenerate = async (): Promise<void> => {
     try {
+      setIsLoading(true);
+
       if (!startDate || !endDate) {
         setError("Please select both start and end dates");
         return;
@@ -26,11 +35,16 @@ const ReportGenerate: React.FC = () => {
         setError("End date cannot be before start date");
         return;
       }
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       setIsReportVisible(true);
       setError(null);
     } catch (err) {
       setError("An error occurred while generating the report");
       console.error("Report generation error:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -38,7 +52,6 @@ const ReportGenerate: React.FC = () => {
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}>
-      {/* Sidebar - Fixed position */}
       <Box
         sx={{
           width: { xs: 60, md: SIDEBAR_WIDTH },
@@ -50,51 +63,89 @@ const ReportGenerate: React.FC = () => {
           top: 0,
           height: "100vh",
           zIndex: 1200,
-          transition: theme.transitions.create("width"),
         }}
       >
         <Sidebar />
       </Box>
 
-      {/* Main Content Area */}
       <Box
         sx={{
           flexGrow: 1,
-          p: { xs: 1, md: 3 },
+          p: { xs: 2, md: 4 },
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          ml: { xs: "60px", md: `${SIDEBAR_WIDTH}px` }, // Add margin to prevent overlap
+          ml: { xs: "60px", md: `${SIDEBAR_WIDTH}px` },
           width: { xs: "calc(100% - 60px)", md: `calc(100% - ${SIDEBAR_WIDTH}px)` },
-          transition: theme.transitions.create(["margin-left", "width"]),
         }}
       >
-        <Header pageName="Craft Your Custom Report" />
+        <Header pageName="Craft Your Custom Report" sx={{ mb: 3, textAlign: "center" }} />
 
-        {/* Date Picker Section */}
-        <Box sx={{ mb: 3 }}>
+        <Box
+          sx={{
+            mb: 3,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
           <CustomDatePicker
             startDate={startDate}
             endDate={endDate}
             setStartDate={setStartDate}
             setEndDate={setEndDate}
             onGenerate={handleGenerate}
+            isLoading={isLoading}
           />
         </Box>
 
-        {/* Report Display Area - Scrollable content */}
         <Box
           sx={{
             flex: 1,
             overflowY: "auto",
-            pr: { xs: 1, md: 2 },
-            mr: { xs: -1, md: -2 },
+            p: 2,
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: 1,
+            boxShadow: theme.shadows[1],
+            display: "flex",
+            justifyContent: "center",
           }}
         >
-          {isReportVisible && <ReportDisplay />}
+          {isReportVisible ? (
+            <ReportDisplay
+              startDate={startDate?.format("YYYY-MM-DD") ?? ""}
+              endDate={endDate?.format("YYYY-MM-DD") ?? ""}
+            />
+          ) : (
+            <Box
+              sx={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                color: theme.palette.text.secondary,
+                textAlign: "center",
+              }}
+            >
+              <Typography variant="h6" gutterBottom>
+                No report generated yet
+              </Typography>
+              <Typography variant="body1">
+                Select dates and click "Generate Report" to view your data
+              </Typography>
+              <Button
+                variant="outlined"
+                onClick={handleGenerate}
+                sx={{ mt: 2 }}
+                disabled={isLoading}
+              >
+                {isLoading ? "Generating..." : "Generate Report"}
+              </Button>
+            </Box>
+          )}
         </Box>
 
-        {/* Error Snackbar */}
         <Snackbar
           open={!!error}
           autoHideDuration={6000}
