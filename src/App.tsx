@@ -11,6 +11,7 @@ import AdminRegister from "./pages/AdminRegister/AdminRegister";
 import ForgetPassword from "./pages/ForgetPassword";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import BudgetPage from "./pages/Budgets/BudgetPage";
+import BudgetDetailsPage from "./pages/Budgets/BudgetDetailsPage";
 
 
 function App() {
@@ -27,10 +28,8 @@ function App() {
         <Route path="/forgetpassword" element={<ForgetPassword />} />
         <Route path="/resetpassword" element={<ResetPasswordPage />} />
         <Route path="/budget" element={<BudgetPage />} />
-
-        
+        <Route path="/budgets/:id" element={<BudgetDetailsPage />} />
         <Route path="/admin/register" element={<AdminRegister/>}/>
-        
       </Routes>
     </Router>
   );

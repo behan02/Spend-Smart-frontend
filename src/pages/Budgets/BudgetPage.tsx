@@ -3,6 +3,7 @@ import {
   Box, 
   Paper
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom'; // Add this import
 import BudgetItem from '../../components/Budget/BudgetItem';
 import BudgetDetails from '../../components/Budget/BudgetDetails';
 import AddBudgetModal from '../../components/Budget/AddBudgetModal';
@@ -10,6 +11,7 @@ import BudgetHeaderCard from '../../components/Budget/BudgetHeaderCard';
 import { budgetCategories } from '../../components/Budget/types/budgetCategories';
 import { Budget, BudgetFormData } from '../../components/Budget/types/budget';
 import Sidebar from '../../components/sidebar/sidebar'; 
+import Header from '../../components/header/header'; // Add this import
 
 const BudgetPage: React.FC = () => {
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
@@ -17,6 +19,8 @@ const BudgetPage: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
+
+  const navigate = useNavigate(); // Add this line
 
   // Mock data - replace with actual data fetching
   useEffect(() => {
@@ -193,8 +197,7 @@ const BudgetPage: React.FC = () => {
   };
 
   const handleViewDetails = (id: number) => {
-    // Navigate to detailed budget view - implement based on your routing
-    console.log('View details for budget:', id);
+    navigate(`/budgets/${id}`); // Navigate to the budget details page
   };
 
   return (
@@ -204,8 +207,7 @@ const BudgetPage: React.FC = () => {
       
       {/* Main Content */}
       <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        {/* Header */}
-        <header />
+        
         
         {/* Page Content */}
         <Box sx={{ mt: 4, mb: 4, flexGrow: 1, px: 4, maxWidth: '1200px', mx: 'auto', overflowX: 'hidden' }}>
@@ -268,8 +270,6 @@ const BudgetPage: React.FC = () => {
 
         {/* Footer */}
     </Box>
-
-                
   );
 };
 
