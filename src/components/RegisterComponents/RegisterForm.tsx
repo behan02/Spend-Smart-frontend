@@ -7,14 +7,18 @@ import {
   Typography,
   CircularProgress,
   Box,
+  Alert,
 } from "@mui/material";
 import User from "@mui/icons-material/PermIdentity";
 import MailIcon from "@mui/icons-material/MailOutline";
 import LockIcon from "@mui/icons-material/LockOutlined";
-import { useNavigate, Link } from "react-router-dom";
-import { useForm, Controller } from "react-hook-form";
+import { Link } from "react-router-dom";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import PasswordStrengthIndicator from "./PasswordStrengthIndicator";
-import Currency from "./Currency"; // assumes your custom Currency dropdown
+import Currency from "./Currency";
+import axios from "axios"; // make sure this is imported at the top
+import { useSnackbar } from "notistack";
+
 
 interface RegisterFormInputs {
   userName: string;
@@ -24,46 +28,65 @@ interface RegisterFormInputs {
   currency?: string;
 }
 
+
+
 const RegisterForm: React.FC = () => {
-  const navigate = useNavigate();
+ 
   const [isLoading, setIsLoading] = useState(false);
+  const [alert, setAlert] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const {
     control,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<RegisterFormInputs>();
+
+  const password = useWatch({ control, name: "password" });
+
+  // Email validation function
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*$/;
+    return emailRegex.test(email);
+  };
+const { enqueueSnackbar } = useSnackbar();
 
   const onSubmit = async (data: RegisterFormInputs) => {
     setIsLoading(true);
     try {
-      const response = await fetch(
+      const response = await axios.post(
         "https://localhost:7211/api/user/auth/register",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        }
+        data
       );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Registration failed");
-      }
-
-      alert(result.message); // e.g. "User registration successful."
-      navigate("/");
+      setAlert({
+        type: "success",
+        message: "Registration successful! Please check your email to verify.",
+      });
     } catch (err: any) {
-      alert(`Registration failed: ${err.message}`);
+      const errorMessage =
+        err.response?.data || err.message || "Registration failed";
+      setAlert({
+        type: "error",
+        message: `Registration failed: ${errorMessage}`,
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
+    <>
+      {alert && (
+        <Alert
+          severity={alert.type}
+          onClose={() => setAlert(null)}
+          sx={{ mb: 2, width: "300px", mx: "auto" }}
+        >
+          {alert.message}
+        </Alert>
+      )}
     <form onSubmit={handleSubmit(onSubmit)}>
-    
+      {/* Username */}
       <Controller
         name="userName"
         control={control}
@@ -87,20 +110,16 @@ const RegisterForm: React.FC = () => {
           />
         )}
       />
-
       <br />
 
-   
+      {/* Email */}
       <Controller
         name="email"
         control={control}
         defaultValue=""
         rules={{
           required: "Email is required",
-          pattern: {
-            value: /^\S+@\S+\.\S+$/,
-            message: "Invalid email format",
-          },
+          validate: (value) => isValidEmail(value) || "Invalid email address",
         }}
         render={({ field }) => (
           <TextField
@@ -121,10 +140,9 @@ const RegisterForm: React.FC = () => {
           />
         )}
       />
-
       <br />
 
-     
+      {/* Password */}
       <Controller
         name="password"
         control={control}
@@ -153,19 +171,20 @@ const RegisterForm: React.FC = () => {
           />
         )}
       />
-
       <br />
-      
-      <PasswordStrengthIndicator password="" /> {/* update if needed */}
-    
+
+      <PasswordStrengthIndicator password={password || ""} />
+      <br />
+
+      {/* Confirm Password */}
       <Controller
         name="confirmPassword"
         control={control}
         defaultValue=""
         rules={{
           required: "Please confirm your password",
-          validate: (value, formValues) =>
-            value === formValues.password || "Passwords do not match",
+          validate: (value) =>
+            value === getValues("password") || "Passwords do not match",
         }}
         render={({ field }) => (
           <TextField
@@ -187,9 +206,9 @@ const RegisterForm: React.FC = () => {
           />
         )}
       />
-
       <br />
-      
+
+      {/* Currency Dropdown */}
       <Controller
         name="currency"
         control={control}
@@ -205,7 +224,8 @@ const RegisterForm: React.FC = () => {
         )}
       />
       <br />
-    
+
+      {/* Submit Button */}
       <Button
         type="submit"
         variant="contained"
@@ -220,6 +240,7 @@ const RegisterForm: React.FC = () => {
       >
         {isLoading ? <CircularProgress size={24} color="inherit" /> : "Sign up"}
       </Button>
+
       <Box
         sx={{ display: "flex", justifyContent: "center", width: "100%", mt: 1 }}
       >
@@ -236,7 +257,11 @@ const RegisterForm: React.FC = () => {
         </Typography>
       </Box>
     </form>
+     </>
   );
+ 
 };
 
 export default RegisterForm;
+
+
