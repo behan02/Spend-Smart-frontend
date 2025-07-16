@@ -1,6 +1,6 @@
 import { Grid } from "@mui/material"
 import AdminLoginLeftImage from "../../components/AdminLoginComponents/AdminLoginLeftImage";
-import AdminLoginHeader from "../../components/AdminLoginComponents/AdminLoginHeader";
+
 import AdminLoginForm from "../../components/AdminLoginComponents/AdminLoginForm";
 
 function AdminLogin() {
@@ -21,7 +21,7 @@ function AdminLogin() {
           flexGrow: 1,
         }}
         >
-          <AdminLoginHeader/>
+          
           <AdminLoginForm/>
         </Grid>
 

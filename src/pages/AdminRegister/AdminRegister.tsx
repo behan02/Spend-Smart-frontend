@@ -23,7 +23,7 @@ const AdminRegister: React.FC = () => (
         
       }}
     >
-      <AdminRegisterHeader />
+      
       <ListItem
         sx={{
           display: "flex",
