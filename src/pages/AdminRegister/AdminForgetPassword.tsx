@@ -331,7 +331,7 @@ function AdminForgetPassword() {
                         >
                           Don't have an account yet?{" "}
                           <Link
-                            to="/register"
+                            to="/admin/register"
                             style={{
                               textDecoration: "none",
                               color: "#023E8A",

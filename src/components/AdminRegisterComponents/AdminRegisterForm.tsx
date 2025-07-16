@@ -27,7 +27,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import Logo from "../../assets/images/logo/Logo.png"
 import { useNavigate, Link } from "react-router-dom";
-import { useForm, Controller, watch } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 
 interface RegisterFormInputs {
   userName: string;
@@ -168,7 +168,7 @@ const RegisterForm: React.FC = () => {
             <Typography
               variant="body2"
               sx={{
-                color: "rgba(0, 0, 0, 0.6)",
+                color: "rgba(0, 0, 0, 0.6)", 
                 fontSize: "14px",
                 lineHeight: 1.5,
               }}
