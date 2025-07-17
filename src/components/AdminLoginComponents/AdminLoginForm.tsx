@@ -95,8 +95,13 @@ const LoginForm = () => {
         }}
       >
         <Slide direction="down" in timeout={800}>
-          <Box sx={{ textAlign: "center", mb: 2 }}>
-            <Box sx={{ textAlign: "center" }}>
+          <Box sx={{ textAlign: "center", mb: 3 }}>
+            <Box sx={{ 
+              display: "flex", 
+              justifyContent: "center", 
+              alignItems: "center",
+              mb: 2
+            }}>
               <img
                 src={Logo}
                 alt="Logo"
@@ -117,6 +122,7 @@ const LoginForm = () => {
                 WebkitBackgroundClip: "text",
                 color: "transparent",
                 mb: 1,
+                textAlign: "center",
               }}
             >
               Step In as Admin
@@ -128,6 +134,7 @@ const LoginForm = () => {
                 color: "rgba(0, 0, 0, 0.6)",
                 fontSize: "14px",
                 lineHeight: 1.5,
+                textAlign: "center",
               }}
             >
               Your leadership begins here—sign up as an admin today.
@@ -135,128 +142,148 @@ const LoginForm = () => {
           </Box>
         </Slide>
 
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}
-        >
-          <TextField
-            label="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            error={!!errors.email}
-            helperText={errors.email}
-            placeholder="Enter your Email"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <MailIcon />
-                  <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ maxWidth: "300px", width: "100%", mb: 2 }}
-            fullWidth
-          />
-
-          <TextField
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            error={!!errors.password}
-            helperText={errors.password}
-            placeholder="**********"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LockIcon />
-                  <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ maxWidth: "300px", width: "100%", mb: 1 }}
-            fullWidth
-          />
-
-          <Typography
-            variant="body2"
-            sx={{
-              maxWidth: "300px",
+        <Slide direction="up" in timeout={800}>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            sx={{ 
+              display: "flex", 
+              flexDirection: "column", 
+              alignItems: "center", 
               width: "100%",
-              textAlign: "right",
-              color: "#FF0000",
-              fontSize: "0.8rem",
-              mb: 2,
-              cursor: "pointer",
-            }}
-            component={Link}
-            to="/admin/forgetpassword"
-          >
-            Forgot password?
-          </Typography>
-
-          <Button
-                          type="submit"
-                          variant="contained"
-                          disabled={isLoading}
-                          sx={{
-                            height: 50,
-                            width: "100%",
-                            borderRadius: 2,
-                            background: "linear-gradient(135deg, #023E8A, #0466C8)",
-                            boxShadow: "0 8px 20px rgba(2, 62, 138, 0.3)",
-                            fontSize: "16px",
-                            fontWeight: 600,
-                            textTransform: "none",
-                            "&:hover": {
-                              background: "linear-gradient(135deg, #022E6A, #0353A4)",
-                              transform: "translateY(-2px)",
-                              boxShadow: "0 12px 30px rgba(2, 62, 138, 0.4)",
-                            },
-                            "&:disabled": {
-                              background: "rgba(0, 0, 0, 0.12)",
-                            },
-                            transition: "all 0.3s ease",
-                          }}
-                        >
-                          {isLoading ? (
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                              <CircularProgress size={20} color="inherit" />
-                              <Typography>Login...</Typography>
-                            </Box>
-                          ) : (
-                            "Login"
-                          )}
-                        </Button>
-
-          <Typography
-            sx={{
-              marginTop: "10px",
-              textAlign: "center",
-              maxWidth: "300px",
-              width: "100%",
-              fontSize: "0.85rem",
-              fontWeight: 200,
+              gap: 2
             }}
           >
-            Don't have an account yet?{" "}
-            <Link to="/admin/register" style={{ textDecoration: "none" }}>
+            <TextField
+              label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={!!errors.email}
+              helperText={errors.email}
+              placeholder="Enter your Email"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <MailIcon />
+                    <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ 
+                maxWidth: "300px", 
+                width: "100%"
+              }}
+              fullWidth
+            />
+
+            <TextField
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={!!errors.password}
+              helperText={errors.password}
+              placeholder="**********"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon />
+                    <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ 
+                maxWidth: "300px", 
+                width: "100%"
+              }}
+              fullWidth
+            />
+
+            <Box sx={{ 
+              maxWidth: "300px", 
+              width: "100%", 
+              display: "flex", 
+              justifyContent: "flex-end"
+            }}>
               <Typography
-                component="span"
+                variant="body2"
                 sx={{
-                  color: "#023E8A",
-                  opacity: 0.7,
-                  fontWeight: "bold",
-                  "&:hover": { opacity: 1 },
-                  fontSize: "0.85rem",
+                  color: "#FF0000",
+                  fontSize: "0.8rem",
+                  cursor: "pointer",
+                  "&:hover": {
+                    textDecoration: "underline"
+                  }
                 }}
+                component={Link}
+                to="/admin/forgetpassword"
               >
-                Sign up here
+                Forgot password?
               </Typography>
-            </Link>
-          </Typography>
-        </Box>
+            </Box>
+
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isLoading}
+              sx={{
+                height: 50,
+                maxWidth: "300px",
+                width: "100%",
+                borderRadius: 2,
+                background: "linear-gradient(135deg, #023E8A, #0466C8)",
+                boxShadow: "0 8px 20px rgba(2, 62, 138, 0.3)",
+                fontSize: "16px",
+                fontWeight: 600,
+                textTransform: "none",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #022E6A, #0353A4)",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 12px 30px rgba(2, 62, 138, 0.4)",
+                },
+                "&:disabled": {
+                  background: "rgba(0, 0, 0, 0.12)",
+                },
+                transition: "all 0.3s ease",
+              }}
+            >
+              {isLoading ? (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <CircularProgress size={20} color="inherit" />
+                  <Typography>Login...</Typography>
+                </Box>
+              ) : (
+                "LOGIN"
+              )}
+            </Button>
+
+            <Typography
+              sx={{
+                textAlign: "center",
+                maxWidth: "300px",
+                width: "100%",
+                fontSize: "0.85rem",
+                fontWeight: 200,
+              }}
+            >
+              Don't have an account yet?{" "}
+              <Link to="/admin/register" style={{ textDecoration: "none" }}>
+                <Typography
+                  component="span"
+                  sx={{
+                    color: "#023E8A",
+                    opacity: 0.7,
+                    fontWeight: "bold",
+                    "&:hover": { opacity: 1 },
+                    fontSize: "0.85rem",
+                  }}
+                >
+                  Sign up here
+                </Typography>
+              </Link>
+            </Typography>
+          </Box>
+        </Slide>
       </Paper>
     </Fade>
   );

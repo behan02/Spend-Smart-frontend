@@ -1,11 +1,11 @@
 import React from "react";
 import { Grid, ListItem } from "@mui/material";
 import RegisterLeftImage from "../../components/RegisterComponents/RegisterLeftImage";
-import RegisterHeader from "../../components/RegisterComponents/RegisterHeader";
+
 import RegisterForm from "../../components/RegisterComponents/RegisterForm";
 
 const UserRegister: React.FC = () => (
-  <Grid container spacing={2} sx={{ height: "100%", width: "100%",margin: 0, padding: 0 }}>  
+  <Grid container spacing={2} sx={{ height: "100%", width: "100%",margin: 0, padding: 0,display: "flex" }}>  
     
     <RegisterLeftImage />
  
@@ -23,7 +23,7 @@ const UserRegister: React.FC = () => (
         
       }}
     >
-      <RegisterHeader />
+      
       <ListItem
         sx={{
           display: "flex",
