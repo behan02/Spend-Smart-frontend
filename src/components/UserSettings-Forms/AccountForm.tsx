@@ -13,14 +13,14 @@ import {
 } from "../../Services/userService";
 
 interface AccountFormProps {
-  userId: number; // Pass this from parent component
+  userId: number;  //Pass this from parent component
   initialName?: string;
   initialEmail?: string;
   onUpdateSuccess?: () => void;
 }
 
 const AccountForm: React.FC<AccountFormProps> = ({
-  userId,
+  userId = 1,
   initialName = "",
   initialEmail = "",
   onUpdateSuccess,
@@ -84,6 +84,7 @@ const AccountForm: React.FC<AccountFormProps> = ({
     try {
       const dto: UpdateUserNameDto = {
         userId: userId,
+       
         userName: formData.name.trim(),
       };
 

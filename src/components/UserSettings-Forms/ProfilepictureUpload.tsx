@@ -14,6 +14,8 @@ const ProfilePictureUpload: React.FC = () => {
   const fileInputRef = React.useRef<HTMLInputElement | null>(null); // Ref for file input
   const [uploading, setUploading] = useState(false); // State for uploading status
 
+  const API_BASE_URL = 'https://localhost:7211/api';
+
   // Handle file change and upload it
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
