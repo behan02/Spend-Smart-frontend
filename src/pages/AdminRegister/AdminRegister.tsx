@@ -1,7 +1,6 @@
 import React from "react";
 import { Grid, ListItem } from "@mui/material";
 import AdminRegisterLeftImage from "../../components/AdminRegisterComponents/AdminRegisterLeftImage";
-import AdminRegisterHeader from "../../components/AdminRegisterComponents/AdminRegiserHeader";
 import AdminRegisterForm from "../../components/AdminRegisterComponents/AdminRegisterForm";
 
 const AdminRegister: React.FC = () => (
