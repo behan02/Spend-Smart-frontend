@@ -104,13 +104,13 @@ function ReportDisplay({ startDate, endDate }: ReportDisplayProps) {
 
   return (
     <Box sx={{ p: 3, minHeight: '100vh' }}>
-      <Typography variant="h4" sx={{ mb: 2 }}>Debug: Report Display</Typography>
+      
       
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         
         {/* Row 1: Summary Cards (4 cards in one row) */}
         <Box>
-          <Typography variant="h6" sx={{ mb: 1 }}>Cards Component:</Typography>
+          
           <Cards data={reportData} />
         </Box>
 
