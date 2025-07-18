@@ -24,7 +24,7 @@ import ForgetPasswordImg from "../assets/images/ForgotPassword.png";
 import Logo from "../assets/images/logo/Logo.png";
 import { Link } from "react-router-dom";
 
-function AdminForgetPassword() {
+function ForgetPassword() {
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState({ email: "" });
   const [successMessage, setSuccessMessage] = useState("");
@@ -33,7 +33,8 @@ function AdminForgetPassword() {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   const validateForm = () => {
     let valid = true;
@@ -84,16 +85,26 @@ function AdminForgetPassword() {
   return (
     <Box sx={{ 
       minHeight: "100vh", 
-      
       display: "flex",
       alignItems: "center"
     }}>
-      <Grid container spacing={0} sx={{ height: "100vh" ,flexGrow:1,flexDirection: { xs: "column", md: "row" }  }}>
-        <LoginLeftImage
-          imageSrc={ForgetPasswordImg}
-          altText="forget password page Image"
-        />
+      <Grid container spacing={0} sx={{ height: "100vh", flexGrow: 1, flexDirection: { xs: "column", md: "row" } }}>
+        {/* Left side - Image (hidden on small screens) */}
+        <Grid
+          item
+          xs={0}
+          md={6}
+          sx={{
+            display: { xs: "none", md: "block" }, // Hide on xs, show on md and up
+          }}
+        >
+          <LoginLeftImage
+            imageSrc={ForgetPasswordImg}
+            altText="forget password page Image"
+          />
+        </Grid>
         
+        {/* Right side - Form */}
         <Grid
           item
           xs={12}
@@ -106,11 +117,35 @@ function AdminForgetPassword() {
             padding: { xs: 2, md: 4 },
             position: "relative",
             overflow: "hidden",
-            flexGrow:1,
+            flexGrow: 1,
             
+            // Background changes based on screen size
+            background: {
+              xs: "linear-gradient(135deg, #023E8A 0%, #0077B6 50%, #00B4D8 100%)", // Custom gradient for small screens
+              md: "transparent" // Transparent for larger screens
+            },
+            
+            // Optional: Add some styling for better mobile experience
+            minHeight: "100vh",
+            
+            // Add a subtle pattern or overlay for mobile (optional)
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: {
+                xs: "rgba(255, 255, 255, 0.1)", // Light overlay on mobile
+                md: "none"
+              },
+              pointerEvents: "none",
+              zIndex: 0
+            }
           }}
         >
-          {/* Background decoration */}
+          {/* Background decoration (hidden on mobile) */}
           <Box
             sx={{
               position: "absolute",
@@ -121,6 +156,7 @@ function AdminForgetPassword() {
               borderRadius: "50%",
               background: "linear-gradient(45deg, #023E8A20, #0277BD20)",
               zIndex: 0,
+              display: { xs: "none", md: "block" }, // Hide decorative element on mobile
             }}
           />
           <Box
@@ -133,23 +169,23 @@ function AdminForgetPassword() {
               borderRadius: "50%",
               background: "linear-gradient(45deg, #023E8A15, #0277BD15)",
               zIndex: 0,
+              display: { xs: "none", md: "block" }, // Hide decorative element on mobile
             }}
           />
 
           <Fade in timeout={800}>
-            <Box sx={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 400,mt:0 }}>
+            <Box sx={{ position: "relative", zIndex: 1, width: "100%", maxWidth: { xs: 350, sm: 400, md: 400 }, mt: 0 }}>
               {/* Logo with animation */}
-              <Box sx={{ textAlign: "center", mb: 4,mt:0 }}>
+              <Box sx={{ textAlign: "center", mb: 4, mt: 0 }}>
                 <Slide direction="down" in timeout={600}>
                   <img
                     src={Logo}
                     alt="Logo"
                     style={{ 
-                      maxWidth: isMobile ? "150px" : "180px", 
-                      height: isMobile ? "150px" : "180px",
+                      maxWidth: isMobile ? "120px" : isTablet ? "150px" : "180px", 
+                      height: isMobile ? "120px" : isTablet ? "150px" : "180px",
                       filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))",
-                      marginTop:0
-
+                      marginTop: 0
                     }}
                   />
                 </Slide>
@@ -178,14 +214,14 @@ function AdminForgetPassword() {
                     },
                   }}
                 >
-                  <CardContent sx={{ p: 2 }}>
+                  <CardContent sx={{ p: { xs: 2, sm: 3, md: 2 } }}>
                     <Box component="form" onSubmit={handleSubmit}>
                       {/* Header */}
                       <Box sx={{ textAlign: "center", mb: 3 }}>
                         <Typography
                           variant="h4"
                           sx={{
-                            fontSize: { xs: "1.8rem", md: "2.2rem" },
+                            fontSize: { xs: "1.5rem", sm: "1.8rem", md: "2.2rem" },
                             fontWeight: 600,
                             color: "#023E8A",
                             mb: 1,
@@ -201,8 +237,9 @@ function AdminForgetPassword() {
                           variant="body2"
                           sx={{
                             color: "text.secondary",
-                            fontSize: { xs: "0.9rem", md: "1rem" },
+                            fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
                             lineHeight: 1.6,
+                            px: { xs: 1, sm: 0 },
                           }}
                         >
                           No worries! Enter your email and we'll send you a reset link
@@ -219,7 +256,7 @@ function AdminForgetPassword() {
                         placeholder="Enter your email address"
                         fullWidth
                         sx={{
-                          mb: 3,
+                          mb: { xs: 2, sm: 3 },
                           "& .MuiOutlinedInput-root": {
                             borderRadius: 2,
                             transition: "all 0.3s ease",
@@ -256,8 +293,9 @@ function AdminForgetPassword() {
                             icon={<CheckCircleIcon />}
                             severity="success"
                             sx={{
-                              mb: 2,
+                              mb: { xs: 1.5, sm: 2 },
                               borderRadius: 2,
+                              fontSize: { xs: "0.8rem", sm: "0.875rem" },
                               "& .MuiAlert-icon": {
                                 color: "#4caf50",
                               },
@@ -273,8 +311,9 @@ function AdminForgetPassword() {
                           <Alert
                             severity="error"
                             sx={{
-                              mb: 2,
+                              mb: { xs: 1.5, sm: 2 },
                               borderRadius: 2,
+                              fontSize: { xs: "0.8rem", sm: "0.875rem" },
                             }}
                           >
                             {errorMessage}
@@ -289,9 +328,9 @@ function AdminForgetPassword() {
                         fullWidth
                         disabled={isLoading}
                         sx={{
-                          height: 56,
+                          height: { xs: 48, sm: 52, md: 56 },
                           borderRadius: 2,
-                          fontSize: "1.1rem",
+                          fontSize: { xs: "1rem", sm: "1.05rem", md: "1.1rem" },
                           fontWeight: 600,
                           textTransform: "none",
                           background: "linear-gradient(45deg, #023E8A, #0277BD)",
@@ -322,12 +361,13 @@ function AdminForgetPassword() {
                       </Button>
 
                       {/* Footer */}
-                      <Box sx={{ textAlign: "center", mt: 3 }}>
+                      <Box sx={{ textAlign: "center", mt: { xs: 2, sm: 3 } }}>
                         <Typography
                           variant="body2"
                           sx={{
                             color: "text.secondary",
-                            fontSize: "0.9rem",
+                            fontSize: { xs: "0.8rem", sm: "0.9rem" },
+                            px: { xs: 1, sm: 0 },
                           }}
                         >
                           Don't have an account yet?{" "}
@@ -356,4 +396,4 @@ function AdminForgetPassword() {
   );
 }
 
-export default AdminForgetPassword;
+export default ForgetPassword;

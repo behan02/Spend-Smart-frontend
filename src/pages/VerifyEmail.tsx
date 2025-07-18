@@ -55,7 +55,8 @@ const VerifyEmail: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [countdown, setCountdown] = useState(3);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   const email = searchParams.get("email");
   const token = searchParams.get("token");
@@ -150,21 +151,21 @@ const VerifyEmail: React.FC = () => {
         background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
       }}
     >
-      {/* Left Section - Enhanced */}
+      {/* Left Section - Image (hidden on small screens) */}
       <Grid
         item
-        xs={12}
+        xs={0}
         md={6}
         sx={{
+          display: { xs: "none", md: "flex" }, // Hide on xs, show on md and up
           background: "linear-gradient(135deg, #023E8A 0%, #0077B6 50%, #00B4D8 100%)",
-          display: "flex",
           justifyContent: "center",
           alignItems: "center",
           height: "100vh",
           position: "relative",
           overflow: "hidden",
-            flexDirection: "column",
-            flexGrow: 1,
+          flexDirection: "column",
+          flexGrow: 1,
         }}
       >
         {/* Animated background elements */}
@@ -247,35 +248,58 @@ const VerifyEmail: React.FC = () => {
         </Fade>
       </Grid>
 
-      {/* Right Section - Enhanced */}
+      {/* Right Section - Form */}
       <Grid
         item
         xs={12}
         md={6}
         sx={{
-          backgroundColor: "#fff",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           height: "100vh",
-          p: 4,
+          p: { xs: 2, md: 4 },
           position: "relative",
-            overflow: "hidden", 
-            flexDirection: "column",
-            flexGrow: 1,
+          overflow: "hidden", 
+          flexDirection: "column",
+          flexGrow: 1,
+          
+          // Background changes based on screen size
+          background: {
+            xs: "linear-gradient(135deg, #023E8A 0%, #0077B6 50%, #00B4D8 100%)", // Custom gradient for small screens
+            md: "#fff" // White background for larger screens
+          },
+          
+          // Add a subtle pattern or overlay for mobile (optional)
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: {
+              xs: "rgba(255, 255, 255, 0.1)", // Light overlay on mobile
+              md: "none"
+            },
+            pointerEvents: "none",
+            zIndex: 0
+          }
         }}
       >
         <Paper
           elevation={0}
           sx={{
             width: "100%",
-            maxWidth: 450,
+            maxWidth: { xs: 350, sm: 400, md: 450 },
             textAlign: "center",
-            p: 4,
+            p: { xs: 3, sm: 4 },
             borderRadius: 3,
             background: "rgba(255, 255, 255, 0.9)",
             backdropFilter: "blur(10px)",
             border: "1px solid rgba(255, 255, 255, 0.2)",
+            position: "relative",
+            zIndex: 1,
           }}
         >
           <Grow in timeout={800}>
@@ -284,7 +308,7 @@ const VerifyEmail: React.FC = () => {
                 src={Logo}
                 alt="Logo"
                 style={{
-                  width: "80px",
+                  width: isMobile ? "60px" : isTablet ? "70px" : "80px",
                   height: "auto",
                   marginBottom: theme.spacing(3),
                   filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))",
@@ -300,6 +324,7 @@ const VerifyEmail: React.FC = () => {
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   mb: 1,
+                  fontSize: { xs: "1.5rem", sm: "1.8rem", md: "2.125rem" },
                 }}
               >
                 Email Verification
@@ -308,7 +333,12 @@ const VerifyEmail: React.FC = () => {
               <Typography
                 variant="body2"
                 color="textSecondary"
-                sx={{ mb: 4, opacity: 0.8 }}
+                sx={{ 
+                  mb: 4, 
+                  opacity: 0.8,
+                  fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                  px: { xs: 1, sm: 0 },
+                }}
               >
                 User Account Setup
               </Typography>
@@ -321,7 +351,7 @@ const VerifyEmail: React.FC = () => {
               <Box>
                 <Box sx={{ mb: 3 }}>
                   <CircularProgress 
-                    size={80} 
+                    size={isMobile ? 60 : 80} 
                     thickness={3} 
                     sx={{ 
                       color: theme.palette.primary.main,
@@ -335,6 +365,7 @@ const VerifyEmail: React.FC = () => {
                   sx={{ 
                     mb: 2,
                     fontWeight: 500,
+                    fontSize: { xs: "1.1rem", sm: "1.25rem" },
                   }}
                 >
                   Verifying your email...
@@ -354,7 +385,11 @@ const VerifyEmail: React.FC = () => {
                     }}
                   />
                 </Box>
-                <Typography variant="body2" color="textSecondary">
+                <Typography 
+                  variant="body2" 
+                  color="textSecondary"
+                  sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+                >
                   Please wait while we verify your email address...
                 </Typography>
               </Box>
@@ -371,7 +406,7 @@ const VerifyEmail: React.FC = () => {
                 }}>
                   <CheckCircleOutlineIcon 
                     sx={{ 
-                      fontSize: 80, 
+                      fontSize: { xs: 60, sm: 70, md: 80 }, 
                       color: theme.palette.success.main,
                       filter: "drop-shadow(0 4px 8px rgba(76, 175, 80, 0.3))",
                     }} 
@@ -383,21 +418,34 @@ const VerifyEmail: React.FC = () => {
                     mb: 2, 
                     fontWeight: 600,
                     color: theme.palette.success.main,
+                    fontSize: { xs: "1.25rem", sm: "1.5rem" },
                   }}
                 >
                   Verification Successful!
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 2, color: "text.secondary" }}>
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    mb: 2, 
+                    color: "text.secondary",
+                    fontSize: { xs: "0.9rem", sm: "1rem" },
+                    px: { xs: 1, sm: 0 },
+                  }}
+                >
                   {message}
                 </Typography>
                 <Box sx={{ 
                   mb: 3,
-                  p: 2,
+                  p: { xs: 1.5, sm: 2 },
                   borderRadius: 2,
                   backgroundColor: "rgba(76, 175, 80, 0.1)",
                   border: "1px solid rgba(76, 175, 80, 0.2)",
                 }}>
-                  <Typography variant="body2" color="success.main">
+                  <Typography 
+                    variant="body2" 
+                    color="success.main"
+                    sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+                  >
                     Redirecting to login in {countdown} seconds...
                   </Typography>
                 </Box>
@@ -407,10 +455,10 @@ const VerifyEmail: React.FC = () => {
                   size="large"
                   fullWidth
                   sx={{ 
-                    py: 1.5,
+                    py: { xs: 1.2, sm: 1.5 },
                     borderRadius: 2,
                     textTransform: "none",
-                    fontSize: "1.1rem",
+                    fontSize: { xs: "1rem", sm: "1.1rem" },
                     fontWeight: 600,
                     background: "linear-gradient(45deg, #023E8A, #0077B6)",
                     boxShadow: "0 4px 15px rgba(2, 62, 138, 0.3)",
@@ -433,7 +481,7 @@ const VerifyEmail: React.FC = () => {
                 <Box sx={{ mb: 3 }}>
                   <ErrorOutlineIcon 
                     sx={{ 
-                      fontSize: 80, 
+                      fontSize: { xs: 60, sm: 70, md: 80 }, 
                       color: theme.palette.error.main,
                       filter: "drop-shadow(0 4px 8px rgba(244, 67, 54, 0.3))",
                     }} 
@@ -445,34 +493,43 @@ const VerifyEmail: React.FC = () => {
                     mb: 2, 
                     fontWeight: 600,
                     color: theme.palette.error.main,
+                    fontSize: { xs: "1.25rem", sm: "1.5rem" },
                   }}
                 >
                   Verification Failed
                 </Typography>
                 <Box sx={{ 
                   mb: 3,
-                  p: 2,
+                  p: { xs: 1.5, sm: 2 },
                   borderRadius: 2,
                   backgroundColor: "rgba(244, 67, 54, 0.1)",
                   border: "1px solid rgba(244, 67, 54, 0.2)",
                 }}>
-                  <Typography variant="body1" color="error.main">
+                  <Typography 
+                    variant="body1" 
+                    color="error.main"
+                    sx={{ 
+                      fontSize: { xs: "0.9rem", sm: "1rem" },
+                      px: { xs: 1, sm: 0 },
+                    }}
+                  >
                     {message}
                   </Typography>
                 </Box>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <Button
-                      onClick={() => navigate("/admin/register")}
+                      onClick={() => navigate("/register")}
                       variant="outlined"
                       size="large"
                       fullWidth
                       startIcon={<ArrowBackIcon />}
                       sx={{
-                        py: 1.5,
+                        py: { xs: 1.2, sm: 1.5 },
                         borderRadius: 2,
                         textTransform: "none",
                         fontWeight: 600,
+                        fontSize: { xs: "0.9rem", sm: "1rem" },
                         borderColor: theme.palette.primary.main,
                         color: theme.palette.primary.main,
                         "&:hover": {
@@ -492,10 +549,11 @@ const VerifyEmail: React.FC = () => {
                       fullWidth
                       startIcon={<RefreshIcon />}
                       sx={{
-                        py: 1.5,
+                        py: { xs: 1.2, sm: 1.5 },
                         borderRadius: 2,
                         textTransform: "none",
                         fontWeight: 600,
+                        fontSize: { xs: "0.9rem", sm: "1rem" },
                         background: "linear-gradient(45deg, #023E8A, #0077B6)",
                         boxShadow: "0 4px 15px rgba(2, 62, 138, 0.3)",
                         "&:hover": {
