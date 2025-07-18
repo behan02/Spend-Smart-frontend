@@ -36,7 +36,7 @@ interface RegisterFormInputs {
   confirmPassword: string;
 }
 
-const RegisterForm: React.FC = () => {
+const AdminRegisterForm: React.FC = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -45,7 +45,8 @@ const RegisterForm: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   const {
     control,
@@ -119,14 +120,14 @@ const RegisterForm: React.FC = () => {
       <Paper
         elevation={20}
         sx={{
-          padding: 4,
+          padding: { xs: 2, sm: 3, md: 4 },
           borderRadius: 4,
           background: "rgba(255, 255, 255, 0.95)",
           backdropFilter: "blur(10px)",
           border: "1px solid rgba(255, 255, 255, 0.2)",
           boxShadow: "0 25px 50px rgba(0, 0, 0, 0.1)",
           width: "100%",
-          maxWidth: "420px",
+          maxWidth: { xs: "350px", sm: "400px", md: "420px" },
           margin: "0 auto",
           position: "relative",
         }}
@@ -135,14 +136,14 @@ const RegisterForm: React.FC = () => {
           <Box sx={{ textAlign: "center", mb: 2 }}>
             
               
-            <Box sx={{ textAlign: "center",}}>
+            <Box sx={{ textAlign: "center" }}>
                 <Slide direction="down" in timeout={600}>
                   <img
                     src={Logo}
                     alt="Logo"
                     style={{ 
-                      maxWidth: isMobile ? "100px" : "130px", 
-                      height: isMobile ? "100px" : "130px",
+                      maxWidth: isMobile ? "80px" : isTablet ? "110px" : "130px", 
+                      height: isMobile ? "80px" : isTablet ? "110px" : "130px",
                       filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))",
                     }}
           
@@ -159,7 +160,7 @@ const RegisterForm: React.FC = () => {
                 WebkitBackgroundClip: "text",
                 color: "transparent",
                 mb: 1,
-                
+                fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" },
               }}
             >
               Step In as Admin
@@ -169,8 +170,9 @@ const RegisterForm: React.FC = () => {
               variant="body2"
               sx={{
                 color: "rgba(0, 0, 0, 0.6)", 
-                fontSize: "14px",
+                fontSize: { xs: "12px", sm: "13px", md: "14px" },
                 lineHeight: 1.5,
+                px: { xs: 1, sm: 0 },
               }}
             >
               Your leadership begins here—sign up as an admin today.
@@ -203,7 +205,7 @@ const RegisterForm: React.FC = () => {
                     }}
                     fullWidth
                     sx={{
-                      mb: 2,
+                      mb: { xs: 1.5, sm: 2 },
                       "& .MuiOutlinedInput-root": {
                         borderRadius: 2,
                         "&:hover .MuiOutlinedInput-notchedOutline": {
@@ -248,7 +250,7 @@ const RegisterForm: React.FC = () => {
                     }}
                     fullWidth
                     sx={{
-                      mb: 2,
+                      mb: { xs: 1.5, sm: 2 },
                       "& .MuiOutlinedInput-root": {
                         borderRadius: 2,
                         "&:hover .MuiOutlinedInput-notchedOutline": {
@@ -301,7 +303,7 @@ const RegisterForm: React.FC = () => {
                     }}
                     fullWidth
                     sx={{
-                      mb: 2,
+                      mb: { xs: 1.5, sm: 2 },
                       "& .MuiOutlinedInput-root": {
                         borderRadius: 2,
                         "&:hover .MuiOutlinedInput-notchedOutline": {
@@ -319,9 +321,16 @@ const RegisterForm: React.FC = () => {
 
             {watchedPassword && (
               <Fade in timeout={300}>
-                <Box sx={{ mb: 2 }}>
+                <Box sx={{ mb: { xs: 1.5, sm: 2 } }}>
                   <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                    <Typography variant="caption" sx={{ color: "rgba(0, 0, 0, 0.6)", mr: 1 }}>
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        color: "rgba(0, 0, 0, 0.6)", 
+                        mr: 1,
+                        fontSize: { xs: "0.7rem", sm: "0.75rem" }
+                      }}
+                    >
                       Password strength:
                     </Typography>
                     <Chip
@@ -330,8 +339,8 @@ const RegisterForm: React.FC = () => {
                       sx={{
                         backgroundColor: getStrengthColor(passwordStrength),
                         color: "white",
-                        fontSize: "10px",
-                        height: "20px",
+                        fontSize: { xs: "9px", sm: "10px" },
+                        height: { xs: "18px", sm: "20px" },
                       }}
                     />
                   </Box>
@@ -390,7 +399,7 @@ const RegisterForm: React.FC = () => {
                     }}
                     fullWidth
                     sx={{
-                      mb: 3,
+                      mb: { xs: 2, sm: 3 },
                       "& .MuiOutlinedInput-root": {
                         borderRadius: 2,
                         "&:hover .MuiOutlinedInput-notchedOutline": {
@@ -412,8 +421,9 @@ const RegisterForm: React.FC = () => {
                   icon={<CheckCircleIcon />}
                   severity="success"
                   sx={{
-                    mb: 2,
+                    mb: { xs: 1.5, sm: 2 },
                     borderRadius: 2,
+                    fontSize: { xs: "0.8rem", sm: "0.875rem" },
                     "& .MuiAlert-icon": {
                       color: "#4caf50",
                     },
@@ -430,8 +440,9 @@ const RegisterForm: React.FC = () => {
                   icon={<ErrorIcon />}
                   severity="error"
                   sx={{
-                    mb: 2,
+                    mb: { xs: 1.5, sm: 2 },
                     borderRadius: 2,
+                    fontSize: { xs: "0.8rem", sm: "0.875rem" },
                     "& .MuiAlert-icon": {
                       color: "#f44336",
                     },
@@ -448,12 +459,12 @@ const RegisterForm: React.FC = () => {
                 variant="contained"
                 disabled={isLoading}
                 sx={{
-                  height: 50,
+                  height: { xs: 45, sm: 48, md: 50 },
                   width: "100%",
                   borderRadius: 2,
                   background: "linear-gradient(135deg, #023E8A, #0466C8)",
                   boxShadow: "0 8px 20px rgba(2, 62, 138, 0.3)",
-                  fontSize: "16px",
+                  fontSize: { xs: "14px", sm: "15px", md: "16px" },
                   fontWeight: 600,
                   textTransform: "none",
                   "&:hover": {
@@ -470,7 +481,7 @@ const RegisterForm: React.FC = () => {
                 {isLoading ? (
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <CircularProgress size={20} color="inherit" />
-                    <Typography>Creating Account...</Typography>
+                    <Typography sx={{ fontSize: { xs: "14px", sm: "15px", md: "16px" } }}>Creating Account...</Typography>
                   </Box>
                 ) : (
                   "Create Account"
@@ -479,8 +490,13 @@ const RegisterForm: React.FC = () => {
             </Grow>
 
             <Fade in timeout={1600}>
-              <Box sx={{ textAlign: "center"}}>
-                <Typography sx={{ fontSize: "14px", color: "rgba(0, 0, 0, 0.6)" }}>
+              <Box sx={{ textAlign: "center" }}>
+                <Typography sx={{ 
+                  fontSize: { xs: "12px", sm: "13px", md: "14px" }, 
+                  color: "rgba(0, 0, 0, 0.6)",
+                  px: { xs: 1, sm: 0 },
+                  mt: { xs: 1.5, sm: 2 }
+                }}>
                   Already have an account?{" "}
                   <Link
                     to="/admin/login"
@@ -512,4 +528,4 @@ const RegisterForm: React.FC = () => {
   );
 };
 
-export default RegisterForm;
+export default AdminRegisterForm;
