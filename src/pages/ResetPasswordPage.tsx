@@ -42,8 +42,9 @@ function ResetPassword() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-   const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   // Password strength calculation
   const getPasswordStrength = (password: string) => {
@@ -125,12 +126,23 @@ function ResetPassword() {
   };
 
   return (
-    <Grid container spacing={0} sx={{ height: "100vh",}}>
-      <UserLeftImage
-        imageSrc={ResetPasswordImage}
-        altText="Reset Password Page Image"
-      />
+    <Grid container spacing={0} sx={{ height: "100vh" }}>
+      {/* Left side - Image (hidden on small screens) */}
+      <Grid
+        item
+        xs={0}
+        md={6}
+        sx={{
+          display: { xs: "none", md: "block" }, // Hide on xs, show on md and up
+        }}
+      >
+        <UserLeftImage
+          imageSrc={ResetPasswordImage}
+          altText="Reset Password Page Image"
+        />
+      </Grid>
 
+      {/* Right side - Form */}
       <Grid
         item
         xs={12}
@@ -140,58 +152,78 @@ function ResetPassword() {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          padding: 3,
+          padding: { xs: 2, md: 3 },
           position: "relative",
           flexGrow: 1,
-        }}
-      > <Box
-                  sx={{
-                    position: "absolute",
-                    top: -50,
-                    right: -50,
-                    width: 200,
-                    height: 200,
-                    borderRadius: "50%",
-                    background: "linear-gradient(45deg, #023E8A20, #0277BD20)",
-                    zIndex: 0,
-                  }}
-                />
-        <Box sx={{ textAlign: "center", mb: 4 }}>
-                <Slide direction="down" in timeout={600}>
-                  <img
-                    src={Logo}
-                    alt="Logo"
-                    style={{ 
-                      maxWidth: isMobile ? "100px" : "130px", 
-                      height: isMobile ? "100px" : "130px",
-                      filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))",
-                    }}
           
-                  />
-                </Slide>
-              </Box>
-              
-
-                
+         
+          background: {
+            background:
+              "linear-gradient(135deg, #023E8A 0%, #0077B6 50%, #00B4D8 100%)", // Gradient background for small screens
+            md: "transparent", 
+          },
+         
+          minHeight: "100vh",
+          
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: {
+              xs: "rgba(255, 255, 255, 0.1)", 
+              md: "none"
+            },
+            pointerEvents: "none",
+            zIndex: 0
+          }
+        }}
+      > 
+        <Box
+          sx={{
+            position: "absolute",
+            top: -50,
+            right: -50,
+            width: 200,
+            height: 200,
+            borderRadius: "50%",
+            background: "linear-gradient(45deg, #023E8A20, #0277BD20)",
+            zIndex: 0,
+            display: { xs: "none", md: "block" }, // Hide decorative element on mobile
+          }}
+        />
+        
+        <Box sx={{ textAlign: "center", mb: 4, position: "relative", zIndex: 1 }}>
+          <Slide direction="down" in timeout={600}>
+            <img
+              src={Logo}
+              alt="Logo"
+              style={{ 
+                maxWidth: isMobile ? "80px" : isTablet ? "110px" : "130px", 
+                height: isMobile ? "80px" : isTablet ? "110px" : "130px",
+                filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))",
+              }}
+            />
+          </Slide>
+        </Box>
+        
         <Fade in timeout={800}>
-            
-            
           <Paper
             elevation={24}
             sx={{
-              padding: 2,
+              padding: { xs: 2, sm: 3, md: 2 },
               borderRadius: 4,
               background: "rgba(255, 255, 255, 0.95)",
-              
-              
               width: "100%",
-              maxWidth: "420px",
+              maxWidth: { xs: "350px", sm: "400px", md: "420px" },
               position: "relative",
+              zIndex: 1,
             }}
           >
             <Slide direction="down" in timeout={600}>
               <Box sx={{ textAlign: "center", mb: 3 }}>
-                
                 <Typography
                   variant="h4"
                   sx={{
@@ -201,6 +233,7 @@ function ResetPassword() {
                     WebkitBackgroundClip: "text",
                     color: "transparent",
                     mb: 1,
+                    fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" },
                   }}
                 >
                   Set New Password
@@ -210,8 +243,9 @@ function ResetPassword() {
                   variant="body2"
                   sx={{
                     color: "rgba(0, 0, 0, 0.6)",
-                    fontSize: "14px",
+                    fontSize: { xs: "12px", sm: "13px", md: "14px" },
                     lineHeight: 1.5,
+                    px: { xs: 1, sm: 0 },
                   }}
                 >
                   Your new password must be different from previously used passwords.
@@ -249,7 +283,7 @@ function ResetPassword() {
                   }}
                   fullWidth
                   sx={{
-                    mb: 2,
+                    mb: { xs: 1.5, sm: 2 },
                     "& .MuiOutlinedInput-root": {
                       borderRadius: 2,
                       "&:hover .MuiOutlinedInput-notchedOutline": {
@@ -264,9 +298,16 @@ function ResetPassword() {
 
                 {password && (
                   <Fade in timeout={300}>
-                    <Box sx={{ mb: 2 }}>
+                    <Box sx={{ mb: { xs: 1.5, sm: 2 } }}>
                       <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                        <Typography variant="caption" sx={{ color: "rgba(0, 0, 0, 0.6)", mr: 1 }}>
+                        <Typography 
+                          variant="caption" 
+                          sx={{ 
+                            color: "rgba(0, 0, 0, 0.6)", 
+                            mr: 1,
+                            fontSize: { xs: "0.7rem", sm: "0.75rem" }
+                          }}
+                        >
                           Password strength:
                         </Typography>
                         <Chip
@@ -275,8 +316,8 @@ function ResetPassword() {
                           sx={{
                             backgroundColor: getStrengthColor(passwordStrength),
                             color: "white",
-                            fontSize: "10px",
-                            height: "20px",
+                            fontSize: { xs: "9px", sm: "10px" },
+                            height: { xs: "18px", sm: "20px" },
                           }}
                         />
                       </Box>
@@ -325,7 +366,7 @@ function ResetPassword() {
                   }}
                   fullWidth
                   sx={{
-                    mb: 3,
+                    mb: { xs: 2, sm: 3 },
                     "& .MuiOutlinedInput-root": {
                       borderRadius: 2,
                       "&:hover .MuiOutlinedInput-notchedOutline": {
@@ -344,8 +385,9 @@ function ResetPassword() {
                       icon={<CheckCircleIcon />}
                       severity="success"
                       sx={{
-                        mb: 2,
+                        mb: { xs: 1.5, sm: 2 },
                         borderRadius: 2,
+                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
                         "& .MuiAlert-icon": {
                           color: "#4caf50",
                         },
@@ -362,8 +404,9 @@ function ResetPassword() {
                       icon={<ErrorIcon />}
                       severity="error"
                       sx={{
-                        mb: 2,
+                        mb: { xs: 1.5, sm: 2 },
                         borderRadius: 2,
+                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
                         "& .MuiAlert-icon": {
                           color: "#f44336",
                         },
@@ -379,12 +422,12 @@ function ResetPassword() {
                   variant="contained"
                   disabled={isLoading}
                   sx={{
-                    height: 50,
+                    height: { xs: 45, sm: 48, md: 50 },
                     width: "100%",
                     borderRadius: 2,
                     background: "linear-gradient(135deg, #023E8A, #0466C8)",
                     boxShadow: "0 8px 20px rgba(2, 62, 138, 0.3)",
-                    fontSize: "16px",
+                    fontSize: { xs: "14px", sm: "15px", md: "16px" },
                     fontWeight: 600,
                     textTransform: "none",
                     "&:hover": {
@@ -401,7 +444,7 @@ function ResetPassword() {
                   {isLoading ? "Resetting..." : "Reset Password"}
                 </Button>
 
-                <Box sx={{ textAlign: "center", mt: 3 }}>
+                <Box sx={{ textAlign: "center", mt: { xs: 2, sm: 3 } }}>
                   <Link to="/" style={{ textDecoration: "none" }}>
                     <Button
                       startIcon={<ArrowBackIcon />}
@@ -409,7 +452,7 @@ function ResetPassword() {
                         color: "#023E8A",
                         fontWeight: 600,
                         textTransform: "none",
-                        fontSize: "14px",
+                        fontSize: { xs: "13px", sm: "14px" },
                         "&:hover": {
                           backgroundColor: "rgba(2, 62, 138, 0.05)",
                         },
