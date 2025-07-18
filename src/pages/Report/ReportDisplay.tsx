@@ -36,26 +36,24 @@ function ReportDisplay({ startDate, endDate }: ReportDisplayProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let userId = localStorage.getItem("userId");
-
-    // TEMP: Log or fallback for dev
-    console.log("userId from localStorage:", userId);
-
-    if (!userId) {
-      // Optional: Temporary fallback (for development/testing only)
-      // userId = "your-test-user-id-here";
-      setError("User not logged in. Please log in first.");
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-
+    // Skip API call for now and use dummy data
+    console.log("ReportDisplay mounting with:", { startDate, endDate });
+    
+    // Set dummy data immediately
+    setReportData({
+      totalIncome: 8000,
+      totalExpenses: 3500,
+      totalSavings: 1500,
+      budgetUtilization: 25
+    });
+    setLoading(false);
+    
+    // Comment out the API call for debugging
+    /*
     axios
       .post("https://localhost:7211/api/Reports/generate", {
         startDate,
         endDate,
-        userId,
       })
       .then((response) => {
         setReportData(response.data);
@@ -65,30 +63,10 @@ function ReportDisplay({ startDate, endDate }: ReportDisplayProps) {
         setError("Report fetch error: " + error.message);
         setLoading(false);
       });
+    */
   }, [startDate, endDate]);
 
-  const handleDownloadCSV = () => {
-    const csvData = new Blob([JSON.stringify(reportData, null, 2)], {
-      type: "text/csv;charset=utf-8;",
-    });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(csvData);
-    link.setAttribute("download", "report.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleDownloadPDF = () => {
-    const printWindow = window.open("", "_blank");
-    if (printWindow) {
-      printWindow.document.write("<html><head><title>Report PDF</title></head><body><pre>");
-      printWindow.document.write(JSON.stringify(reportData, null, 2));
-      printWindow.document.write("</pre></body></html>");
-      printWindow.document.close();
-      printWindow.print();
-    }
-  };
+  console.log("ReportDisplay render:", { loading, error, reportData });
 
   if (loading) {
     return (
@@ -101,6 +79,7 @@ function ReportDisplay({ startDate, endDate }: ReportDisplayProps) {
         }}
       >
         <CircularProgress />
+        <Typography sx={{ ml: 2 }}>Loading report...</Typography>
       </Box>
     );
   }
@@ -110,56 +89,60 @@ function ReportDisplay({ startDate, endDate }: ReportDisplayProps) {
       <Box
         sx={{
           display: "flex",
+          flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
           minHeight: "60vh",
+          gap: 2
         }}
       >
         <Typography color="error">{error}</Typography>
+        <Button onClick={() => window.location.reload()}>Retry</Button>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      {/* Summary Cards */}
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-        <Cards data={reportData} />
-      </Box>
+    <Box sx={{ p: 3, minHeight: '100vh' }}>
+      <Typography variant="h4" sx={{ mb: 2 }}>Debug: Report Display</Typography>
+      
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        
+        {/* Row 1: Summary Cards (4 cards in one row) */}
+        <Box>
+          <Typography variant="h6" sx={{ mb: 1 }}>Cards Component:</Typography>
+          <Cards data={reportData} />
+        </Box>
 
-      {/* Pie and Bar Graph */}
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={6}>
-          <PieChart data={reportData?.categoryBreakdown} />
+        {/* Row 2: Pie Chart and Bar Graph */}
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6} sx={{ display: "flex", flexDirection: "column", alignItems: "center", flexGrow: 2 }}>
+            {/* <Typography variant="h6" sx={{ mb: 1 }}>Pie Chart:</Typography> */}
+            <PieChart data={reportData?.categoryBreakdown} />
+          </Grid>
+          <Grid item xs={12} md={6} sx={{ display: "flex", flexDirection: "column", alignItems: "center", flexGrow: 1 }}>
+            {/* <Typography variant="h6" sx={{ mb: 1 }}>Bar Graph:</Typography> */}
+            <BarGraph data={reportData?.monthlyData} />
+          </Grid>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <BarGraph data={reportData?.monthlyData} />
-        </Grid>
-      </Grid>
 
-      {/* Area Chart and Goals */}
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={6}>
-          <BalanceAreaChart data={reportData?.monthlyData} />
+        {/* Row 3: Area Chart and Goals */}
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            {/* <Typography variant="h6" sx={{ mb: 1 }}>Income Chart:</Typography> */}
+            <BalanceAreaChart data={reportData?.monthlyData} />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            {/* <Typography variant="h6" sx={{ mb: 1 }}>Goals:</Typography> */}
+            <ReportGoal data={reportData?.goals} />
+          </Grid>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <ReportGoal data={reportData?.goals} />
-        </Grid>
-      </Grid>
 
-      {/* Transactions Table */}
-      <Box>
-        <BasicTable data={reportData?.transactions} />
-      </Box>
-
-      {/* Export Buttons */}
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2, gap: 1 }}>
-        <Button variant="outlined" onClick={handleDownloadCSV}>
-          Download CSV
-        </Button>
-        <Button variant="outlined" onClick={handleDownloadPDF}>
-          Download PDF
-        </Button>
+        {/* Row 4: Transactions Table (full width) */}
+        <Box>
+          <Typography variant="h6" sx={{ mb: 1 }}>Transaction Table:</Typography>
+          <BasicTable data={reportData?.transactions} />
+        </Box>
       </Box>
     </Box>
   );

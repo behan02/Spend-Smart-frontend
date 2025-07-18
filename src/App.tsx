@@ -12,6 +12,7 @@ import ForgetPassword from "./pages/ForgetPassword";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ReportGenerate from "./pages/Report/ReportGenerate";
 import VerifyEmail  from "./pages/VerifyEmail";
+import { Box, Typography, Button, FormControl, Select, MenuItem } from "@mui/material";
 
 function App() {
   return (

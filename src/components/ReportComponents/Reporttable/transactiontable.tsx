@@ -1,71 +1,146 @@
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import { Typography } from "@mui/material";
+import {
+  Box,
+  Card,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+} from "@mui/material";
 
-function transactionData(
-  date: string,
-  category: string,
-  amount: string | number,
-  type: string
-) {
-  return { date, category, amount, type };
+interface Transaction {
+  date: string;
+  category: string;
+  amount: string;
+  type: 'Income' | 'Expense';
 }
 
-const rows = [
-  transactionData("12/02/2024", "Foods", "LKR 500", "Expense"),
-  transactionData("05/10/2025", "Grocery", "LKR 300", "Expense"),
-  transactionData("15/03/2024", "Transport", "LKR 200", "Expense"),
-  transactionData("23/01/2024", "Transport", "LKR 450", "Income"),
-  transactionData("12/06/2023", "Foods", "LKR 800", "Expense"),
-  transactionData("25/04/2025", "Entertainment", "LKR 1000", "Income"),
+interface BasicTableProps {
+  data?: Transaction[];
+}
+
+const defaultTransactions: Transaction[] = [
+  { date: '2/2/24', category: 'Foods', amount: 'LKR 500', type: 'Expense' },
+  { date: '3/2/24', category: 'Grocery', amount: 'LKR 300', type: 'Expense' },
+  { date: '3/2/24', category: 'Transport', amount: 'LKR 200', type: 'Expense' },
+  { date: '4/2/24', category: 'Foods', amount: 'LKR 500', type: 'Income' },
+  { date: '4/2/24', category: 'Entertainment', amount: 'LKR 1000', type: 'Expense' }
 ];
 
-export default function BasicTable() {
+function BasicTable({ data }: BasicTableProps) {
+  const transactions = data || defaultTransactions;
+
+  const getTypeColor = (type: string) => {
+    return type === 'Income' ? '#4444ff' : '#ff4444';
+  };
+
   return (
-    <TableContainer
-      component={Paper}
-      sx={{
-        mt: 2,
-        width: "100%",
-        padding: 2,
-        boxShadow: 3,
-        borderRadius: 2,
-        backgroundColor: "#fff",
-      }}
-    >
-      <Typography sx={{ m: 2, fontWeight: "bold" }}>
-        Transaction Summary
-      </Typography>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Date</TableCell>
-            <TableCell align="right">Category</TableCell>
-            <TableCell align="right">Amount</TableCell>
-            <TableCell align="right">Type</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow
-              key={row.date}
-              sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-            >
-              <TableCell component="th" scope="row">
-                {row.date}
+    <Card sx={{ p: 2, backgroundColor: '#fff', borderRadius: 2, border: '1px solid #e0e0e0' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', fontSize: '13px' }}>
+          Transaction Summary
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Box sx={{ width: 8, height: 8, backgroundColor: '#ff4444', borderRadius: '50%' }} />
+            <Typography variant="body2" sx={{ fontSize: '10px' }}>Expense</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Box sx={{ width: 8, height: 8, backgroundColor: '#4444ff', borderRadius: '50%' }} />
+            <Typography variant="body2" sx={{ fontSize: '10px' }}>Income</Typography>
+          </Box>
+        </Box>
+      </Box>
+      
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontSize: '11px', fontWeight: 'bold', py: 1, borderBottom: '1px solid #e0e0e0' }}>
+                Date
               </TableCell>
-              <TableCell align="right">{row.category}</TableCell>
-              <TableCell align="right">{row.amount}</TableCell>
-              <TableCell align="right">{row.type}</TableCell>
+              <TableCell sx={{ fontSize: '11px', fontWeight: 'bold', py: 1, borderBottom: '1px solid #e0e0e0' }}>
+                Category
+              </TableCell>
+              <TableCell sx={{ fontSize: '11px', fontWeight: 'bold', py: 1, borderBottom: '1px solid #e0e0e0' }}>
+                Amount
+              </TableCell>
+              <TableCell sx={{ fontSize: '11px', fontWeight: 'bold', py: 1, borderBottom: '1px solid #e0e0e0' }}>
+                Type
+              </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {transactions.map((transaction, index) => (
+              <TableRow key={index} sx={{ '&:last-child td': { border: 0 } }}>
+                <TableCell sx={{ fontSize: '10px', py: 1, border: 'none' }}>
+                  {transaction.date}
+                </TableCell>
+                <TableCell sx={{ 
+                  fontSize: '10px', 
+                  py: 1, 
+                  border: 'none',
+                  color: getTypeColor(transaction.type)
+                }}>
+                  {transaction.category}
+                </TableCell>
+                <TableCell sx={{ fontSize: '10px', py: 1, border: 'none' }}>
+                  {transaction.amount}
+                </TableCell>
+                <TableCell sx={{ 
+                  fontSize: '10px', 
+                  py: 1, 
+                  border: 'none',
+                  color: getTypeColor(transaction.type)
+                }}>
+                  {transaction.type}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      
+      {/* Export Buttons */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2 }}>
+        <Typography variant="body2" sx={{ fontSize: '10px', mr: 1, alignSelf: 'center' }}>
+          Export As:
+        </Typography>
+        <FormControl size="small" sx={{ minWidth: 60 }}>
+          <Select
+            value="PDF"
+            sx={{ 
+              fontSize: '10px',
+              height: '28px',
+              '& .MuiSelect-select': { py: 0.5 }
+            }}
+          >
+            <MenuItem value="PDF" sx={{ fontSize: '10px' }}>PDF</MenuItem>
+            <MenuItem value="CSV" sx={{ fontSize: '10px' }}>CSV</MenuItem>
+          </Select>
+        </FormControl>
+        <Button 
+          variant="contained" 
+          size="small"
+          sx={{ 
+            fontSize: '10px',
+            textTransform: 'none',
+            px: 2,
+            py: 0.5,
+            height: '28px'
+          }}
+        >
+          Download Report
+        </Button>
+      </Box>
+    </Card>
   );
 }
+
+export default BasicTable;

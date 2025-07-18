@@ -34,7 +34,7 @@ const cardData = [
 function Cards() {
   return (
     <Box sx={{ width: "100%",  }}>
-      <Grid container spacing={15} sx={{ width: '100%', margin: 0 }}>
+      <Grid container spacing={12} sx={{ width: '100%', margin: 0 }}>
         {cardData.map((card, index) => (
           <Grid item xs={12} sm={9} md={6} key={index}>
             <Card sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

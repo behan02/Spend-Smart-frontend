@@ -30,8 +30,8 @@ function PieChart() {
             outerRadius: 100,
           },
         ]}
-        width={400}
-        height={300}
+        width={350}
+        height={260}
       />
     </Box>
   );
