@@ -42,7 +42,8 @@ interface RegisterFormInputs {
 
 const RegisterForm: React.FC = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -122,14 +123,14 @@ const RegisterForm: React.FC = () => {
       <Paper
         elevation={20}
         sx={{
-          padding: 0,
+          padding: { xs: 2, sm: 3, md: 0 },
           borderRadius: 4,
           background: "rgba(255, 255, 255, 0.95)",
           backdropFilter: "blur(10px)",
           border: "1px solid rgba(255, 255, 255, 0.2)",
           boxShadow: "0 25px 50px rgba(0, 0, 0, 0.1)",
           width: "100%",
-          maxWidth: "420px",
+          maxWidth: { xs: "350px", sm: "400px", md: "420px" },
           margin: "0 auto",
           position: "relative",
         }}
@@ -147,8 +148,8 @@ const RegisterForm: React.FC = () => {
                   src={Logo}
                   alt="Logo"
                   style={{
-                    maxWidth: isMobile ? "100px" : "130px",
-                    height: isMobile ? "100px" : "130px",
+                    maxWidth: isMobile ? "80px" : isTablet ? "110px" : "130px",
+                    height: isMobile ? "80px" : isTablet ? "110px" : "130px",
                     filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))",
                   }}
                 />
@@ -165,6 +166,7 @@ const RegisterForm: React.FC = () => {
                 color: "transparent",
                 mb: 1,
                 textAlign: "center",
+                fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" },
               }}
             >
               Join, Budget, Thrive!
@@ -174,14 +176,14 @@ const RegisterForm: React.FC = () => {
               variant="body2"
               sx={{
                 color: "rgba(0, 0, 0, 0.6)",
-                fontSize: "14px",
+                fontSize: { xs: "12px", sm: "13px", md: "14px" },
                 lineHeight: 1,
                 textAlign: "center",
-                mt:0,
+                mt: 0,
+                px: { xs: 1, sm: 0 },
               }}
             >
               Sign up to simplify saving and managing your finances.
-
             </Typography>
           </Box>
         </Slide>
@@ -195,8 +197,8 @@ const RegisterForm: React.FC = () => {
               flexDirection: "column", 
               alignItems: "center", 
               width: "100%",
-              gap: 2,
-              mt:1,
+              gap: { xs: 1.5, sm: 2 },
+              mt: 1,
             }}
           >
             {alert && (
@@ -206,9 +208,10 @@ const RegisterForm: React.FC = () => {
                   severity={alert.type}
                   onClose={() => setAlert(null)}
                   sx={{
-                    maxWidth: "300px",
+                    maxWidth: { xs: "100%", sm: "280px", md: "300px" },
                     width: "100%",
                     borderRadius: 2,
+                    fontSize: { xs: "0.8rem", sm: "0.875rem" },
                     "& .MuiAlert-icon": {
                       color: alert.type === "success" ? "#4caf50" : "#f44336",
                     },
@@ -241,7 +244,7 @@ const RegisterForm: React.FC = () => {
                       ),
                     }}
                     sx={{
-                      maxWidth: "300px",
+                      maxWidth: { xs: "100%", sm: "280px", md: "300px" },
                       width: "100%",
                       "& .MuiOutlinedInput-root": {
                         borderRadius: 2,
@@ -284,7 +287,7 @@ const RegisterForm: React.FC = () => {
                       ),
                     }}
                     sx={{
-                      maxWidth: "300px",
+                      maxWidth: { xs: "100%", sm: "280px", md: "300px" },
                       width: "100%",
                       "& .MuiOutlinedInput-root": {
                         borderRadius: 2,
@@ -338,7 +341,7 @@ const RegisterForm: React.FC = () => {
                       ),
                     }}
                     sx={{
-                      maxWidth: "300px",
+                      maxWidth: { xs: "100%", sm: "280px", md: "300px" },
                       width: "100%",
                       "& .MuiOutlinedInput-root": {
                         borderRadius: 2,
@@ -358,9 +361,9 @@ const RegisterForm: React.FC = () => {
 
             {password && (
               <Fade in timeout={300}>
-                <Box sx={{ maxWidth: "300px", width: "100%" }}>
+                <Box sx={{ maxWidth: { xs: "100%", sm: "280px", md: "300px" }, width: "100%" }}>
                   <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                    <Typography variant="caption" sx={{ color: "rgba(0, 0, 0, 0.6)", mr: 1 }}>
+                    <Typography variant="caption" sx={{ color: "rgba(0, 0, 0, 0.6)", mr: 1, fontSize: { xs: "0.7rem", sm: "0.75rem" } }}>
                       Password strength:
                     </Typography>
                     <Chip
@@ -369,8 +372,8 @@ const RegisterForm: React.FC = () => {
                       sx={{
                         backgroundColor: getStrengthColor(passwordStrength),
                         color: "white",
-                        fontSize: "10px",
-                        height: "20px",
+                        fontSize: { xs: "9px", sm: "10px" },
+                        height: { xs: "18px", sm: "20px" },
                       }}
                     />
                   </Box>
@@ -428,7 +431,7 @@ const RegisterForm: React.FC = () => {
                       ),
                     }}
                     sx={{
-                      maxWidth: "300px",
+                      maxWidth: { xs: "100%", sm: "280px", md: "300px" },
                       width: "100%",
                       "& .MuiOutlinedInput-root": {
                         borderRadius: 2,
@@ -452,7 +455,7 @@ const RegisterForm: React.FC = () => {
               defaultValue=""
               render={({ field, fieldState }) => (
                 <Grow in timeout={1300}>
-                  <Box sx={{ maxWidth: "300px", width: "100%" }}>
+                  <Box sx={{ maxWidth: { xs: "100%", sm: "280px", md: "300px" }, width: "100%" }}>
                     <Currency
                       value={field.value}
                       onChange={field.onChange}
@@ -471,13 +474,13 @@ const RegisterForm: React.FC = () => {
                 variant="contained"
                 disabled={isLoading}
                 sx={{
-                  height: 50,
-                  maxWidth: "300px",
+                  height: { xs: 45, sm: 48, md: 50 },
+                  maxWidth: { xs: "100%", sm: "280px", md: "300px" },
                   width: "100%",
                   borderRadius: 2,
                   background: "linear-gradient(135deg, #023E8A, #0466C8)",
                   boxShadow: "0 8px 20px rgba(2, 62, 138, 0.3)",
-                  fontSize: "16px",
+                  fontSize: { xs: "14px", sm: "15px", md: "16px" },
                   fontWeight: 600,
                   textTransform: "none",
                   "&:hover": {
@@ -494,7 +497,7 @@ const RegisterForm: React.FC = () => {
                 {isLoading ? (
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <CircularProgress size={20} color="inherit" />
-                    <Typography>Creating Account...</Typography>
+                    <Typography sx={{ fontSize: { xs: "14px", sm: "15px", md: "16px" } }}>Creating Account...</Typography>
                   </Box>
                 ) : (
                   "Create Account"
@@ -506,10 +509,11 @@ const RegisterForm: React.FC = () => {
               <Typography
                 sx={{
                   textAlign: "center",
-                  maxWidth: "300px",
+                  maxWidth: { xs: "100%", sm: "280px", md: "300px" },
                   width: "100%",
-                  fontSize: "0.85rem",
+                  fontSize: { xs: "0.8rem", sm: "0.85rem" },
                   fontWeight: 200,
+                  px: { xs: 1, sm: 0 },
                 }}
               >
                 Already have an account?{" "}
