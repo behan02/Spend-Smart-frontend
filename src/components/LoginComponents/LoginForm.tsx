@@ -11,15 +11,18 @@ import {
   Fade,
   Slide,
   useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import MailIcon from "@mui/icons-material/MailOutline";
 import LockIcon from "@mui/icons-material/LockOutlined";
 import { useNavigate, Link } from "react-router-dom";
-import Logo from "../../assets/images/logo/Logo.png"; // Adjust the path as needed
+import Logo from "../../assets/images/logo/Logo.png";
 
 const LoginForm = () => {
   const navigate = useNavigate();
-  const isMobile = useMediaQuery("(max-width:600px)");
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ email: "", password: "" });
@@ -52,11 +55,14 @@ const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("https://localhost:7211/api/user/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await fetch(
+        "https://localhost:7211/api/user/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -79,14 +85,14 @@ const LoginForm = () => {
       <Paper
         elevation={20}
         sx={{
-          padding: 4,
+          padding: { xs: 2, sm: 3, md: 4 },
           borderRadius: 4,
           background: "rgba(255, 255, 255, 0.95)",
           backdropFilter: "blur(10px)",
           border: "1px solid rgba(255, 255, 255, 0.2)",
           boxShadow: "0 25px 50px rgba(0, 0, 0, 0.1)",
           width: "100%",
-          maxWidth: "420px",
+          maxWidth: { xs: "350px", sm: "400px", md: "420px" },
           margin: "0 auto",
           position: "relative",
         }}
@@ -98,8 +104,8 @@ const LoginForm = () => {
                 src={Logo}
                 alt="Logo"
                 style={{
-                  maxWidth: isMobile ? "100px" : "130px",
-                  height: isMobile ? "100px" : "130px",
+                  maxWidth: isMobile ? "80px" : isTablet ? "110px" : "130px",
+                  height: isMobile ? "80px" : isTablet ? "110px" : "130px",
                   filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))",
                 }}
               />
@@ -114,17 +120,19 @@ const LoginForm = () => {
                 WebkitBackgroundClip: "text",
                 color: "transparent",
                 mb: 1,
+                fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" },
               }}
             >
-             Welcome Back!
+              Welcome Back!
             </Typography>
 
             <Typography
               variant="body2"
               sx={{
                 color: "rgba(0, 0, 0, 0.6)",
-                fontSize: "14px",
+                fontSize: { xs: "12px", sm: "13px", md: "14px" },
                 lineHeight: 1.5,
+                px: { xs: 1, sm: 0 },
               }}
             >
               Let's make managing your finances easy and stress-free.
@@ -132,133 +140,148 @@ const LoginForm = () => {
           </Box>
         </Slide>
 
-         <Slide direction="up" in timeout={800}>
-
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            width: "100%",
-          }}
-        >
-          <TextField
-            label="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            error={!!errors.email}
-            helperText={errors.email}
-            placeholder="Enter your Email"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <MailIcon />
-                  <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ width: "300px", mb: 2 }}
-            fullWidth
-          />
-
-          <TextField
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            error={!!errors.password}
-            helperText={errors.password}
-            placeholder="**********"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LockIcon />
-                  <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ width: "300px", mb: 1 }}
-            fullWidth
-          />
-
-          <Typography
-            variant="body2"
+        <Slide direction="up" in timeout={800}>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
             sx={{
-              width: "300px",
-              textAlign: "right",
-              color: "#FF0000",
-              fontSize: "0.8rem",
-              mb: 2,
-              cursor: "pointer",
-            }}
-            component={Link}
-            to="/forgetpassword"
-          >
-            Forgot password?
-          </Typography>
-
-           <Button
-                                    type="submit"
-                                    variant="contained"
-                                    disabled={isLoading}
-                                    sx={{
-                                      height: 50,
-                                      width: "300px",
-                                      borderRadius: 2,
-                                      background: "linear-gradient(135deg, #023E8A, #0466C8)",
-                                      boxShadow: "0 8px 20px rgba(2, 62, 138, 0.3)",
-                                      fontSize: "16px",
-                                      fontWeight: 600,
-                                      textTransform: "none",
-                                      "&:hover": {
-                                        background: "linear-gradient(135deg, #022E6A, #0353A4)",
-                                        transform: "translateY(-2px)",
-                                        boxShadow: "0 12px 30px rgba(2, 62, 138, 0.4)",
-                                      },
-                                      "&:disabled": {
-                                        background: "rgba(0, 0, 0, 0.12)",
-                                      },
-                                      transition: "all 0.3s ease",
-                                    }}
-                                  >
-                                    {isLoading ? (
-                                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                        <CircularProgress size={20} color="inherit" />
-                                        <Typography>Login...</Typography>
-                                      </Box>
-                                    ) : (
-                                      "LOGIN"
-                                    )}
-                                  </Button>
-
-          <Typography
-            sx={{
-              marginTop: "10px",
-              textAlign: "center",
-              width: "300px",
-              fontSize: "0.85rem",
-              fontWeight: 200,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              width: "100%",
             }}
           >
-            Don't have an account yet?{" "}
-            <Link to="/register" style={{ textDecoration: "none" }}>
-              <Typography
-                component="span"
-                sx={{
-                  color: "#023E8A",
-                  opacity: 0.7,
-                  fontWeight: "bold",
-                  "&:hover": { opacity: 1 },
-                  fontSize: "0.85rem",
-                }}
-              >
-                Sign up here
-              </Typography>
-            </Link>
-          </Typography>
-        </Box>
+            <TextField
+              label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={!!errors.email}
+              helperText={errors.email}
+              placeholder="Enter your Email"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <MailIcon />
+                    <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                width: { xs: "100%", sm: "280px", md: "300px" },
+                mb: 2,
+                maxWidth: "300px",
+              }}
+              fullWidth
+            />
+
+            <TextField
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={!!errors.password}
+              helperText={errors.password}
+              placeholder="**********"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon />
+                    <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                width: { xs: "100%", sm: "280px", md: "300px" },
+                mb: 1,
+                maxWidth: "300px",
+              }}
+              fullWidth
+            />
+
+            <Typography
+              variant="body2"
+              sx={{
+                width: { xs: "100%", sm: "280px", md: "300px" },
+                maxWidth: "300px",
+                textAlign: "right",
+                color: "#FF0000",
+                fontSize: { xs: "0.75rem", sm: "0.8rem" },
+                mb: 2,
+                cursor: "pointer",
+              }}
+              component={Link}
+              to="/forgetpassword"
+            >
+              Forgot password?
+            </Typography>
+
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isLoading}
+              sx={{
+                height: { xs: 45, sm: 48, md: 50 },
+                width: { xs: "100%", sm: "280px", md: "300px" },
+                maxWidth: "300px",
+                borderRadius: 2,
+                background: "linear-gradient(135deg, #023E8A, #0466C8)",
+                boxShadow: "0 8px 20px rgba(2, 62, 138, 0.3)",
+                fontSize: { xs: "14px", sm: "15px", md: "16px" },
+                fontWeight: 600,
+                textTransform: "none",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #022E6A, #0353A4)",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 12px 30px rgba(2, 62, 138, 0.4)",
+                },
+                "&:disabled": {
+                  background: "rgba(0, 0, 0, 0.12)",
+                },
+                transition: "all 0.3s ease",
+              }}
+            >
+              {isLoading ? (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <CircularProgress size={20} color="inherit" />
+                  <Typography
+                    sx={{ fontSize: { xs: "14px", sm: "15px", md: "16px" } }}
+                  >
+                    Login...
+                  </Typography>
+                </Box>
+              ) : (
+                "LOGIN"
+              )}
+            </Button>
+
+            <Typography
+              sx={{
+                marginTop: "10px",
+                textAlign: "center",
+                width: { xs: "100%", sm: "280px", md: "300px" },
+                maxWidth: "300px",
+                fontSize: { xs: "0.8rem", sm: "0.85rem" },
+                fontWeight: 200,
+                px: { xs: 1, sm: 0 },
+              }}
+            >
+              Don't have an account yet?{" "}
+              <Link to="/register" style={{ textDecoration: "none" }}>
+                <Typography
+                  component="span"
+                  sx={{
+                    color: "#023E8A",
+                    opacity: 0.7,
+                    fontWeight: "bold",
+                    "&:hover": { opacity: 1 },
+                    fontSize: { xs: "0.8rem", sm: "0.85rem" },
+                  }}
+                >
+                  Sign up here
+                </Typography>
+              </Link>
+            </Typography>
+          </Box>
         </Slide>
       </Paper>
     </Fade>
