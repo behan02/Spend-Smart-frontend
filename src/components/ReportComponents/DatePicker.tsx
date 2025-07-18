@@ -1,101 +1,62 @@
-// CustomDatePicker.tsx
-
-import dayjs, { Dayjs } from "dayjs";
+import { Box, TextField } from "@mui/material";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import {
-  Box,
-  Typography,
-  useMediaQuery,
-  useTheme,
-  Breakpoint,
-} from "@mui/material";
+import { Dayjs } from "dayjs";
+import Button from "@mui/material/Button";
 
-
-interface Props {
+interface CustomDatePickerProps {
   startDate: Dayjs | null;
   endDate: Dayjs | null;
   setStartDate: (date: Dayjs | null) => void;
   setEndDate: (date: Dayjs | null) => void;
   onGenerate: () => void;
+  isLoading: boolean;
 }
 
-function CustomDatePicker({
+const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   startDate,
   endDate,
   setStartDate,
   setEndDate,
   onGenerate,
-}: Props) {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm" as Breakpoint));
-
+  isLoading,
+}) => {
   return (
-    <Box>
-      <Typography
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Box sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', sm: 'row' },
+        gap: 2,
+        alignItems: 'center',
+        mb: 2
+      }}>
+        <DatePicker
+          label="Start Date"
+          value={startDate}
+          onChange={(newValue) => setStartDate(newValue)}
+          renderInput={(params) => <TextField {...params} />}
+        />
+        <DatePicker
+          label="End Date"
+          value={endDate}
+          onChange={(newValue) => setEndDate(newValue)}
+          renderInput={(params) => <TextField {...params} />}
+        />
+      </Box>
+      <Button
+        variant="contained"
+        onClick={onGenerate}
+        disabled={isLoading}
         sx={{
-          fontSize: {
-            xs: "1.2rem",
-            md: "2.5rem",
-          },
-          fontWeight: 600,
-          color: "primary.main",
-          opacity: 0.8,
-          mb: 2,
+          px: 4,
+          py: 1.5,
+          alignSelf: 'center'
         }}
       >
-        Choose the period you want to generate reports for
-      </Typography>
-
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Box display="flex" flexDirection="row" gap={2} flexWrap="wrap">
-          <Box flex="1 1 300px">
-            <DatePicker
-              label="Start Date"
-              value={startDate}
-              onChange={(newValue) => setStartDate(newValue ? dayjs(newValue) : null)}
-              slotProps={{
-                textField: {
-                  fullWidth: true,
-                  variant: "outlined",
-                } as any,
-              }}
-            />
-          </Box>
-          <Box flex="1 1 300px">
-            <DatePicker
-              label="End Date"
-              value={endDate}
-              onChange={(newValue) => setEndDate(newValue ? dayjs(newValue) : null)}
-              slotProps={{
-                textField: {
-                  fullWidth: true,
-                  variant: "outlined",
-                } as any,
-              }}
-            />
-          </Box>
-
-          <Box
-            component="button"
-            sx={{
-              backgroundColor: theme.palette.primary.main,
-              color: theme.palette.common.white,
-              padding: "10px 20px",
-              borderRadius: "5px",
-              border: "none",
-              cursor: "pointer",
-              fontSize: isMobile ? "0.8rem" : "1rem",
-            }}
-            onClick={onGenerate}
-          >
-            Generate Report
-          </Box>
-        </Box>
-      </LocalizationProvider>
-    </Box>
+        {isLoading ? 'Generating...' : 'Generate Report'}
+      </Button>
+    </LocalizationProvider>
   );
-}
+};
 
 export default CustomDatePicker;

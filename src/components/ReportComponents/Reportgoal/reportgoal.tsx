@@ -16,7 +16,8 @@ const ReportGoal = () => {
         borderRadius: "15px",
         height: "500px",
         m: "0px",
-        width: "700px",
+        width: "500px",
+        //height: "400px"
       }}
     >
       <Box

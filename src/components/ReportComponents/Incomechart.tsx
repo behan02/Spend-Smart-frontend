@@ -24,7 +24,7 @@ export default function BalanceAreaChart() {
     >
       <LineChart
         height={300}
-        width={600}
+        width={400}
         series={[
           {
             data: uData,
