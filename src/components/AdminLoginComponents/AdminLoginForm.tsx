@@ -7,22 +7,22 @@ import {
   Divider,
   Button,
   CircularProgress,
+  Paper,
   Fade,
   Slide,
-  Paper,
-  useTheme,
   useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import MailIcon from "@mui/icons-material/MailOutline";
 import LockIcon from "@mui/icons-material/LockOutlined";
 import { useNavigate, Link } from "react-router-dom";
 import Logo from "../../assets/images/logo/Logo.png";
 
-const LoginForm = () => {
+const AdminLoginForm = () => {
   const navigate = useNavigate();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ email: "", password: "" });
@@ -55,11 +55,14 @@ const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("https://localhost:7211/api/admin/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await fetch(
+        "https://localhost:7211/api/admin/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -68,8 +71,8 @@ const LoginForm = () => {
 
       const data = await response.json();
       localStorage.setItem("authToken", data.token);
-      localStorage.setItem("user", JSON.stringify(data));
-      navigate("/dashboard");
+      localStorage.setItem("admin", JSON.stringify(data));
+      navigate("/admin/dashboard");
     } catch (err: any) {
       alert(`Error: ${err.message}`);
     } finally {
@@ -82,32 +85,27 @@ const LoginForm = () => {
       <Paper
         elevation={20}
         sx={{
-          padding: 4,
+          padding: { xs: 2, sm: 3, md: 4 },
           borderRadius: 4,
           background: "rgba(255, 255, 255, 0.95)",
           backdropFilter: "blur(10px)",
           border: "1px solid rgba(255, 255, 255, 0.2)",
           boxShadow: "0 25px 50px rgba(0, 0, 0, 0.1)",
           width: "100%",
-          maxWidth: "420px",
+          maxWidth: { xs: "350px", sm: "400px", md: "420px" },
           margin: "0 auto",
           position: "relative",
         }}
       >
         <Slide direction="down" in timeout={800}>
-          <Box sx={{ textAlign: "center", mb: 3 }}>
-            <Box sx={{ 
-              display: "flex", 
-              justifyContent: "center", 
-              alignItems: "center",
-              mb: 2
-            }}>
+          <Box sx={{ textAlign: "center", mb: 2 }}>
+            <Box sx={{ textAlign: "center" }}>
               <img
                 src={Logo}
                 alt="Logo"
                 style={{
-                  maxWidth: isMobile ? "100px" : "130px",
-                  height: isMobile ? "100px" : "130px",
+                  maxWidth: isMobile ? "80px" : isTablet ? "110px" : "130px",
+                  height: isMobile ? "80px" : isTablet ? "110px" : "130px",
                   filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))",
                 }}
               />
@@ -122,22 +120,22 @@ const LoginForm = () => {
                 WebkitBackgroundClip: "text",
                 color: "transparent",
                 mb: 1,
-                textAlign: "center",
+                fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" },
               }}
             >
-              Step In as Admin
+              Welcome Back!
             </Typography>
 
             <Typography
               variant="body2"
               sx={{
                 color: "rgba(0, 0, 0, 0.6)",
-                fontSize: "14px",
+                fontSize: { xs: "12px", sm: "13px", md: "14px" },
                 lineHeight: 1.5,
-                textAlign: "center",
+                px: { xs: 1, sm: 0 },
               }}
             >
-              Your leadership begins here—sign up as an admin today.
+              Access your administrative dashboard with secure login.
             </Typography>
           </Box>
         </Slide>
@@ -146,12 +144,11 @@ const LoginForm = () => {
           <Box
             component="form"
             onSubmit={handleSubmit}
-            sx={{ 
-              display: "flex", 
-              flexDirection: "column", 
-              alignItems: "center", 
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
               width: "100%",
-              gap: 2
             }}
           >
             <TextField
@@ -169,9 +166,10 @@ const LoginForm = () => {
                   </InputAdornment>
                 ),
               }}
-              sx={{ 
-                maxWidth: "300px", 
-                width: "100%"
+              sx={{
+                width: { xs: "100%", sm: "280px", md: "300px" },
+                mb: 2,
+                maxWidth: "300px",
               }}
               fullWidth
             />
@@ -192,48 +190,43 @@ const LoginForm = () => {
                   </InputAdornment>
                 ),
               }}
-              sx={{ 
-                maxWidth: "300px", 
-                width: "100%"
+              sx={{
+                width: { xs: "100%", sm: "280px", md: "300px" },
+                mb: 1,
+                maxWidth: "300px",
               }}
               fullWidth
             />
 
-            <Box sx={{ 
-              maxWidth: "300px", 
-              width: "100%", 
-              display: "flex", 
-              justifyContent: "flex-end"
-            }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "#FF0000",
-                  fontSize: "0.8rem",
-                  cursor: "pointer",
-                  "&:hover": {
-                    textDecoration: "underline"
-                  }
-                }}
-                component={Link}
-                to="/admin/forgetpassword"
-              >
-                Forgot password?
-              </Typography>
-            </Box>
+            <Typography
+              variant="body2"
+              sx={{
+                width: { xs: "100%", sm: "280px", md: "300px" },
+                maxWidth: "300px",
+                textAlign: "right",
+                color: "#FF0000",
+                fontSize: { xs: "0.75rem", sm: "0.8rem" },
+                mb: 2,
+                cursor: "pointer",
+              }}
+              component={Link}
+              to="/admin/forgetpassword"
+            >
+              Forgot password?
+            </Typography>
 
             <Button
               type="submit"
               variant="contained"
               disabled={isLoading}
               sx={{
-                height: 50,
+                height: { xs: 45, sm: 48, md: 50 },
+                width: { xs: "100%", sm: "280px", md: "300px" },
                 maxWidth: "300px",
-                width: "100%",
                 borderRadius: 2,
                 background: "linear-gradient(135deg, #023E8A, #0466C8)",
                 boxShadow: "0 8px 20px rgba(2, 62, 138, 0.3)",
-                fontSize: "16px",
+                fontSize: { xs: "14px", sm: "15px", md: "16px" },
                 fontWeight: 600,
                 textTransform: "none",
                 "&:hover": {
@@ -250,23 +243,29 @@ const LoginForm = () => {
               {isLoading ? (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <CircularProgress size={20} color="inherit" />
-                  <Typography>Login...</Typography>
+                  <Typography
+                    sx={{ fontSize: { xs: "14px", sm: "15px", md: "16px" } }}
+                  >
+                    Login...
+                  </Typography>
                 </Box>
               ) : (
-                "LOGIN"
+                "ADMIN LOGIN"
               )}
             </Button>
 
             <Typography
               sx={{
+                marginTop: "10px",
                 textAlign: "center",
+                width: { xs: "100%", sm: "280px", md: "300px" },
                 maxWidth: "300px",
-                width: "100%",
-                fontSize: "0.85rem",
+                fontSize: { xs: "0.8rem", sm: "0.85rem" },
                 fontWeight: 200,
+                px: { xs: 1, sm: 0 },
               }}
             >
-              Don't have an account yet?{" "}
+              Don't have an admin account?{" "}
               <Link to="/admin/register" style={{ textDecoration: "none" }}>
                 <Typography
                   component="span"
@@ -275,7 +274,7 @@ const LoginForm = () => {
                     opacity: 0.7,
                     fontWeight: "bold",
                     "&:hover": { opacity: 1 },
-                    fontSize: "0.85rem",
+                    fontSize: { xs: "0.8rem", sm: "0.85rem" },
                   }}
                 >
                   Sign up here
@@ -289,4 +288,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default AdminLoginForm;
