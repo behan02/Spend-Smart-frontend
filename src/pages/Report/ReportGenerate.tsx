@@ -150,7 +150,7 @@ const ReportGenerate: React.FC = () => {
           open={!!error}
           autoHideDuration={6000}
           onClose={handleCloseError}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
         >
           <Alert onClose={handleCloseError} severity="error" sx={{ width: "100%" }}>
             {error}
