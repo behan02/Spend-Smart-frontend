@@ -14,7 +14,7 @@ const ProfilePictureUpload: React.FC = () => {
   const fileInputRef = React.useRef<HTMLInputElement | null>(null); // Ref for file input
   const [uploading, setUploading] = useState(false); // State for uploading status
 
-  const API_BASE_URL = 'https://localhost:7211/api';
+  const API_BASE_URL = "https://localhost:7211/api";
 
   // Handle file change and upload it
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,7 +85,7 @@ const ProfilePictureUpload: React.FC = () => {
   };
 
   return (
-    <div>
+    <div style={{ margin: "16px 0", padding: "8px" }}>
       {/* File input - triggers file selection */}
       <input
         type="file"
@@ -105,7 +105,8 @@ const ProfilePictureUpload: React.FC = () => {
           padding: "10px 20px",
           borderRadius: "4px",
           cursor: "pointer",
-          marginRight: "10px",
+          marginRight: "12px",
+          marginLeft: "8px",
           fontSize: "14px",
           fontWeight: "500",
         }}
@@ -133,6 +134,7 @@ const ProfilePictureUpload: React.FC = () => {
           cursor: "pointer",
           fontSize: "14px",
           fontWeight: "500",
+          marginRight: "8px",
         }}
       >
         Delete Picture

@@ -6,6 +6,7 @@ import {
   Divider,
   useMediaQuery,
   useTheme,
+  ThemeProvider,
 } from "@mui/material";
 
 import UserSettingsImage from "../../assets/images/settings-header.jpg";
@@ -44,6 +45,7 @@ const UserSettings: React.FC = () => {
   };
 
   return (
+    <ThemeProvider theme={theme}>
     <Box display="flex" sx={{ margin: 0, padding: 0 }}>
       {/* Sidebar */}
       {!isSmallScreen && <Sidebar />}
@@ -178,7 +180,7 @@ const UserSettings: React.FC = () => {
                   sx={{
                     width: "100%",
                     maxWidth: { xs: 250, sm: 300, md: 350, lg: 400 },
-                    height: "auto",
+                    height: 350,
                     objectFit: "contain",
                   }}
                 />
@@ -197,6 +199,7 @@ const UserSettings: React.FC = () => {
         <Footer />
       </Box>
     </Box>
+    </ThemeProvider>
   );
 };
 
