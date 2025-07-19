@@ -28,7 +28,7 @@ interface MenuItem {
 
 // ✅ Type menuItems
 const menuItems: MenuItem[] = [
-  { text: "Dashboard", icon: <DashboardIcon />, path: "/", },
+  { text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
   { text: "Report", icon: <SummarizeIcon />, path: "/report" },
   { text: "Budget", icon: <AccountBalanceWallet />, path: "/budget" },
   { text: "Goals", icon: <Flag />, path: "/goals" },

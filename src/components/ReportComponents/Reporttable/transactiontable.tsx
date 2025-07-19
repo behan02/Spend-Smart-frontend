@@ -8,10 +8,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
+ 
 } from "@mui/material";
 
 interface Transaction {
@@ -107,38 +104,8 @@ function BasicTable({ data }: BasicTableProps) {
         </Table>
       </TableContainer>
       
-      {/* Export Buttons */}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2 }}>
-        <Typography variant="body2" sx={{ fontSize: '10px', mr: 1, alignSelf: 'center' }}>
-          Export As:
-        </Typography>
-        <FormControl size="small" sx={{ minWidth: 60 }}>
-          <Select
-            value="PDF"
-            sx={{ 
-              fontSize: '10px',
-              height: '28px',
-              '& .MuiSelect-select': { py: 0.5 }
-            }}
-          >
-            <MenuItem value="PDF" sx={{ fontSize: '10px' }}>PDF</MenuItem>
-            <MenuItem value="CSV" sx={{ fontSize: '10px' }}>CSV</MenuItem>
-          </Select>
-        </FormControl>
-        <Button 
-          variant="contained" 
-          size="small"
-          sx={{ 
-            fontSize: '10px',
-            textTransform: 'none',
-            px: 2,
-            py: 0.5,
-            height: '28px'
-          }}
-        >
-          Download Report
-        </Button>
-      </Box>
+      
+     
     </Card>
   );
 }
