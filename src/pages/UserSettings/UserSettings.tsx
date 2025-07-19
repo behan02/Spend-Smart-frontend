@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Avatar,
@@ -8,9 +8,9 @@ import {
   useTheme,
   ThemeProvider,
 } from "@mui/material";
+import axios from "axios";
 
 import UserSettingsImage from "../../assets/images/settings-header.jpg";
-import ProfileImage from "../../assets/images/profile-photo.jpg";
 import ResetPwdImage from "../../assets/images/Reset password-bro.png";
 
 import Sidebar from "../../components/sidebar/sidebar";
@@ -20,185 +20,145 @@ import AccountForm from "../../components/UserSettings-Forms/AccountForm";
 import Passwordchange from "../../components/UserSettings-Forms/Passwordchange";
 import PageButton from "../../components/Button/PageButton";
 
+interface UserData {
+  userId: number;
+  name: string;
+  email: string;
+}
+
 const UserSettings: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(
     theme.breakpoints.down("md" as import("@mui/material/styles").Breakpoint)
   );
-  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
-  const [profileImage, setProfileImage] = React.useState<string | undefined>(
-    ProfileImage
-  );
+  
+  // ✅ FIX: Proper ref type for Avatar (should be HTMLDivElement or remove if not used)
+  const fileInputRef = React.useRef<HTMLDivElement>(null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | undefined>(undefined);
+  
+  const API_BASE_URL = "https://localhost:7211/api";
+  const currentUserId = 1;
 
-  // User data - You should get this from your authentication context, state management, or API
-  const [userData, setUserData] = React.useState({
-    userId: 1, // Replace with actual user ID from your auth system
-    //name: "Lakshan Rajapaksha",
-    // email: "lakshan@example.com", // Replace with actual user email
+  const [userData, setUserData] = useState<UserData>({
+    userId: 1,
+    name: "Lakshan Rajapaksha",
+    email: "lakshan@example.com",
   });
 
-  // Handle successful updates
+  useEffect(() => {
+    loadProfilePicture();
+  }, []);
+
+  const loadProfilePicture = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/ProfilePicture/url/${currentUserId}`);
+      if (response.data.profilePictureUrl) {
+        setProfileImageUrl(response.data.profilePictureUrl);
+      }
+    } catch (error) {
+      console.error('Error loading profile picture:', error);
+    }
+  };
+
+  const handleProfilePictureUpdate = (newImageUrl: string | null) => {
+    setProfileImageUrl(newImageUrl || undefined);
+  };
+
   const handleUpdateSuccess = () => {
-    // You can refresh user data here if needed
     console.log("User data updated successfully!");
-    // Optionally refresh the page or update local state
   };
 
   return (
     <ThemeProvider theme={theme}>
-    <Box display="flex" sx={{ margin: 0, padding: 0 }}>
-      {/* Sidebar */}
-      {!isSmallScreen && <Sidebar />}
+      <Box display="flex" sx={{ margin: 0, padding: 0 }}>
+        {!isSmallScreen && <Sidebar />}
 
-      {/* Main content */}
-      <Box
-        flex={1}
-        sx={{
-          backgroundColor: "#F6F6F8",
-          p: 0, // Remove all padding
-        }}
-      >
-        {/* Header with Background Image */}
         <Box
+          flex={1}
           sx={{
-            position: "relative",
-            height: 120,
-            backgroundImage: `url(${UserSettingsImage})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            borderRadius: 0, // Remove border radius to make it flush
+            backgroundColor: "#F6F6F8",
+            p: 0,
           }}
         >
-          <Avatar
-            ref={fileInputRef}
-            alt="profile-picture"
-            src={profileImage}
-            sx={{
-              width: 100,
-              height: 100,
-              position: "absolute",
-              bottom: -40,
-              left: 24,
-              border: "4px solid white",
-            }}
-          />
-        </Box>
-
-        {/* Content with internal padding */}
-        <Box sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
-          {/* Profile Upload */}
-          <Box sx={{ mt: 6 }}>
-            <ProfilePictureUpload />
-          </Box>
-
-          {/* User name */}
-          <Typography variant="h6" mt={2} ml={1}>
-            {userData.name}
-          </Typography>
-
-          {/* Divider */}
-          <Divider sx={{ my: 2 }} />
-
-          {/* Profile Settings Heading */}
-          <Typography variant="h6" mb={2}>
-            Profile Settings
-          </Typography>
-
-          {/* Account Section */}
           <Box
             sx={{
-              borderRadius: 2,
-              backgroundColor: "#FFFFFF",
-              mb: 3,
-              p: 2,
+              position: "relative",
+              height: 120,
+              backgroundImage: `url(${UserSettingsImage})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              borderRadius: 0,
             }}
           >
-            <Typography variant="subtitle1" mb={2}>
-              Account
-            </Typography>
-            <AccountForm
-              userId={userData.userId}
-              initialName={userData.name}
-              initialEmail={userData.email}
-              onUpdateSuccess={handleUpdateSuccess}
-            />
-          </Box>
-
-          {/* Password Section */}
-          <Box
-            sx={{
-              borderRadius: 2,
-              backgroundColor: "#FFFFFF",
-              mb: 3,
-              p: 2,
-            }}
-          >
-            <Typography variant="subtitle1" mb={2}>
-              Password
-            </Typography>
-
-            {/* Password form and image side by side */}
-            <Box
+            <Avatar
+              ref={fileInputRef}
+              alt="profile-picture"
+              src={profileImageUrl}
               sx={{
-                display: "flex",
-                gap: 3,
-                alignItems: "flex-start",
-                flexDirection: { xs: "column", lg: "row" },
-                minHeight: { lg: "350px" },
+                width: 100,
+                height: 100,
+                position: "absolute",
+                bottom: -40,
+                left: 24,
+                border: "4px solid white",
+                backgroundColor: profileImageUrl ? 'transparent' : '#e0e0e0',
+                color: '#666',
+                fontSize: '14px',
               }}
             >
-              {/* Password fields on the left */}
-              <Box
-                sx={{
-                  flex: { xs: 1, lg: "1 1 60%" },
-                  minWidth: { lg: "400px" },
-                }}
-              >
-                <Passwordchange />
-              </Box>
+              {!profileImageUrl && "👤"}
+            </Avatar>
+          </Box>
 
-              {/* Image on the right - larger and covering more space */}
-              <Box
-                sx={{
-                  flex: { xs: 1, lg: "1 1 40%" },
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  minHeight: {
-                    xs: "200px",
-                    sm: "250px",
-                    md: "300px",
-                    lg: "350px",
-                  },
-                  width: "100%",
-                }}
-              >
-                <Box
-                  component="img"
-                  src={ResetPwdImage}
-                  alt="pwd Reset"
-                  sx={{
-                    width: "100%",
-                    maxWidth: { xs: 250, sm: 300, md: 350, lg: 400 },
-                    height: 350,
-                    objectFit: "contain",
-                  }}
-                />
-              </Box>
+          <Box sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
+            <Box sx={{ mt: 6 }}>
+              <ProfilePictureUpload onImageUpdate={handleProfilePictureUpdate} />
             </Box>
 
-            <PageButton
-              text="Save Changes"
-              onClick={() => alert("Password updated!")}
-              type="button"
-            />
-          </Box>
-        </Box>
+            <Typography variant="h6" mt={2} ml={1}>
+              {userData.name}
+            </Typography>
 
-        {/* Footer */}
-        <Footer />
+            <Divider sx={{ my: 2 }} />
+
+            <Typography variant="h6" mb={2}>
+              Profile Settings
+            </Typography>
+
+            <Box sx={{ borderRadius: 2, backgroundColor: "#FFFFFF", mb: 3, p: 2 }}>
+              <Typography variant="subtitle1" mb={2}>
+                Account
+              </Typography>
+              <AccountForm
+                userId={userData.userId}
+                initialName={userData.name}
+                initialEmail={userData.email}
+                onUpdateSuccess={handleUpdateSuccess}
+              />
+            </Box>
+
+            <Box sx={{ borderRadius: 2, backgroundColor: "#FFFFFF", mb: 3, p: 2 }}>
+              <Typography variant="subtitle1" mb={2}>
+                Password
+              </Typography>
+
+              <Box sx={{ display: "flex", gap: 3, alignItems: "flex-start", flexDirection: { xs: "column", lg: "row" }, minHeight: { lg: "350px" } }}>
+                <Box sx={{ flex: { xs: 1, lg: "1 1 60%" }, minWidth: { lg: "400px" } }}>
+                  <Passwordchange />
+                </Box>
+
+                <Box sx={{ flex: { xs: 1, lg: "1 1 40%" }, display: "flex", justifyContent: "center", alignItems: "center", minHeight: { xs: "200px", sm: "250px", md: "300px", lg: "350px" }, width: "100%" }}>
+                  <Box component="img" src={ResetPwdImage} alt="pwd Reset" sx={{ width: "100%", maxWidth: { xs: 250, sm: 300, md: 350, lg: 400 }, height: 350, objectFit: "contain" }} />
+                </Box>
+              </Box>
+
+              <PageButton text="Save Changes" onClick={() => alert("Password updated!")} type="button" />
+            </Box>
+          </Box>
+
+          <Footer />
+        </Box>
       </Box>
-    </Box>
     </ThemeProvider>
   );
 };

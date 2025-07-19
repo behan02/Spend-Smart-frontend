@@ -46,50 +46,83 @@ class ProfilePictureService {
    */
   async uploadProfilePicture(file: File, userId: number): Promise<ProfilePictureUploadResponse> {
     try {
-      // Ensure user is authenticated with Firebase
-      await ensureAuthenticated();
+        console.log('Starting profile picture upload for user:', userId);
 
-      // Create a unique filename to avoid conflicts
-      const timestamp = Date.now();
-      const fileName = `user_${userId}_${timestamp}_${file.name}`;
+        // Validate file before upload
+        this.validateFile(file);
 
-      // Create a reference in Firebase Storage
-      const storageRef = ref(storage, `profile_pictures/${fileName}`);
+        // Ensure user is authenticated with Firebase
+        await ensureAuthenticated();
 
-      // Upload file to Firebase Storage
-      const snapshot = await uploadBytes(storageRef, file);
-      console.log('File uploaded to Firebase:', snapshot);
+        // Create a unique filename to avoid conflicts
+        const timestamp = Date.now();
+        const fileExtension = file.name.split('.').pop() || 'jpg';
+        const fileName = `user_${userId}_${timestamp}.${fileExtension}`;
 
-      // Get the download URL from Firebase
-      const firebaseUrl = await getDownloadURL(storageRef);
-      console.log('Firebase download URL:', firebaseUrl);
+        // Create a reference in Firebase Storage
+        const storageRef = ref(storage, `profile_pictures/${fileName}`);
 
-      // Now save the Firebase URL to backend database
-      const response = await axios.put(`${this.baseUrl}/update-url`, {
-        userId: userId,
-        profilePictureUrl: firebaseUrl,
-        fileName: fileName
-      });
+        // Upload file to Firebase Storage
+        console.log('Uploading to Firebase...');
+        const snapshot = await uploadBytes(storageRef, file);
+        console.log('File uploaded to Firebase successfully:', snapshot);
 
-      return {
-        success: true,
-        message: "Profile picture uploaded successfully!",
-        profilePictureUrl: firebaseUrl,
-        fileName: fileName,
-        uploadedAt: new Date().toISOString()
-      };
+        // Get the download URL from Firebase
+        const firebaseUrl = await getDownloadURL(storageRef);
+        console.log('Firebase download URL:', firebaseUrl);
+
+        // ✅ FIX: Use the existing update-url endpoint that works
+        console.log('Saving URL to backend database...');
+        const backendResponse = await axios.put(`${this.baseUrl}/update-url`, {
+            userId: userId,
+            profilePictureUrl: firebaseUrl,
+            fileName: fileName
+        });
+
+        if (backendResponse.data.success) {
+            console.log('Backend database updated successfully');
+            return {
+                success: true,
+                message: "Profile picture uploaded successfully!",
+                profilePictureUrl: firebaseUrl,
+                fileName: fileName,
+                uploadedAt: new Date().toISOString()
+            };
+        } else {
+            throw new Error(backendResponse.data.message || 'Backend update failed');
+        }
 
     } catch (error: any) {
-      console.error("Upload failed:", error);
-      throw new Error(handleApiError(error));
+        console.error("Upload failed:", error);
+        
+        // Better error handling
+        let errorMessage = 'Upload failed';
+        
+        if (error.response) {
+            // Backend responded with error
+            errorMessage = error.response.data?.message || `Backend error: ${error.response.status}`;
+        } else if (error.message.includes('Firebase')) {
+            // Firebase error
+            errorMessage = 'Firebase upload failed: ' + error.message;
+        } else if (error.message.includes('Network')) {
+            // Network error
+            errorMessage = 'Network error. Please check your connection and try again.';
+        } else {
+            // General error
+            errorMessage = error.message || 'An unexpected error occurred';
+        }
+        
+        throw new Error(errorMessage);
     }
-  }
+}
 
   /**
    * Delete a profile picture: Remove from Firebase and update backend
    */
   async deleteProfilePicture(userId: number): Promise<DeleteProfilePictureResponse> {
     try {
+      console.log('Starting profile picture deletion for user:', userId);
+
       // First get the current profile picture info from backend
       const currentPicture = await this.getProfilePictureUrl(userId);
       
@@ -104,6 +137,7 @@ class ProfilePictureService {
       await ensureAuthenticated();
 
       // Extract the file path from Firebase URL to delete from Firebase Storage
+      let firebaseDeleted = false;
       try {
         // Parse the Firebase URL to get the file path
         const url = new URL(currentPicture.profilePictureUrl);
@@ -112,25 +146,28 @@ class ProfilePictureService {
           const filePath = decodeURIComponent(pathMatch[1]);
           const fileRef = ref(storage, filePath);
           await deleteObject(fileRef);
-          console.log('File deleted from Firebase');
+          console.log('File deleted from Firebase successfully');
+          firebaseDeleted = true;
         }
       } catch (firebaseError) {
         console.warn('Could not delete file from Firebase:', firebaseError);
         // Continue with backend deletion even if Firebase deletion fails
       }
 
-      // Update backend to remove the profile picture URL
-      const response = await axios.put(`${this.baseUrl}/update-url`, {
-        userId: userId,
-        profilePictureUrl: null,
-        fileName: null
-      });
+      // ✅ Update backend using the correct delete endpoint
+      const backendResponse = await axios.delete(`${this.baseUrl}/delete/${userId}`);
 
-      return {
-        success: true,
-        message: "Profile picture deleted successfully!",
-        deletedAt: new Date().toISOString()
-      };
+      if (backendResponse.data.success) {
+        return {
+          success: true,
+          message: firebaseDeleted 
+            ? "Profile picture deleted successfully from both Firebase and database!"
+            : "Profile picture deleted from database (Firebase deletion failed)",
+          deletedAt: new Date().toISOString()
+        };
+      } else {
+        throw new Error(backendResponse.data.message || 'Backend deletion failed');
+      }
 
     } catch (error: any) {
       console.error("Delete failed:", error);
@@ -172,6 +209,33 @@ class ProfilePictureService {
     } catch (error) {
       throw new Error(handleApiError(error));
     }
+  }
+
+  /**
+   * Validate file before upload
+   */
+  private validateFile(file: File): void {
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+    if (!file) {
+      throw new Error('No file selected');
+    }
+
+    if (file.size > maxSize) {
+      throw new Error('File size exceeds 5MB limit');
+    }
+
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error('Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed');
+    }
+  }
+
+  /**
+   * Get file extension from filename
+   */
+  private getFileExtension(filename: string): string {
+    return filename.split('.').pop()?.toLowerCase() || 'jpg';
   }
 }
 
