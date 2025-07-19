@@ -1,4 +1,4 @@
-import { Drawer, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PeopleIcon from '@mui/icons-material/People';
@@ -6,7 +6,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from 'react-router-dom';
 
 const Sidebar = () => {
-  const navigate = useNavigate(); // 👈 for navigation programmatically
+  const navigate = useNavigate(); //  for navigation programmatically
 
   return (
     <Drawer
@@ -23,35 +23,43 @@ const Sidebar = () => {
     >
       <List>
         {/* Dashboard Button */}
-        <ListItem button onClick={() => navigate('/')}>
-          <ListItemIcon sx={{ color: '#fff' }}>
-            <DashboardIcon />
-          </ListItemIcon>
-          <ListItemText primary="Dashboard" />
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => navigate('/')}>
+            <ListItemIcon sx={{ color: '#fff' }}>
+              <DashboardIcon />
+            </ListItemIcon>
+            <ListItemText primary="Dashboard" />
+          </ListItemButton>
         </ListItem>
 
         {/* Manage Users Button */}
-        <ListItem button onClick={() => navigate('/user')}>
-          <ListItemIcon sx={{ color: '#fff' }}>
-            <PeopleIcon />
-          </ListItemIcon>
-          <ListItemText primary="Manage Users" />
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => navigate('/user')}>
+            <ListItemIcon sx={{ color: '#fff' }}>
+              <PeopleIcon />
+            </ListItemIcon>
+            <ListItemText primary="Manage Users" />
+          </ListItemButton>
         </ListItem>
 
         {/* System Settings Button */}
-        <ListItem button onClick={() => navigate('/settings')}>
-          <ListItemIcon sx={{ color: '#fff' }}>
-            <SettingsIcon />
-          </ListItemIcon>
-          <ListItemText primary="System Settings" />
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => navigate('/settings')}>
+            <ListItemIcon sx={{ color: '#fff' }}>
+              <SettingsIcon />
+            </ListItemIcon>
+            <ListItemText primary="System Settings" />
+          </ListItemButton>
         </ListItem>
 
         {/* Logout Button */}
-        <ListItem button>
-          <ListItemIcon sx={{ color: '#fff' }}>
-            <LogoutIcon />
-          </ListItemIcon>
-          <ListItemText primary="Logout" />
+        <ListItem disablePadding>
+          <ListItemButton>
+            <ListItemIcon sx={{ color: '#fff' }}>
+              <LogoutIcon />
+            </ListItemIcon>
+            <ListItemText primary="Logout" />
+          </ListItemButton>
         </ListItem>
       </List>
     </Drawer>

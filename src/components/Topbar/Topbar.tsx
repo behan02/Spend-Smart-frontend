@@ -1,25 +1,13 @@
-import { AppBar, Toolbar, Typography, InputBase, Box, IconButton, Badge, Avatar } from '@mui/material';
-import { styled } from '@mui/system';
-import SearchIcon from '@mui/icons-material/Search';
+import { AppBar, Toolbar, Typography, Box, IconButton, Badge, Avatar } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: '#f1f3f4', // very soft gray
-  '&:hover': {
-    backgroundColor: '#e0e0e0',
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: '100%',
-  maxWidth: 250,
-  display: 'flex',
-  alignItems: 'center',
-  padding: '4px 10px',
-}));
+import { useAdminProfile } from '../../contexts/AdminProfileContext';
 
 const Topbar = () => {
+  const { adminProfile, profilePictureUrl } = useAdminProfile();
+  
+  // Debug log to see what we're getting
+  console.log('Topbar - profilePictureUrl:', profilePictureUrl ? profilePictureUrl.substring(0, 50) + '...' : 'null');
+  console.log('Topbar - adminProfile:', adminProfile?.name);
   return (
     <AppBar
       position="static"
@@ -37,15 +25,9 @@ const Topbar = () => {
           Admin
         </Typography>
 
-        {/* Right Side: Search, Notification, Profile */}
+        {/* Right Side: Notification, Profile */}
         <Box display="flex" alignItems="center">
           
-          {/* Search */}
-          <Search>
-            <SearchIcon color="action" />
-            <InputBase placeholder="Search..." sx={{ ml: 1, width: '100%' }} />
-          </Search>
-
           {/* Notification */}
           <IconButton sx={{ color: '#555' }}>
             <Badge badgeContent={3} color="error">
@@ -55,7 +37,21 @@ const Topbar = () => {
 
           {/* Avatar/Profile */}
           <IconButton sx={{ ml: 2 }}>
-            <Avatar alt="Admin" src="/static/images/avatar/1.jpg" />
+            <Avatar 
+              alt={adminProfile?.name || "Admin"} 
+              src={profilePictureUrl ? (
+                profilePictureUrl.startsWith('data:') 
+                  ? profilePictureUrl 
+                  : `data:image/jpeg;base64,${profilePictureUrl}`
+              ) : undefined}
+              sx={{ 
+                width: 32, 
+                height: 32,
+                fontSize: '0.875rem'
+              }}
+            >
+              {!profilePictureUrl && (adminProfile?.name?.charAt(0).toUpperCase() || "A")}
+            </Avatar>
           </IconButton>
 
         </Box>
