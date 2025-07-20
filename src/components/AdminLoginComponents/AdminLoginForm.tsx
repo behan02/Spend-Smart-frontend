@@ -1,13 +1,28 @@
 import React, { useState } from "react";
 import {
-  Box, TextField, Typography, InputAdornment, Divider, Button, CircularProgress
+  Box,
+  TextField,
+  Typography,
+  InputAdornment,
+  Divider,
+  Button,
+  CircularProgress,
+  Paper,
+  Fade,
+  Slide,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import MailIcon from "@mui/icons-material/MailOutline";
 import LockIcon from "@mui/icons-material/LockOutlined";
 import { useNavigate, Link } from "react-router-dom";
+import Logo from "../../assets/images/logo/Logo.png";
 
-const LoginForm = () => {
+const AdminLoginForm = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ email: "", password: "" });
@@ -40,11 +55,14 @@ const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("https://localhost:7211/api/admin/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await fetch(
+        "https://localhost:7211/api/admin/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -53,8 +71,8 @@ const LoginForm = () => {
 
       const data = await response.json();
       localStorage.setItem("authToken", data.token);
-      localStorage.setItem("user", JSON.stringify(data));
-      navigate("/dashboard");
+      localStorage.setItem("admin", JSON.stringify(data));
+      navigate("/admin/dashboard");
     } catch (err: any) {
       alert(`Error: ${err.message}`);
     } finally {
@@ -63,85 +81,211 @@ const LoginForm = () => {
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-      <TextField
-        label="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        error={!!errors.email}
-        helperText={errors.email}
-        placeholder="Enter your Email"
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <MailIcon />
-              <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-            </InputAdornment>
-          ),
-        }}
-        sx={{ width: "300px", mb: 2 }}
-        fullWidth
-      />
-
-      <TextField
-        label="Password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        error={!!errors.password}
-        helperText={errors.password}
-        placeholder="**********"
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <LockIcon />
-              <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-            </InputAdornment>
-          ),
-        }}
-        sx={{ width: "300px", mb: 1 }}
-        fullWidth
-      />
-
-      <Typography
-        variant="body2"
-        sx={{ width: "300px", textAlign: "right", color: "#FF0000", fontSize: "0.8rem", mb: 2, cursor: "pointer" }}
-      >
-        Forgot password?
-      </Typography>
-
-      <Button
-        type="submit"
-        variant="contained"
-        disabled={isLoading}
+    <Fade in timeout={600}>
+      <Paper
+        elevation={20}
         sx={{
-          height: "45px",
-          width: "300px",
-          backgroundColor: "#023E8A",
-          "&:hover": { backgroundColor: "#022E6A" },
+          padding: { xs: 2, sm: 3, md: 4 },
+          borderRadius: 4,
+          background: "rgba(255, 255, 255, 0.95)",
+          backdropFilter: "blur(10px)",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
+          boxShadow: "0 25px 50px rgba(0, 0, 0, 0.1)",
+          width: "100%",
+          maxWidth: { xs: "350px", sm: "400px", md: "420px" },
+          margin: "0 auto",
+          position: "relative",
         }}
       >
-        {isLoading ? <CircularProgress size={24} color="inherit" /> : "Login"}
-      </Button>
+        <Slide direction="down" in timeout={800}>
+          <Box sx={{ textAlign: "center", mb: 2 }}>
+            <Box sx={{ textAlign: "center" }}>
+              <img
+                src={Logo}
+                alt="Logo"
+                style={{
+                  maxWidth: isMobile ? "80px" : isTablet ? "110px" : "130px",
+                  height: isMobile ? "80px" : isTablet ? "110px" : "130px",
+                  filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))",
+                }}
+              />
+            </Box>
 
-      <Typography
-        sx={{
-          marginTop: "10px",
-          textAlign: "center",
-          width: "300px",
-          fontSize: "0.85rem",
-          fontWeight: 200,
-        }}
-      >
-        Don't have an account yet?{" "}
-        <Link to="/admin/register" style={{ textDecoration: "none" }}>
-          <Typography component="span" sx={{ color: "#023E8A", opacity: 0.7, fontWeight: "bold", "&:hover": { opacity: 1 },fontSize: "0.85rem", }}>
-            Sign up here
-          </Typography>
-        </Link>
-      </Typography>
-    </Box>
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 700,
+                background: "linear-gradient(135deg, #023E8A, #0466C8)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                color: "transparent",
+                mb: 1,
+                fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" },
+              }}
+            >
+              Welcome Back!
+            </Typography>
+
+            <Typography
+              variant="body2"
+              sx={{
+                color: "rgba(0, 0, 0, 0.6)",
+                fontSize: { xs: "12px", sm: "13px", md: "14px" },
+                lineHeight: 1.5,
+                px: { xs: 1, sm: 0 },
+              }}
+            >
+              Access your administrative dashboard with secure login.
+            </Typography>
+          </Box>
+        </Slide>
+
+        <Slide direction="up" in timeout={800}>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            <TextField
+              label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={!!errors.email}
+              helperText={errors.email}
+              placeholder="Enter your Email"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <MailIcon />
+                    <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                width: { xs: "100%", sm: "280px", md: "300px" },
+                mb: 2,
+                maxWidth: "300px",
+              }}
+              fullWidth
+            />
+
+            <TextField
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={!!errors.password}
+              helperText={errors.password}
+              placeholder="**********"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon />
+                    <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                width: { xs: "100%", sm: "280px", md: "300px" },
+                mb: 1,
+                maxWidth: "300px",
+              }}
+              fullWidth
+            />
+
+            <Typography
+              variant="body2"
+              sx={{
+                width: { xs: "100%", sm: "280px", md: "300px" },
+                maxWidth: "300px",
+                textAlign: "right",
+                color: "#FF0000",
+                fontSize: { xs: "0.75rem", sm: "0.8rem" },
+                mb: 2,
+                cursor: "pointer",
+              }}
+              component={Link}
+              to="/admin/forgetpassword"
+            >
+              Forgot password?
+            </Typography>
+
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isLoading}
+              sx={{
+                height: { xs: 45, sm: 48, md: 50 },
+                width: { xs: "100%", sm: "280px", md: "300px" },
+                maxWidth: "300px",
+                borderRadius: 2,
+                background: "linear-gradient(135deg, #023E8A, #0466C8)",
+                boxShadow: "0 8px 20px rgba(2, 62, 138, 0.3)",
+                fontSize: { xs: "14px", sm: "15px", md: "16px" },
+                fontWeight: 600,
+                textTransform: "none",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #022E6A, #0353A4)",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 12px 30px rgba(2, 62, 138, 0.4)",
+                },
+                "&:disabled": {
+                  background: "rgba(0, 0, 0, 0.12)",
+                },
+                transition: "all 0.3s ease",
+              }}
+            >
+              {isLoading ? (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <CircularProgress size={20} color="inherit" />
+                  <Typography
+                    sx={{ fontSize: { xs: "14px", sm: "15px", md: "16px" } }}
+                  >
+                    Login...
+                  </Typography>
+                </Box>
+              ) : (
+                "ADMIN LOGIN"
+              )}
+            </Button>
+
+            <Typography
+              sx={{
+                marginTop: "10px",
+                textAlign: "center",
+                width: { xs: "100%", sm: "280px", md: "300px" },
+                maxWidth: "300px",
+                fontSize: { xs: "0.8rem", sm: "0.85rem" },
+                fontWeight: 200,
+                px: { xs: 1, sm: 0 },
+              }}
+            >
+              Don't have an admin account?{" "}
+              <Link to="/admin/register" style={{ textDecoration: "none" }}>
+                <Typography
+                  component="span"
+                  sx={{
+                    color: "#023E8A",
+                    opacity: 0.7,
+                    fontWeight: "bold",
+                    "&:hover": { opacity: 1 },
+                    fontSize: { xs: "0.8rem", sm: "0.85rem" },
+                  }}
+                >
+                  Sign up here
+                </Typography>
+              </Link>
+            </Typography>
+          </Box>
+        </Slide>
+      </Paper>
+    </Fade>
   );
 };
 
-export default LoginForm;
+export default AdminLoginForm;
