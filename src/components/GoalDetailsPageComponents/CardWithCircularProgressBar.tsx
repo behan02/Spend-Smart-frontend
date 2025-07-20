@@ -1,7 +1,4 @@
 import React from 'react';
-import { Box, Typography, Card, IconButton } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 
 interface Goal {
   id: number;
@@ -25,15 +22,11 @@ interface SavingRecord {
 interface CardWithCircularProgressBarProps {
   goal: Goal;
   savingRecords: SavingRecord[];
-  onEdit?: () => void;
-  onDelete?: () => void;
 }
 
 const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = ({
   goal,
-  savingRecords,
-  onEdit,
-  onDelete
+  savingRecords
 }) => {
   // Calculate total saved amount from records
   const totalSavedFromRecords = savingRecords.reduce((total, record) => total + record.amount, 0);
@@ -55,423 +48,230 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
   const strokeDashoffset = circumference - (progressPercentage / 100) * circumference;
 
   return (
-    <Card 
-      sx={{ 
-        p: "6px",
-        marginLeft: 3,
-        borderRadius: "24px", 
-        boxShadow: "0 8px 32px rgba(0, 119, 182, 0.15), 0 2px 8px rgba(0, 119, 182, 0.08)",
-        border: "2px solid rgba(0, 119, 182, 0.1)",
-        background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e0f2fe 100%)",
-        width: '450px',
-        height: '500px',
-        position: 'relative',
-        transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-        overflow: 'hidden',
-        "&:hover": {
-          boxShadow: "0 16px 48px rgba(0, 119, 182, 0.2), 0 4px 16px rgba(0, 119, 182, 0.15)",
-          transform: "translateY(-4px) scale(1.02)",
-          border: "2px solid rgba(0, 119, 182, 0.2)"
-        },
-        "&::before": {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '4px',
-          background: "linear-gradient(90deg, #0077B6 0%, #00B4D8 50%, #0077B6 100%)",
-          borderRadius: "24px 24px 0 0",
-          animation: 'shimmer 3s ease-in-out infinite'
-        },
-        "@keyframes shimmer": {
-          "0%": { backgroundPosition: "-200px 0" },
-          "100%": { backgroundPosition: "200px 0" }
-        }
-      }}
-    >
-      {/* Decorative background elements */}
-      <Box sx={{
-        position: 'absolute',
-        top: -50,
-        right: -50,
-        width: 150,
-        height: 150,
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(0, 119, 182, 0.08) 0%, transparent 70%)',
-        zIndex: 0,
-        animation: 'float 6s ease-in-out infinite'
-      }} />
-      
-      <Box sx={{
-        position: 'absolute',
-        bottom: -30,
-        left: -30,
-        width: 100,
-        height: 100,
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(0, 180, 216, 0.06) 0%, transparent 70%)',
-        zIndex: 0,
-        animation: 'float 8s ease-in-out infinite reverse'
-      }} />
-
-      {/* Main Content */}
-      <Box sx={{ 
-        p: 3, 
-        height: '100%', 
-        display: 'flex', 
-        flexDirection: 'column',
-        position: 'relative',
-        zIndex: 1
+    <div style={{ 
+      padding: '24px',
+      borderRadius: '16px',
+      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+      border: "1px solid #e2e8f0",
+      backgroundColor: "#ffffff",
+      width: '420px',
+      height: '400px',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      {/* Header with Goal Name */}
+      <div style={{ 
+        marginBottom: '24px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px'
       }}>
-        {/* Header with Goal Name */}
-        <Box sx={{ 
-          mb: 3,
+        <div style={{
+          width: '35px',
+          height: '35px',
+          borderRadius: '8px',
+          backgroundColor: "#0072ddff",
           display: 'flex',
           alignItems: 'center',
-          gap: 2
+          justifyContent: 'center'
         }}>
-          <Box sx={{
-            width: 48,
-            height: 48,
-            borderRadius: '16px',
-            background: "linear-gradient(135deg, #0077B6 0%, #00B4D8 100%)",
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: "0 4px 16px rgba(0, 119, 182, 0.3)",
-            animation: 'pulse 2s ease-in-out infinite'
-          }}>
-            <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold' }}>
-              🎯
-            </Typography>
-          </Box>
-          <Box sx={{ flex: 1 }}>
-            <Typography 
-              variant="h5" 
-              fontWeight="800" 
-              sx={{ 
-                background: "linear-gradient(135deg, #0077B6 0%, #023E8A 100%)",
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                color: "transparent",
-                letterSpacing: '-0.02em',
-                fontSize: '1.3rem',
-                lineHeight: 1.2
-              }}
-            >
-              {goal.name || 'Savings Goal'}
-            </Typography>
-            {goal.description && (
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: '#6b7280',
-                  mt: 0.5,
-                  lineHeight: 1.4,
-                  fontWeight: 500
-                }}
-              >
-                {goal.description}
-              </Typography>
-            )}
-          </Box>
-        </Box>
-
-        {/* Progress and Amount Section */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1 }}>
-          {/* Circular Progress */}
-          <Box sx={{ 
-            position: 'relative', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            background: 'rgba(255, 255, 255, 0.8)',
-            borderRadius: '50%',
-            padding: '15px',
-            backdropFilter: 'blur(10px)',
-            border: '2px solid rgba(0, 119, 182, 0.1)',
-            boxShadow: '0 8px 24px rgba(0, 119, 182, 0.15)',
-            animation: 'breathe 4s ease-in-out infinite'
-          }}>
-            <svg width="130" height="130">
-              {/* Background circle */}
-              <circle
-                cx="65"
-                cy="65"
-                r={radius}
-                stroke="rgba(0, 119, 182, 0.1)"
-                strokeWidth="10"
-                fill="transparent"
-              />
-              {/* Progress circle */}
-              <circle
-                cx="65"
-                cy="65"
-                r={radius}
-                stroke={progressPercentage > 0 ? 
-                  `url(#gradient-${goal.id})` : "rgba(0, 119, 182, 0.1)"}
-                strokeWidth="10"
-                fill="transparent"
-                strokeDasharray={circumference}
-                strokeDashoffset={strokeDashoffset}
-                strokeLinecap="round"
-                transform="rotate(-90 65 65)"
-                style={{
-                  transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
-                  filter: 'drop-shadow(0 2px 8px rgba(0, 119, 182, 0.3))'
-                }}
-              />
-              {/* Gradient definition */}
-              <defs>
-                <linearGradient id={`gradient-${goal.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#0077B6" />
-                  <stop offset="50%" stopColor="#00B4D8" />
-                  <stop offset="100%" stopColor="#0077B6" />
-                </linearGradient>
-              </defs>
-            </svg>
+          <span style={{ color: 'white', fontSize: '25px' }}>🎯</span>
+        </div>
+        <div style={{ flex: 1  }}>
+            <h3 style={{ 
+            margin: 0,
+            fontWeight: "bold",
+            color: "#1F2937",
+            fontSize: '26px',
+            fontFamily: '"Inter", "Roboto", "Arial", sans-serif',
+            lineHeight: 1.2
             
-            {/* Percentage text in center */}
-            <Box sx={{ 
-              position: 'absolute',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center'
             }}>
-              <Typography 
-                variant="h3" 
-                fontWeight="800" 
-                sx={{ 
-                  background: progressPercentage >= 100 
-                    ? "linear-gradient(135deg, #059669 0%, #047857 100%)"
-                    : "linear-gradient(135deg, #0077B6 0%, #023E8A 100%)",
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  color: "transparent",
-                  lineHeight: 1,
-                  fontSize: '2rem',
-                  textShadow: '0 2px 8px rgba(0, 119, 182, 0.2)',
-                  animation: progressPercentage >= 100 ? 'celebrate 1s ease-in-out infinite' : 'none'
-                }}
-              >
-                {progressPercentage}%
-              </Typography>
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: '#0077B6',
-                  fontSize: '0.75rem',
-                  fontWeight: '600',
-                  mt: 0.5,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}
-              >
-                Complete
-              </Typography>
-            </Box>
-          </Box>
-
-          {/* Amount Information - Enhanced styling */}
-          <Box sx={{ 
-            flexGrow: 1, 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'flex-end', 
-            gap: 2.5 
-          }}>
-            <Box sx={{ 
-              textAlign: 'right',
-              background: 'rgba(255, 255, 255, 0.8)',
-              borderRadius: '16px',
-              p: 2,
-              minWidth: '140px',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(0, 119, 182, 0.1)',
-              boxShadow: '0 4px 16px rgba(0, 119, 182, 0.1)',
-              transition: 'all 0.3s ease'
+            {goal.name || 'Savings Goal'}
+            </h3>
+          {goal.description && (
+            <p style={{ 
+              margin: '4px 0 0 0',
+              color: '#6B7280',
+              fontSize: '14px',
+              fontFamily: '"Inter", "Roboto", "Arial", sans-serif',
+              lineHeight: 1.4
             }}>
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: '#0077B6',
-                  fontSize: '0.7rem',
-                  fontWeight: '600',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}
-              >
-                🎯 Target Goal
-              </Typography>
-              <Typography 
-                variant="h6" 
-                fontWeight="700" 
-                sx={{ 
-                  color: '#0077B6',
-                  lineHeight: 1.2,
-                  fontSize: '1.2rem',
-                  mt: 0.5
-                }}
-              >
-                {goal.targetAmount.toLocaleString()} LKR
-              </Typography>
-            </Box>
+              {goal.description}
+            </p>
+          )}
+        </div>
+      </div>
 
-            <Box sx={{ 
-              textAlign: 'right',
-              background: 'rgba(255, 255, 255, 0.8)',
-              borderRadius: '16px',
-              p: 2,
-              minWidth: '140px',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(5, 150, 105, 0.1)',
-              boxShadow: '0 4px 16px rgba(5, 150, 105, 0.1)',
-              transition: 'all 0.3s ease'
-            }}>
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: '#059669',
-                  fontSize: '0.7rem',
-                  fontWeight: '600',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}
-              >
-                💰 Saved Amount
-              </Typography>
-              <Typography 
-                variant="h6" 
-                fontWeight="700" 
-                sx={{ 
-                  color: '#059669',
-                  lineHeight: 1.2,
-                  fontSize: '1.2rem',
-                  mt: 0.5
-                }}
-              >
-                {currentSavedAmount.toLocaleString()} LKR
-              </Typography>
-            </Box>
-
-            <Box sx={{ 
-              textAlign: 'right',
-              background: 'rgba(255, 255, 255, 0.8)',
-              borderRadius: '16px',
-              p: 2,
-              minWidth: '140px',
-              backdropFilter: 'blur(10px)',
-              border: `1px solid ${remainingDays > 30 ? 'rgba(0, 119, 182, 0.1)' : 'rgba(220, 38, 38, 0.1)'}`,
-              boxShadow: `0 4px 16px ${remainingDays > 30 ? 'rgba(0, 119, 182, 0.1)' : 'rgba(220, 38, 38, 0.1)'}`,
-              transition: 'all 0.3s ease'
-            }}>
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: remainingDays > 30 ? '#0077B6' : '#dc2626',
-                  fontSize: '0.7rem',
-                  fontWeight: '600',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}
-              >
-                ⏰ Days Left
-              </Typography>
-              <Typography 
-                variant="h6" 
-                fontWeight="700" 
-                sx={{ 
-                  color: remainingDays > 30 ? '#0077B6' : '#dc2626',
-                  lineHeight: 1.2,
-                  fontSize: '1.2rem',
-                  mt: 0.5
-                }}
-              >
-                {remainingDays} Days
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-
-        {/* Bottom Action Buttons - Enhanced with matching style */}
-        <Box sx={{ 
+      {/* Progress and Amount Section */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '32px', flex: 1 }}>
+        {/* Circular Progress */}
+        <div style={{ 
+          position: 'relative', 
           display: 'flex', 
-          justifyContent: 'flex-end', 
-          gap: 1.5,
-          mt: 2,
-          pt: 2,
-          borderTop: '2px solid rgba(0, 119, 182, 0.1)'
+          alignItems: 'center', 
+          justifyContent: 'center',
+          backgroundColor: '#F9FAFB',
+          borderRadius: '50%',
+          padding: '15px',
+          border: '1px solid #E5E7EB'
         }}>
-          <IconButton 
-            onClick={onEdit}
-            sx={{
-              background: 'linear-gradient(135deg, rgba(0, 119, 182, 0.1) 0%, rgba(0, 180, 216, 0.15) 100%)',
-              color: '#0077B6',
-              width: 48,
-              height: 48,
-              border: '2px solid rgba(0, 119, 182, 0.15)',
-              backdropFilter: 'blur(10px)',
-              boxShadow: '0 4px 16px rgba(0, 119, 182, 0.2)',
-              '&:hover': {
-                background: 'linear-gradient(135deg, rgba(0, 119, 182, 0.15) 0%, rgba(0, 180, 216, 0.2) 100%)',
-                transform: 'translateY(-2px) scale(1.05)',
-                boxShadow: '0 8px 24px rgba(0, 119, 182, 0.3)',
-                border: '2px solid rgba(0, 119, 182, 0.25)'
-              },
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-            }}
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
-          <IconButton 
-            onClick={onDelete}
-            sx={{
-              background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(239, 68, 68, 0.15) 100%)',
-              color: '#dc2626',
-              width: 48,
-              height: 48,
-              border: '2px solid rgba(220, 38, 38, 0.15)',
-              backdropFilter: 'blur(10px)',
-              boxShadow: '0 4px 16px rgba(220, 38, 38, 0.2)',
-              '&:hover': {
-                background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.15) 0%, rgba(239, 68, 68, 0.2) 100%)',
-                transform: 'translateY(-2px) scale(1.05)',
-                boxShadow: '0 8px 24px rgba(220, 38, 38, 0.3)',
-                border: '2px solid rgba(220, 38, 38, 0.25)'
-              },
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-            }}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Box>
-      </Box>
+          <svg width="130" height="130">
+            {/* Background circle */}
+            <circle
+              cx="65"
+              cy="65"
+              r={radius}
+              stroke="#E5E7EB"
+              strokeWidth="8"
+              fill="transparent"
+            />
+            {/* Progress circle */}
+            <circle
+              cx="65"
+              cy="65"
+              r={radius}
+              stroke={progressPercentage >= 100 ? "#10B981" : "#0072ddff"}
+              strokeWidth="8"
+              fill="transparent"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              transform="rotate(-90 65 65)"
+              style={{
+                transition: 'stroke-dashoffset 0.5s ease'
+              }}
+            />
+          </svg>
+          
+          {/* Percentage text in center */}
+          <div style={{ 
+            position: 'absolute',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div style={{ 
+              fontSize: '32px',
+              fontWeight: "700",
+              color: progressPercentage >= 100 ? "#4caf50" : "#0b00dd",
+              lineHeight: 1,
+              margin: 0
+            }}>
+              {progressPercentage}%
+            </div>
+            <div style={{ 
+              color: '#666',
+              fontSize: '12px',
+              fontWeight: '500',
+              marginTop: '4px',
+              textTransform: 'uppercase'
+            }}>
+              Complete
+            </div>
+          </div>
+        </div>
 
-      {/* CSS animations */}
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(180deg); }
-        }
-        
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-        }
-        
-        @keyframes breathe {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-        }
-        
-        @keyframes celebrate {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-        }
-      `}</style>
-    </Card>
+        {/* Amount Information */}
+        <div style={{ 
+          flexGrow: 1, 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'flex-end', 
+          gap: '20px' 
+        }}>
+          <div style={{ 
+            textAlign: 'right',
+            backgroundColor: '#F9FAFB',
+            borderRadius: '8px',
+            padding: '16px',
+            minWidth: '140px',
+            border: '1px solid #E5E7EB'
+          }}>
+            <div style={{ 
+              color: '#6B7280',
+              fontSize: '11px',
+              fontWeight: '600',
+              textTransform: 'uppercase',
+              marginBottom: '4px',
+              fontFamily: '"Inter", "Roboto", "Arial", sans-serif'
+            }}>
+              🎯 Target Goal
+            </div>
+            <div style={{ 
+              color: '#1F2937',
+              lineHeight: 1.2,
+              fontSize: '18px',
+              fontWeight: '600',
+              fontFamily: '"Inter", "Roboto", "Arial", sans-serif'
+            }}>
+              {goal.targetAmount.toLocaleString()} LKR
+            </div>
+          </div>
+
+          <div style={{ 
+            textAlign: 'right',
+            backgroundColor: '#F9FAFB',
+            borderRadius: '8px',
+            padding: '16px',
+            minWidth: '140px',
+            border: '1px solid #E5E7EB'
+          }}>
+            <div style={{ 
+              color: '#6B7280',
+              fontSize: '11px',
+              fontWeight: '600',
+              textTransform: 'uppercase',
+              marginBottom: '4px',
+              fontFamily: '"Inter", "Roboto", "Arial", sans-serif'
+            }}>
+              💰 Saved Amount
+            </div>
+            <div style={{ 
+              color: '#1F2937',
+              lineHeight: 1.2,
+              fontSize: '18px',
+              fontWeight: '600',
+              fontFamily: '"Inter", "Roboto", "Arial", sans-serif'
+            }}>
+              {currentSavedAmount.toLocaleString()} LKR
+            </div>
+          </div>
+
+          <div style={{ 
+            textAlign: 'right',
+            backgroundColor: '#F9FAFB',
+            borderRadius: '8px',
+            padding: '16px',
+            minWidth: '140px',
+            border: `1px solid ${remainingDays > 30 ? '#E5E7EB' : '#FEE2E2'}`
+          }}>
+            <div style={{ 
+              color: remainingDays > 30 ? '#6B7280' : '#EF4444',
+              fontSize: '11px',
+              fontWeight: '600',
+              textTransform: 'uppercase',
+              marginBottom: '4px',
+              fontFamily: '"Inter", "Roboto", "Arial", sans-serif'
+            }}>
+              ⏰ Days Left
+            </div>
+            <div style={{ 
+              color: remainingDays > 30 ? '#1F2937' : '#EF4444',
+              lineHeight: 1.2,
+              fontSize: '18px',
+              fontWeight: '600',
+              fontFamily: '"Inter", "Roboto", "Arial", sans-serif'
+            }}>
+              {remainingDays} Days
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
   );
 };
 

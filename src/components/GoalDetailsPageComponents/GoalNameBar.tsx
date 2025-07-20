@@ -29,7 +29,7 @@ const GoalNameBar: React.FC<GoalNameBarProps> = ({ goalName, onBack }) => {
         py: 2,
         px: 3,
         backgroundColor: '#fff',
-        borderBottom: '1px solid #e0e0e0',
+        borderBottom: '1px solid #E5E7EB',
         position: 'sticky',
         top: 0,
         zIndex: 100,
@@ -40,9 +40,9 @@ const GoalNameBar: React.FC<GoalNameBarProps> = ({ goalName, onBack }) => {
       <IconButton
         onClick={handleBackClick}
         sx={{
-          color: '#666',
+          color: '#6B7280',
           '&:hover': {
-            backgroundColor: '#f5f5f5'
+            backgroundColor: '#F3F4F6'
           }
         }}
         aria-label="Go back to goals"
@@ -55,9 +55,10 @@ const GoalNameBar: React.FC<GoalNameBarProps> = ({ goalName, onBack }) => {
         variant="h5"
         component="h1"
         sx={{
-          fontWeight: 600,
-          color: '#333',
-          fontSize: '1.5rem'
+          fontWeight: 'normal',
+          color: '#1F2937',
+          fontSize: '20px',
+          fontFamily: '"Inter", "Roboto", "Arial", sans-serif'
         }}
       >
         {goalName}

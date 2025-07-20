@@ -1,298 +1,319 @@
-import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Box
-} from '@mui/material';
-import SavingRecord, { SavingRecord as SavingRecordType } from './SavingRecord';
+import React, { useState } from 'react';
+import { IconButton, Tooltip } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
-interface SavingRecordsHistoryTableProps {
-  records: SavingRecordType[];
+interface SavingRecord {
+  id: number;
+  amount: number;
+  date: string; // ISO string format for API compatibility
+  description?: string;
+  goalId: number;
+  userId?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-const SavingRecordsHistoryTable: React.FC<SavingRecordsHistoryTableProps> = ({ records }) => {
-  return (
-    <Box sx={{ mt: 4, position: 'relative' }}>
-      {/* Decorative background elements */}
-      <Box sx={{
-        position: 'absolute',
-        top: -30,
-        right: -30,
-        width: 120,
-        height: 120,
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(0, 119, 182, 0.06) 0%, transparent 70%)',
-        zIndex: 0,
-        animation: 'float 8s ease-in-out infinite'
-      }} />
-      
-      <Box sx={{
-        position: 'absolute',
-        bottom: -20,
-        left: -20,
-        width: 80,
-        height: 80,
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(0, 180, 216, 0.04) 0%, transparent 70%)',
-        zIndex: 0,
-        animation: 'float 6s ease-in-out infinite reverse'
-      }} />
+interface SavingRecordsHistoryTableProps {
+  records: SavingRecord[];
+  onDeleteRecord?: (recordId: number) => void;
+}
 
-      {/* Header with enhanced styling */}
-      <Box sx={{ 
-        ml:5,
-        mb: 3,
+const SavingRecordsHistoryTable: React.FC<SavingRecordsHistoryTableProps> = ({ 
+  records, 
+  onDeleteRecord 
+}) => {
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [deletingRecord, setDeletingRecord] = useState<number | null>(null);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const formatAmount = (amount: number) => {
+    return `+${amount.toFixed(2)} LKR`;
+  };
+
+  const handleDeleteClick = async (recordId: number) => {
+    if (!onDeleteRecord) return;
+    
+    if (window.confirm('Are you sure you want to delete this saving record?')) {
+      setDeletingRecord(recordId);
+      try {
+        await onDeleteRecord(recordId);
+      } catch (error) {
+        console.error('Error deleting record:', error);
+      } finally {
+        setDeletingRecord(null);
+      }
+    }
+  };
+
+  return (
+    <div style={{ marginTop: '32px', position: 'relative' }}>
+      {/* Header */}
+      <div style={{ 
+        marginLeft: '40px',
+        marginBottom: '24px',
         display: 'flex',
         alignItems: 'center',
-        gap: 2,
-        position: 'relative',
-        zIndex: 1
+        gap: '16px'
       }}>
-        <Box sx={{
-          width: 40,
-          height: 40,
+        <div style={{
+          width: '40px',
+          height: '40px',
           borderRadius: '12px',
-          background: "linear-gradient(135deg, #0077B6 0%, #00B4D8 100%)",
+          backgroundColor: "#0b00dd",
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: "0 4px 16px rgba(0, 119, 182, 0.3)",
-          animation: 'pulse 2s ease-in-out infinite'
+          justifyContent: 'center'
         }}>
-          <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
+          <span style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }}>
             📊
-          </Typography>
-        </Box>
-        <Typography 
-          variant="h5" 
-          sx={{ 
-            background: "linear-gradient(135deg, #0077B6 0%, #023E8A 100%)",
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            color: "transparent",
-            fontWeight: '800',
-            letterSpacing: '-0.02em',
-            fontSize: '1.3rem'
-          }}
-        >
+          </span>
+        </div>
+        <h2 style={{ 
+          margin: 0,
+          color: "#0b00dd",
+          fontWeight: '700',
+          fontSize: '22px'
+        }}>
           Savings History
-        </Typography>
-      </Box>
+        </h2>
+      </div>
       
-      <TableContainer 
-        component={Paper} 
-        sx={{ 
-          borderRadius: "24px",
-          boxShadow: "0 8px 32px rgba(0, 119, 182, 0.15), 0 2px 8px rgba(0, 119, 182, 0.08)",
-          border: "2px solid rgba(0, 119, 182, 0.1)",
-          background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e0f2fe 100%)",
-          overflow: 'hidden',
-          position: 'relative',
-          zIndex: 1,
-          bottom:10,
-          transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-          "&:hover": {
-            boxShadow: "0 16px 48px rgba(0, 119, 182, 0.2), 0 4px 16px rgba(0, 119, 182, 0.15)",
-            transform: "translateY(-2px)",
-            border: "2px solid rgba(0, 119, 182, 0.2)"
-          },
-          "&::before": {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '4px',
-           
-            zIndex: 1,
-            animation: 'shimmer 3s ease-in-out infinite'
-          }
-        }}
-      >
-        <Table>
-          <TableHead>
-            <TableRow sx={{ 
-              background: 'linear-gradient(135deg, rgba(0, 119, 182, 0.08) 0%, rgba(0, 180, 216, 0.05) 100%)',
-              '& .MuiTableCell-root': {
-                borderBottom: '2px solid rgba(0, 119, 182, 0.15)',
-                py: 2
-              }
+      <div style={{ 
+        borderRadius: "12px",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+        border: "1px solid #e0e0e0",
+        backgroundColor: "#ffffff",
+        overflow: 'hidden',
+        marginBottom: '40px'
+      }}>
+        <table style={{
+          width: '100%',
+          borderCollapse: 'collapse'
+        }}>
+          <thead>
+            <tr style={{ 
+              backgroundColor: '#f8f9fa',
+              borderBottom: '2px solid #e0e0e0'
             }}>
-              <TableCell>
-                <Typography 
-                  variant="subtitle2" 
-                  sx={{ 
-                    fontWeight: '700',
-                    color: '#0077B6',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    fontSize: '0.75rem'
-                  }}
-                >
-                  📅 Date
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Typography 
-                  variant="subtitle2" 
-                  sx={{ 
-                    fontWeight: '700',
-                    color: '#0077B6',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    fontSize: '0.75rem'
-                  }}
-                >
-                  ⏰ Time
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Typography 
-                  variant="subtitle2" 
-                  sx={{ 
-                    fontWeight: '700',
-                    color: '#0077B6',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    fontSize: '0.75rem'
-                  }}
-                >
-                  📝 Description
-                </Typography>
-              </TableCell>
-              <TableCell align="right">
-                <Typography 
-                  variant="subtitle2" 
-                  sx={{ 
-                    fontWeight: '700',
-                    color: '#0077B6',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    fontSize: '0.75rem'
-                  }}
-                >
-                  💰 Amount
-                </Typography>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+              <th style={{
+                padding: '16px',
+                textAlign: 'left',
+                fontWeight: '700',
+                color: '#0b00dd',
+                textTransform: 'uppercase',
+                fontSize: '12px',
+                letterSpacing: '0.5px'
+              }}>
+                📅 Date
+              </th>
+              <th style={{
+                padding: '16px',
+                textAlign: 'left',
+                fontWeight: '700',
+                color: '#0b00dd',
+                textTransform: 'uppercase',
+                fontSize: '12px',
+                letterSpacing: '0.5px'
+              }}>
+                ⏰ Time
+              </th>
+              <th style={{
+                padding: '16px',
+                textAlign: 'left',
+                fontWeight: '700',
+                color: '#0b00dd',
+                textTransform: 'uppercase',
+                fontSize: '12px',
+                letterSpacing: '0.5px'
+              }}>
+                📝 Description
+              </th>
+              <th style={{
+                padding: '16px',
+                textAlign: 'right',
+                fontWeight: '700',
+                color: '#0b00dd',
+                textTransform: 'uppercase',
+                fontSize: '12px',
+                letterSpacing: '0.5px'
+              }}>
+                💰 Amount
+              </th>
+              <th style={{
+                padding: '16px',
+                textAlign: 'center',
+                fontWeight: '700',
+                color: '#0b00dd',
+                textTransform: 'uppercase',
+                fontSize: '12px',
+                letterSpacing: '0.5px',
+                width: '80px'
+              }}>
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
             {records.length > 0 ? (
               records.map((record, index) => (
-                <TableRow 
+                <tr 
                   key={record.id}
-                  sx={{
-                    background: index % 2 === 0 
-                      ? 'rgba(255, 255, 255, 0.8)' 
-                      : 'rgba(0, 119, 182, 0.02)',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      background: 'rgba(0, 119, 182, 0.08)',
-                      transform: 'translateX(4px)',
-                      boxShadow: '0 4px 16px rgba(0, 119, 182, 0.1)',
-                      '& .MuiTableCell-root': {
-                        borderBottom: '1px solid rgba(0, 119, 182, 0.2)'
-                      }
-                    },
-                    '& .MuiTableCell-root': {
-                      borderBottom: '1px solid rgba(0, 119, 182, 0.1)',
-                      py: 2
-                    }
+                  style={{
+                    backgroundColor: index % 2 === 0 ? '#ffffff' : '#fafafa',
+                    borderBottom: '1px solid #e0e0e0',
+                    transition: 'all 0.2s ease',
+                    opacity: deletingRecord === record.id ? 0.5 : 1
                   }}
+                  onMouseEnter={() => setHoveredRow(record.id)}
+                  onMouseLeave={() => setHoveredRow(null)}
                 >
-                  <SavingRecord record={record} />
-                </TableRow>
+                  <td style={{
+                    padding: '16px',
+                    borderBottom: '1px solid #e0e0e0',
+                    backgroundColor: hoveredRow === record.id ? '#f0f7ff' : 'transparent'
+                  }}>
+                    <div style={{ fontSize: '14px', color: '#333' }}>
+                      {formatDate(record.date)}
+                    </div>
+                  </td>
+                  <td style={{
+                    padding: '16px',
+                    borderBottom: '1px solid #e0e0e0',
+                    backgroundColor: hoveredRow === record.id ? '#f0f7ff' : 'transparent'
+                  }}>
+                    <div style={{ fontSize: '14px', color: '#333' }}>
+                      {formatTime(record.date)}
+                    </div>
+                  </td>
+                  <td style={{
+                    padding: '16px',
+                    borderBottom: '1px solid #e0e0e0',
+                    backgroundColor: hoveredRow === record.id ? '#f0f7ff' : 'transparent'
+                  }}>
+                    <div style={{ fontSize: '14px', color: '#666' }}>
+                      {record.description || 'Necessities'}
+                    </div>
+                  </td>
+                  <td style={{
+                    padding: '16px',
+                    borderBottom: '1px solid #e0e0e0',
+                    textAlign: 'right',
+                    backgroundColor: hoveredRow === record.id ? '#f0f7ff' : 'transparent'
+                  }}>
+                    <div style={{ 
+                      fontSize: '14px', 
+                      fontWeight: '500', 
+                      color: '#4CAF50' 
+                    }}>
+                      {formatAmount(record.amount)}
+                    </div>
+                  </td>
+                  <td style={{
+                    padding: '16px',
+                    borderBottom: '1px solid #e0e0e0',
+                    textAlign: 'center',
+                    backgroundColor: hoveredRow === record.id ? '#f0f7ff' : 'transparent'
+                  }}>
+                    {onDeleteRecord && (
+                      <Tooltip title="Delete record" arrow>
+                        <IconButton
+                          onClick={() => handleDeleteClick(record.id)}
+                          disabled={deletingRecord === record.id}
+                          size="small"
+                          sx={{
+                            color: '#e74c3c',
+                            opacity: hoveredRow === record.id ? 1 : 0.6,
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              backgroundColor: '#ffebee',
+                              color: '#c62828',
+                              transform: 'scale(1.1)'
+                            },
+                            '&:disabled': {
+                              color: '#bdc3c7',
+                              cursor: 'not-allowed'
+                            }
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </td>
+                </tr>
               ))
             ) : (
-              <TableRow>
-                <TableCell 
-                  colSpan={4} 
-                  align="center" 
-                  sx={{ 
-                    py: 6,
-                    background: 'rgba(255, 255, 255, 0.8)',
+              <tr>
+                <td 
+                  colSpan={5} 
+                  style={{ 
+                    padding: '48px',
+                    textAlign: 'center',
+                    backgroundColor: '#ffffff',
                     borderBottom: 'none'
                   }}
                 >
-                  <Box sx={{
+                  <div style={{
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: 2
+                    gap: '16px'
                   }}>
-                    <Box sx={{
-                      width: 64,
-                      height: 64,
-                      borderRadius: '20px',
-                      background: "linear-gradient(135deg, rgba(0, 119, 182, 0.1) 0%, rgba(0, 180, 216, 0.15) 100%)",
+                    <div style={{
+                      width: '64px',
+                      height: '64px',
+                      borderRadius: '16px',
+                      backgroundColor: '#f0f7ff',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      boxShadow: "0 4px 16px rgba(0, 119, 182, 0.2)",
-                      animation: 'breathe 4s ease-in-out infinite'
+                      border: '2px solid #e3f2fd'
                     }}>
-                      <Typography variant="h4" sx={{ color: '#0077B6' }}>
-                        📈
-                      </Typography>
-                    </Box>
-                    <Typography 
-                      variant="h6" 
-                      sx={{ 
-                        color: '#0077B6',
-                        fontWeight: '600',
-                        textAlign: 'center'
-                      }}
-                    >
+                      <span style={{ fontSize: '32px' }}>📈</span>
+                    </div>
+                    <h3 style={{ 
+                      margin: 0,
+                      color: '#0b00dd',
+                      fontWeight: '600',
+                      fontSize: '18px'
+                    }}>
                       No Savings Records Yet
-                    </Typography>
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        color: '#6b7280',
-                        textAlign: 'center',
-                        maxWidth: '300px',
-                        fontWeight: '500'
-                      }}
-                    >
+                    </h3>
+                    <p style={{ 
+                      margin: 0,
+                      color: '#666',
+                      textAlign: 'center',
+                      maxWidth: '300px',
+                      fontSize: '14px',
+                      lineHeight: 1.5
+                    }}>
                       Start your savings journey by clicking "Add Saving Record" to track your progress towards your goals.
-                    </Typography>
-                  </Box>
-                </TableCell>
-              </TableRow>
+                    </p>
+                  </div>
+                </td>
+              </tr>
             )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      {/* CSS animations */}
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-15px) rotate(180deg); }
-        }
-        
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-        }
-        
-        @keyframes breathe {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-        }
-        
-        @keyframes shimmer {
-          0% { background-position: -200px 0; }
-          100% { background-position: 200px 0; }
-        }
-      `}</style>
-    </Box>
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 

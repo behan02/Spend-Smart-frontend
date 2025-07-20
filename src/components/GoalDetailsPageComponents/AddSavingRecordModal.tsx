@@ -32,7 +32,7 @@ const AddSavingRecordModal: React.FC<AddSavingRecordModalProps> = ({
 
     const newRecord = {
       amount: parseFloat(amount),
-      date: new Date(),
+      date: new Date().toISOString(),
       description: description || 'Necessities',
       goalId: goalId
     };

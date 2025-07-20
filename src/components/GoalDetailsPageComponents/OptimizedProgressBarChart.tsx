@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 interface SavingRecord {
   id: number;
@@ -16,7 +17,7 @@ interface ProgressBarChartProps {
   goalCreationDate?: Date;
 }
 
-const ProgressBarChart: React.FC<ProgressBarChartProps> = ({ 
+const OptimizedProgressBarChart: React.FC<ProgressBarChartProps> = ({ 
   savingRecords, 
   goalTargetAmount,
   goalDeadline,
@@ -52,12 +53,31 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
   // Find the week that contains the most recent transaction
   const findMostRecentTransactionWeek = (weeks: Date[], records: SavingRecord[]): Date => {
     if (records.length === 0) {
-      return weeks[0] || new Date(); // Return first week if no records
+      // No transactions - prioritize current week if it exists, otherwise the last week
+      const currentDate = new Date();
+      const currentWeekStart = getWeekStart(currentDate);
+      
+      // Check if current week is in our weeks array
+      const currentWeekInArray = weeks.find(week => 
+        week.getTime() === currentWeekStart.getTime()
+      );
+      
+      if (currentWeekInArray) {
+        console.log('No transactions, but current week is in range:', currentWeekStart.toDateString());
+        return currentWeekStart;
+      } else {
+        // Return the most recent week (last in array)
+        const lastWeek = weeks[weeks.length - 1] || new Date();
+        console.log('No transactions, returning last week:', lastWeek.toDateString());
+        return lastWeek;
+      }
     }
 
     // Sort records by date (most recent first)
     const sortedRecords = [...records].sort((a, b) => b.date.getTime() - a.date.getTime());
     const mostRecentRecord = sortedRecords[0];
+
+    console.log('Most recent transaction date:', mostRecentRecord.date.toDateString());
 
     // Find which week contains this record
     for (const week of weeks) {
@@ -65,36 +85,81 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
       weekEnd.setDate(week.getDate() + 6);
       
       if (mostRecentRecord.date >= week && mostRecentRecord.date <= weekEnd) {
+        console.log('Found matching week for transaction:', week.toDateString());
         return week;
       }
     }
 
-    // If not found, return the first week
-    return weeks[0] || new Date();
+    // If not found, return the last week (most recent)
+    const fallbackWeek = weeks[weeks.length - 1] || new Date();
+    console.log('Transaction week not found, using last week:', fallbackWeek.toDateString());
+    return fallbackWeek;
   };
 
   // Initialize weeks and current week
   useEffect(() => {
+    console.log('=== INITIALIZING WEEKS ===');
+    console.log('Goal Creation Date:', goalCreationDate);
+    console.log('Goal Deadline:', goalDeadline);
+    
     const generatedWeeks = generateWeeks();
+    console.log('Generated weeks:', generatedWeeks.length, generatedWeeks.map(w => w.toDateString()));
     setWeeks(generatedWeeks);
     
     if (generatedWeeks.length > 0) {
-      const initialWeek = findMostRecentTransactionWeek(generatedWeeks, savingRecords);
+      // Always start with the most recent week (current week or week with most recent transaction)
+      const currentDate = new Date();
+      const currentWeekStart = getWeekStart(currentDate);
+      
+      // Check if current week is within our range
+      const isCurrentWeekInRange = generatedWeeks.some(week => 
+        week.getTime() === currentWeekStart.getTime()
+      );
+      
+      let initialWeek: Date;
+      if (isCurrentWeekInRange) {
+        // If current week is in range, use it
+        initialWeek = currentWeekStart;
+        console.log('Using current week:', initialWeek.toDateString());
+      } else {
+        // Otherwise find the most recent transaction week or use the last week
+        if (savingRecords.length > 0) {
+          initialWeek = findMostRecentTransactionWeek(generatedWeeks, savingRecords);
+          console.log('Using most recent transaction week:', initialWeek.toDateString());
+        } else {
+          // No transactions, use the last week (most recent)
+          initialWeek = generatedWeeks[generatedWeeks.length - 1];
+          console.log('No transactions, using last week:', initialWeek.toDateString());
+        }
+      }
+      
       setCurrentWeekStart(initialWeek);
     }
-  }, [goalDeadline, goalCreationDate, savingRecords]);
+  }, [goalDeadline, goalCreationDate]);
 
-  // Update current week when savingRecords change
+  // Update current week when savingRecords change (but not on initial load)
   useEffect(() => {
+    console.log('=== SAVING RECORDS CHANGED ===');
+    console.log('Saving records:', savingRecords.length);
+    console.log('Weeks:', weeks.length);
+    
     if (weeks.length > 0 && savingRecords.length > 0) {
       const recentWeek = findMostRecentTransactionWeek(weeks, savingRecords);
+      console.log('Setting current week to most recent transaction week:', recentWeek.toDateString());
       setCurrentWeekStart(recentWeek);
     }
-  }, [savingRecords, weeks]);
+  }, [savingRecords]);
 
   const currentWeekIndex = weeks.findIndex(week => 
     week.getTime() === currentWeekStart.getTime()
   );
+
+  console.log('=== CURRENT STATE ===');
+  console.log('Current week index:', currentWeekIndex);
+  console.log('Total weeks:', weeks.length);
+  console.log('Current week start:', currentWeekStart.toDateString());
+  console.log('Can go previous:', currentWeekIndex > 0);
+  console.log('Can go next:', currentWeekIndex < weeks.length - 1);
 
   // Generate 7 days for current week
   const generateWeekDays = () => {
@@ -113,7 +178,6 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
   const processWeekData = () => {
     if (!savingRecords || savingRecords.length === 0) {
       return {
-        xAxisData: weekDays.map(day => day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
         seriesData: new Array(7).fill(0),
         cumulativeData: new Array(7).fill(0)
       };
@@ -123,11 +187,7 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
     const weekData = weekDays.map(day => {
       const dayRecords = savingRecords.filter(record => {
         const recordDate = new Date(record.date);
-        return (
-          recordDate.getDate() === day.getDate() &&
-          recordDate.getMonth() === day.getMonth() &&
-          recordDate.getFullYear() === day.getFullYear()
-        );
+        return recordDate.toDateString() === day.toDateString();
       });
       
       return {
@@ -136,35 +196,46 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
       };
     });
 
-    const xAxisData = weekData.map(d => d.date);
     const seriesData = weekData.map(d => d.amount);
     
     // Calculate total saved from ALL records (not just current week)
     const totalSaved = savingRecords.reduce((sum, record) => sum + record.amount, 0);
     const cumulativeData = [totalSaved];
 
-    return { xAxisData, seriesData, cumulativeData };
+    return { seriesData, cumulativeData };
   };
 
-  const { xAxisData, seriesData, cumulativeData } = processWeekData();
+  const { seriesData, cumulativeData } = processWeekData();
   
   const totalSaved = cumulativeData && cumulativeData.length > 0 ? cumulativeData[0] : 0;
   const progressPercentage = goalTargetAmount > 0 ? (totalSaved / goalTargetAmount) * 100 : 0;
 
-  // Calculate max value for scaling bars - use actual data, not hardcoded
+  // Calculate max value for scaling bars
   const maxAmountFromData = seriesData && seriesData.length > 0 ? Math.max(...seriesData) : 0;
-  const maxAmount = Math.max(maxAmountFromData, 100); // Minimum scale of 100
+  const maxAmount = Math.max(maxAmountFromData, 100);
 
   // Navigation functions
   const goToPreviousWeek = () => {
+    console.log('Previous week clicked');
+    console.log('Current week index:', currentWeekIndex);
+    console.log('Weeks length:', weeks.length);
+    
     if (currentWeekIndex > 0 && weeks.length > 0) {
-      setCurrentWeekStart(weeks[currentWeekIndex - 1]);
+      const newWeekStart = weeks[currentWeekIndex - 1];
+      console.log('Setting new week start:', newWeekStart);
+      setCurrentWeekStart(newWeekStart);
     }
   };
 
   const goToNextWeek = () => {
+    console.log('Next week clicked');
+    console.log('Current week index:', currentWeekIndex);
+    console.log('Weeks length:', weeks.length);
+    
     if (currentWeekIndex < weeks.length - 1 && weeks.length > 0) {
-      setCurrentWeekStart(weeks[currentWeekIndex + 1]);
+      const newWeekStart = weeks[currentWeekIndex + 1];
+      console.log('Setting new week start:', newWeekStart);
+      setCurrentWeekStart(newWeekStart);
     }
   };
 
@@ -178,13 +249,8 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
   return (
     <div style={{ 
       padding: '24px', 
-      borderRadius: '12px', 
       width: '100%',
-      minWidth: '600px',
-      height: '500px', // Reduced height to match circular progress card
-      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-      border: "1px solid #e1e5e9",
-      backgroundColor: "#ffffff",
+      height: '400px',
       display: 'flex',
       flexDirection: 'column'
     }}>
@@ -193,25 +259,35 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
         display: "flex", 
         justifyContent: "space-between", 
         alignItems: "center", 
-        marginBottom: '24px',
+        marginBottom: '20px',
         paddingBottom: '16px',
-        borderBottom: '1px solid #f0f0f0'
+        borderBottom: '1px solid #e2e8f0'
       }}>
         <div>
           <h3 style={{ 
             margin: 0,
             fontWeight: "600",
-            color: "#2c3e50",
-            fontSize: '20px'
+            color: "#1e293b",
+            fontSize: '18px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}>
-            Saving Progress
+            📊 Saving Progress
           </h3>
           <p style={{ 
             margin: '4px 0 0 0',
             fontSize: '14px',
-            color: '#7f8c8d'
+            color: '#64748b'
           }}>
-            {formatWeekRange()}
+            🗓️ Week: {formatWeekRange()}
+          </p>
+          <p style={{ 
+            margin: '2px 0 0 0',
+            fontSize: '12px',
+            color: '#94a3b8'
+          }}>
+            Week {currentWeekIndex + 1} of {weeks.length} • Use arrows to navigate
           </p>
         </div>
         
@@ -220,14 +296,14 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
           textAlign: 'right'
         }}>
           <div style={{ 
-            fontSize: '24px',
+            fontSize: '28px',
             fontWeight: "700",
-            color: progressPercentage >= 100 ? '#27ae60' : '#0B00DD',
+            color: progressPercentage >= 100 ? '#10b981' : '#0b00dd',
             margin: 0
           }}>
-            {Math.round(progressPercentage)}%
+            {progressPercentage.toFixed(0)}%
           </div>
-          <div style={{ fontSize: '12px', color: '#95a5a6' }}>
+          <div style={{ fontSize: '13px', color: '#94a3b8' }}>
             Complete
           </div>
         </div>
@@ -235,32 +311,32 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
 
       {/* Chart Container */}
       <div style={{
-        backgroundColor: "#fafbfc",
-        borderRadius: '8px',
+        backgroundColor: "#ffffff",
+        borderRadius: '12px',
         padding: '24px',
         flex: 1,
-        border: '1px solid #e1e5e9',
+        border: '1px solid #e2e8f0',
         position: 'relative',
         display: 'flex',
         flexDirection: 'column'
       }}>
         {/* Chart with Axes */}
         <div style={{ 
-          height: '300px', // Reduced chart height
+          height: '260px',
           display: 'flex',
           flexDirection: 'column',
-          marginTop: '20px',
+          marginTop: '10px',
           position: 'relative'
         }}>
           {/* Y-axis label */}
           <div style={{
             position: 'absolute',
-            left: '-40px',
+            left: '-35px',
             top: '50%',
             transform: 'rotate(-90deg) translateY(-50%)',
             transformOrigin: 'center',
             fontSize: '12px',
-            color: '#7f8c8d',
+            color: '#64748b',
             fontWeight: '500',
             whiteSpace: 'nowrap'
           }}>
@@ -271,13 +347,13 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
           <div style={{
             display: 'flex',
             alignItems: 'flex-end',
-            height: '230px', // Reduced chart area height
+            height: '200px',
             paddingLeft: '60px',
             paddingRight: '20px',
             paddingBottom: '40px',
             position: 'relative'
           }}>
-            {/* Y-axis grid and labels */}
+            {/* Y-axis labels */}
             <div style={{
               position: 'absolute',
               left: '0',
@@ -288,29 +364,37 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
               flexDirection: 'column',
               justifyContent: 'space-between'
             }}>
-              {[4, 3, 2, 1, 0].map((level) => {
-                const value = Math.round((maxAmount * level) / 4);
-                return (
-                  <div key={level} style={{
-                    fontSize: '10px',
-                    color: '#95a5a6',
-                    textAlign: 'right',
-                    paddingRight: '8px',
-                    position: 'relative'
-                  }}>
-                    {value.toLocaleString()}
-                    {/* Grid lines */}
-                    <div style={{
-                      position: 'absolute',
-                      left: '50px',
-                      top: '50%',
-                      width: '500px',
-                      height: '1px',
-                      backgroundColor: level === 0 ? '#bdc3c7' : '#ecf0f1'
-                    }} />
-                  </div>
-                );
-              })}
+              {[4, 3, 2, 1, 0].map((level) => (
+                <div key={level} style={{
+                  fontSize: '11px',
+                  color: '#64748b',
+                  textAlign: 'right',
+                  paddingRight: '10px'
+                }}>
+                  {Math.round((maxAmount * level) / 4)}
+                </div>
+              ))}
+            </div>
+
+            {/* Grid lines */}
+            <div style={{
+              position: 'absolute',
+              left: '60px',
+              right: '20px',
+              top: '0',
+              bottom: '40px',
+              pointerEvents: 'none'
+            }}>
+              {[4, 3, 2, 1, 0].map((level) => (
+                <div key={level} style={{
+                  position: 'absolute',
+                  top: `${(4 - level) * 25}%`,
+                  left: 0,
+                  right: 0,
+                  height: '1px',
+                  backgroundColor: level === 0 ? '#e2e8f0' : '#f8fafc'
+                }} />
+              ))}
             </div>
 
             {/* Bars */}
@@ -319,14 +403,11 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
               alignItems: 'flex-end',
               height: '100%',
               flex: 1,
-              gap: '8px',
+              gap: '12px',
               paddingLeft: '60px'
             }}>
               {seriesData && seriesData.map((amount, index) => {
-                const barHeight = (maxAmount && maxAmount > 0) ? (amount / maxAmount) * 190 : 0; // Adjusted for smaller height
-                const currentDay = weekDays[index];
-                const dayName = currentDay ? currentDay.toLocaleDateString('en-US', { weekday: 'short' }) : '';
-                const dayDate = currentDay ? currentDay.getDate() : '';
+                const barHeight = maxAmount > 0 ? (amount / maxAmount) * 160 : 0;
                 const isHovered = hoveredBar === index;
                 
                 return (
@@ -335,25 +416,26 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
                     flexDirection: 'column',
                     alignItems: 'center',
                     flex: 1,
-                    position: 'relative'
+                    position: 'relative',
+                    minWidth: '50px'
                   }}>
-                    {/* Amount tooltip */}
+                    {/* Tooltip */}
                     {amount > 0 && isHovered && (
                       <div style={{
                         position: 'absolute',
-                        bottom: `${barHeight + 10}px`,
+                        bottom: `${barHeight + 20}px`,
                         left: '50%',
                         transform: 'translateX(-50%)',
-                        backgroundColor: '#2c3e50',
+                        backgroundColor: '#1e293b',
                         color: 'white',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        fontSize: '10px',
-                        fontWeight: '600',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
                         whiteSpace: 'nowrap',
-                        zIndex: 20
+                        zIndex: 10,
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
                       }}>
-                        {amount.toLocaleString()} LKR
+                        LKR {amount.toLocaleString()}
                       </div>
                     )}
                     
@@ -361,14 +443,15 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
                     <div 
                       style={{
                         width: '100%',
-                        maxWidth: '50px',
+                        maxWidth: '60px',
                         height: `${Math.max(barHeight, 4)}px`,
-                        backgroundColor: amount > 0 ? (isHovered ? '#2980b9' : '#3498db') : '#ecf0f1',
-                        borderRadius: '4px 4px 0 0',
+                        backgroundColor: amount > 0 ? (isHovered ? '#0900bb' : '#0b00dd') : '#e2e8f0',
+                        borderRadius: '6px 6px 0 0',
                         transition: 'all 0.3s ease',
-                        boxShadow: amount > 0 ? (isHovered ? '0 4px 8px rgba(52, 152, 219, 0.3)' : '0 2px 4px rgba(52, 152, 219, 0.2)') : 'none',
+                        boxShadow: amount > 0 ? (isHovered ? '0 4px 12px rgba(11, 0, 221, 0.4)' : '0 2px 8px rgba(11, 0, 221, 0.2)') : 'none',
                         cursor: amount > 0 ? 'pointer' : 'default',
-                        transform: isHovered ? 'translateY(-2px)' : 'translateY(0)'
+                        transform: isHovered ? 'translateY(-3px)' : 'translateY(0)',
+                        border: amount > 0 ? '2px solid rgba(11, 0, 221, 0.3)' : 'none'
                       }}
                       onMouseEnter={() => setHoveredBar(index)}
                       onMouseLeave={() => setHoveredBar(null)}
@@ -385,7 +468,7 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
             alignItems: 'center',
             paddingLeft: '60px',
             paddingRight: '20px',
-            gap: '8px',
+            gap: '12px',
             position: 'relative'
           }}>
             {/* Left Arrow */}
@@ -394,15 +477,15 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
               disabled={currentWeekIndex <= 0}
               style={{
                 position: 'absolute',
-                left: '10px',
+                left: '15px',
                 top: '50%',
                 transform: 'translateY(-50%)',
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
-                border: 'none',
-                backgroundColor: currentWeekIndex <= 0 ? '#ecf0f1' : '#ffffff',
-                color: currentWeekIndex <= 0 ? '#bdc3c7' : '#2c3e50',
+                border: '2px solid #e2e8f0',
+                backgroundColor: currentWeekIndex <= 0 ? '#f8fafc' : '#ffffff',
+                color: currentWeekIndex <= 0 ? '#cbd5e1' : '#475569',
                 cursor: currentWeekIndex <= 0 ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -413,7 +496,7 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
               }}
               onMouseEnter={(e) => {
                 if (currentWeekIndex > 0) {
-                  e.currentTarget.style.backgroundColor = '#f8f9fa';
+                  e.currentTarget.style.backgroundColor = '#f1f5f9';
                   e.currentTarget.style.transform = 'translateY(-50%) scale(1.05)';
                 }
               }}
@@ -424,13 +507,18 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
                 }
               }}
             >
-              <ChevronLeft fontSize="small" />
+              <ArrowBackIosIcon 
+                sx={{ 
+                  fontSize: '16px',
+                  color: currentWeekIndex <= 0 ? '#cbd5e1' : '#475569'
+                }} 
+              />
             </button>
 
             {/* Day labels */}
             <div style={{
               display: 'flex',
-              gap: '8px',
+              gap: '12px',
               flex: 1,
               justifyContent: 'space-between'
             }}>
@@ -442,12 +530,13 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
                   <div key={index} style={{
                     flex: 1,
                     textAlign: 'center',
-                    fontSize: '11px',
-                    color: '#2c3e50',
-                    fontWeight: '500'
+                    fontSize: '12px',
+                    color: '#475569',
+                    fontWeight: '500',
+                    minWidth: '50px'
                   }}>
-                    <div style={{ fontWeight: '600' }}>{dayName}</div>
-                    <div style={{ fontSize: '10px', color: '#7f8c8d', marginTop: '2px' }}>{dayDate}</div>
+                    <div style={{ fontWeight: '600', marginBottom: '2px' }}>{dayName}</div>
+                    <div style={{ fontSize: '10px', color: '#64748b' }}>{dayDate}</div>
                   </div>
                 );
               })}
@@ -459,15 +548,15 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
               disabled={currentWeekIndex >= weeks.length - 1}
               style={{
                 position: 'absolute',
-                right: '10px',
+                right: '15px',
                 top: '50%',
                 transform: 'translateY(-50%)',
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
-                border: 'none',
-                backgroundColor: currentWeekIndex >= weeks.length - 1 ? '#ecf0f1' : '#ffffff',
-                color: currentWeekIndex >= weeks.length - 1 ? '#bdc3c7' : '#2c3e50',
+                border: '2px solid #e2e8f0',
+                backgroundColor: currentWeekIndex >= weeks.length - 1 ? '#f8fafc' : '#ffffff',
+                color: currentWeekIndex >= weeks.length - 1 ? '#cbd5e1' : '#475569',
                 cursor: currentWeekIndex >= weeks.length - 1 ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -478,7 +567,7 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
               }}
               onMouseEnter={(e) => {
                 if (currentWeekIndex < weeks.length - 1) {
-                  e.currentTarget.style.backgroundColor = '#f8f9fa';
+                  e.currentTarget.style.backgroundColor = '#f1f5f9';
                   e.currentTarget.style.transform = 'translateY(-50%) scale(1.05)';
                 }
               }}
@@ -489,26 +578,18 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
                 }
               }}
             >
-              <ChevronRight fontSize="small" />
+              <ArrowForwardIosIcon 
+                sx={{ 
+                  fontSize: '16px',
+                  color: currentWeekIndex >= weeks.length - 1 ? '#cbd5e1' : '#475569'
+                }} 
+              />
             </button>
-          </div>
-
-          {/* X-axis label */}
-          <div style={{
-            textAlign: 'center',
-            marginTop: '10px',
-            fontSize: '12px',
-            color: '#7f8c8d',
-            fontWeight: '500'
-          }}>
-            Days of Week
           </div>
         </div>
       </div>
-      
-      {/* Summary Section - REMOVED as requested */}
     </div>
   );
 };
 
-export default ProgressBarChart;
+export default OptimizedProgressBarChart;

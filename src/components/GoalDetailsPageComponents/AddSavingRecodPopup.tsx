@@ -6,38 +6,106 @@ import {
   Typography,
   TextField,
   Button,
-  IconButton
+  IconButton,
+  Alert
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { SavingRecord } from './SavingRecord';
+
+interface Goal {
+  id: number;
+  name: string;
+  savedAmount: number;
+  targetAmount: number;
+  progress: number;
+  deadline?: Date;
+  description?: string;
+  remainingDays?: number;
+  createdAt?: string;
+  startDate?: string;
+}
 
 interface AddSavingRecodPopupProps {
   open: boolean;
   onClose: () => void;
   onSave: (record: Omit<SavingRecord, 'id'>) => void;
   goalId: number;
+  goal?: Goal;
+  savingRecords: SavingRecord[];
 }
 
 const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
   open,
   onClose,
   onSave,
-  goalId
+  goalId,
+  goal,
+  savingRecords
 }) => {
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [description, setDescription] = useState('');
+  const [validationError, setValidationError] = useState('');
+
+  // Calculate current total saved amount
+  const getCurrentSavedAmount = () => {
+    if (!goal) return 0;
+    const totalFromRecords = savingRecords.reduce((total, record) => total + record.amount, 0);
+    return goal.savedAmount + totalFromRecords;
+  };
+
+  // Validate if the new amount would exceed target
+  const validateAmount = (newAmount: number) => {
+    if (!goal) return true;
+    
+    const currentSaved = getCurrentSavedAmount();
+    const proposedTotal = currentSaved + newAmount;
+    const targetAmount = goal.targetAmount;
+    
+    if (proposedTotal > targetAmount) {
+      const remainingAmount = targetAmount - currentSaved;
+      if (remainingAmount <= 0) {
+        setValidationError('🎉 Goal already completed! You cannot add more savings.');
+        return false;
+      } else {
+        setValidationError(`⚠️ Amount exceeds target! You can only add up to ${remainingAmount.toLocaleString()} LKR more to reach your goal.`);
+        return false;
+      }
+    } else if (proposedTotal === targetAmount) {
+      setValidationError('🎉 Perfect! This amount will complete your goal exactly at 100%!');
+      return true;
+    }
+    
+    setValidationError('');
+    return true;
+  };
+
+  const handleAmountChange = (value: string) => {
+    setAmount(value);
+    if (value && !isNaN(parseFloat(value))) {
+      validateAmount(parseFloat(value));
+    } else {
+      setValidationError('');
+    }
+  };
 
   const handleSave = () => {
     if (!amount || !date || !time) return;
+
+    const numericAmount = parseFloat(amount);
+    
+    // Final validation before saving
+    if (!validateAmount(numericAmount)) {
+      return;
+    }
 
     // Combine date and time into a single Date object and convert to ISO string for API
     const combinedDateTime = new Date(`${date}T${time}`);
     const isoDateString = combinedDateTime.toISOString();
 
     const newRecord = {
-      amount: parseFloat(amount),
+      amount: numericAmount,
       date: isoDateString,
       description: description || 'Necessities',
       goalId: goalId
@@ -52,6 +120,7 @@ const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
     setDate('');
     setTime('');
     setDescription('');
+    setValidationError('');
     onClose();
   };
 
@@ -91,11 +160,12 @@ const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
             fullWidth
             variant="outlined"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => handleAmountChange(e.target.value)}
             type="number"
             size="small"
             placeholder="Enter amount"
             inputProps={{ min: 0, step: "0.01" }}
+            error={!!validationError}
             sx={{
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
@@ -103,6 +173,34 @@ const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
               }
             }}
           />
+          
+          {/* Current Progress Info */}
+          {goal && (
+            <Box sx={{ mt: 2, p: 2, bgcolor: '#f8f9fa', borderRadius: 2, border: '1px solid #e2e8f0' }}>
+              <Typography variant="body2" sx={{ fontSize: '12px', color: '#64748b', mb: 1 }}>
+                📊 Current Progress
+              </Typography>
+              <Typography variant="body2" sx={{ fontSize: '13px', fontWeight: 500 }}>
+                Saved: {getCurrentSavedAmount().toLocaleString()} LKR / {goal.targetAmount.toLocaleString()} LKR
+              </Typography>
+              <Typography variant="body2" sx={{ fontSize: '12px', color: '#64748b' }}>
+                Remaining: {Math.max(0, goal.targetAmount - getCurrentSavedAmount()).toLocaleString()} LKR
+              </Typography>
+            </Box>
+          )}
+          
+          {/* Validation Error */}
+          {validationError && (
+            <Alert 
+              severity={
+                validationError.includes('completed') || validationError.includes('Perfect') ? 'success' : 
+                validationError.includes('exceeds') ? 'warning' : 'info'
+              } 
+              sx={{ mt: 2 }}
+            >
+              {validationError}
+            </Alert>
+          )}
         </Box>
 
         <Box sx={{ mb: 3 }}>
@@ -181,7 +279,7 @@ const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
               borderRadius: 3, 
               textTransform: 'none',
               bgcolor: '#e3f2fd',
-              color: '#1976d2',
+              color: '#0b00dd',
               fontWeight: 600,
               px: 3,
               py: 1,
@@ -195,16 +293,19 @@ const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
           <Button 
             variant="contained" 
             onClick={handleSave}
-            disabled={!amount || !date || !time}
+            disabled={
+              !amount || !date || !time || 
+              (!!validationError && !validationError.includes('Perfect'))
+            }
             sx={{ 
               borderRadius: 3, 
               textTransform: 'none',
-              bgcolor: '#1976d2',
+              bgcolor: '#0b00dd',
               fontWeight: 600,
               px: 3,
               py: 1,
               '&:hover': {
-                bgcolor: '#1565c0'
+                bgcolor: '#0a00bb'
               }
             }}
           >
