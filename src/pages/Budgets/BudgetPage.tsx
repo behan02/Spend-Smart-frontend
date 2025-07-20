@@ -58,6 +58,7 @@ const BudgetPage: React.FC = () => {
       setLoading(false);
     }
   };
+
   const handleAddBudget = () => {
     setIsEditMode(false);
     setEditingBudget(null);

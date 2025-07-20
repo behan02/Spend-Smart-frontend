@@ -10,6 +10,7 @@ import {
   DialogActions, 
   Button
 } from '@mui/material';
+import { getCategoryIconAndColor } from '../../utils/categoryUtils';
 
 interface Budget {
   id: number;
@@ -197,31 +198,40 @@ const BudgetDetails: React.FC<BudgetDetailsProps> = ({ budget, onEdit, onDelete,
               Categories
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              {budget.categories.map((category) => (
-                <Box 
-                  key={category.id}
-                  sx={{ 
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    backgroundColor: '#F9FAFB',
-                    px: 2,
-                    py: 1,
-                    borderRadius: '8px',
-                    border: '1px solid #E5E7EB'
-                  }}
-                >
-                  <Typography sx={{ fontSize: '16px' }}>
-                    {category.icon || '📊'}
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontSize: '14px', fontWeight: 500 }}>
-                    {category.name}
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontSize: '14px', color: '#6B7280' }}>
-                    ${category.spentAmount.toFixed(2)} / ${category.allocatedAmount.toFixed(2)}
-                  </Typography>
-                </Box>
-              ))}
+              {budget.categories.map((category) => {
+                const { icon, color } = getCategoryIconAndColor(category.name);
+                return (
+                  <Box 
+                    key={category.id}
+                    sx={{ 
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      backgroundColor: '#F9FAFB',
+                      px: 2,
+                      py: 1,
+                      borderRadius: '8px',
+                      border: `1px solid ${color}20`, // Add subtle border with category color
+                      '&:hover': {
+                        backgroundColor: `${color}10`, // Light background on hover
+                      }
+                    }}
+                  >
+                    <Typography sx={{ 
+                      fontSize: '16px',
+                      color: color // Use category color for the icon
+                    }}>
+                      {icon}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontSize: '14px', fontWeight: 500 }}>
+                      {category.name}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontSize: '14px', color: '#6B7280' }}>
+                      ${category.spentAmount.toFixed(2)} / ${category.allocatedAmount.toFixed(2)}
+                    </Typography>
+                  </Box>
+                );
+              })}
             </Box>
           </Box>
         )}

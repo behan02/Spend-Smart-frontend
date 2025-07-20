@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Typography, List, ListItem, ListItemText } from '@mui/material';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { ExpenseBreakdown } from '../types/BudgetDetails';
+import { getCategoryIconAndColor } from '../../../utils/categoryUtils';
 
 interface ExpenseBreakdownChartProps {
   data: ExpenseBreakdown[];
@@ -18,11 +19,15 @@ const ExpenseBreakdownChart: React.FC<ExpenseBreakdownChartProps> = ({
     '#607D8B', '#795548', '#009688', '#FFEB3B', '#E91E63'
   ];
 
-  // Prepare data for the pie chart
-  const chartData = data.map((item, index) => ({
-    ...item,
-    color: item.color || defaultColors[index % defaultColors.length]
-  }));
+  // Prepare data for the pie chart with CategoryIcons
+  const chartData = data.map((item, index) => {
+    const { icon, color } = getCategoryIconAndColor(item.label);
+    return {
+      ...item,
+      icon: icon,
+      color: item.color || color || defaultColors[index % defaultColors.length]
+    };
+  });
 
   const renderCustomizedLabel = () => {
     return (

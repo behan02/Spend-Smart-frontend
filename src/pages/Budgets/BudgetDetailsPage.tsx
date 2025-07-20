@@ -6,6 +6,7 @@ import BudgetProgressCard from '../../components/Budget/BudgetDetailsCom/BudgetP
 import ExpenseHistoryTable from '../../components/Budget/BudgetDetailsCom/ExpenseHistoryTable';
 import { Budget, Transaction, ExpenseBreakdown } from '../../components/Budget/types/BudgetDetails';
 import { budgetService } from '../../services/budgetService';
+import { getCategoryIconAndColor } from '../../utils/categoryUtils';
 import Sidebar from '../../components/sidebar/sidebar';
 import Header from '../../components/header/header'; // Importing header component
 // Import the chart components
@@ -189,7 +190,18 @@ const BudgetDetailsPage: React.FC<BudgetDetailsPageProps> = ({
 
   const fetchExpenseBreakdown = async (budgetId: string) => {
     const breakdown = await budgetService.getExpenseBreakdown(budgetId);
-    setExpenseBreakdown(breakdown);
+    
+    // Enhance breakdown data with CategoryIcons
+    const enhancedBreakdown = breakdown.map(item => {
+      const { icon, color } = getCategoryIconAndColor(item.label);
+      return {
+        ...item,
+        icon: icon,
+        color: item.color || color
+      };
+    });
+    
+    setExpenseBreakdown(enhancedBreakdown);
   };
 
   const fetchPeriodData = async (budgetId: string) => {
