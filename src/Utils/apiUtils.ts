@@ -52,7 +52,7 @@ export const getApiBaseUrl = (): string => {
   // In a real application, you would use environment variables
   // For development
   if (import.meta.env.DEV) {
-    return import.meta.env.VITE_API_URL || 'http://localhost:5110/api';
+    return import.meta.env.VITE_API_URL || 'https://localhost:7211/api';
   }
   
   // For production

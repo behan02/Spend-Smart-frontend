@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Button, Alert, CircularProgress, Box } from '@mui/material';
-import { userService } from '../../src/Services/userService'; // Adjust path based on your folder structure
+import React, { useState } from "react";
+import { Button, Alert, CircularProgress, Box } from "@mui/material";
+import userService from "../Services/userService";
 
 const ConnectionTest: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -12,24 +12,26 @@ const ConnectionTest: React.FC = () => {
   const testConnection = async () => {
     setLoading(true);
     setResult(null);
-    
+
     try {
-      const response = await userService.testConnection();
+      // Test connection using existing method
+      const response = await userService.checkPendingEmailChange(1);
       setResult({
         success: true,
-        message: `✅ Connection successful! ${response.message}`,
+        message: `✅ Connection successful! API is responding.`,
       });
     } catch (error: any) {
-      let errorMessage = '❌ Connection failed: ';
-      
-      if (error.code === 'ERR_NETWORK') {
-        errorMessage += 'Network error - Check if backend is running and CORS is configured';
+      let errorMessage = "❌ Connection failed: ";
+
+      if (error.code === "ERR_NETWORK") {
+        errorMessage +=
+          "Network error - Check if backend is running and CORS is configured";
       } else if (error.response?.status) {
         errorMessage += `Server responded with ${error.response.status} - ${error.response.statusText}`;
       } else {
-        errorMessage += error.message || 'Unknown error';
+        errorMessage += error.message || "Unknown error";
       }
-      
+
       setResult({
         success: false,
         message: errorMessage,
@@ -40,10 +42,10 @@ const ConnectionTest: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: 2, mb: 2 }}>
+    <Box sx={{ p: 2, border: "1px solid #ccc", borderRadius: 2, mb: 2 }}>
       <h3>🔧 API Connection Test</h3>
-      <p>Current API URL: {import.meta.env.VITE_API_URL || 'Not configured'}</p>
-      
+      <p>Current API URL: {import.meta.env.VITE_API_URL || "Not configured"}</p>
+
       <Button
         onClick={testConnection}
         disabled={loading}
@@ -51,11 +53,11 @@ const ConnectionTest: React.FC = () => {
         startIcon={loading ? <CircularProgress size={16} /> : null}
         sx={{ mb: 2 }}
       >
-        {loading ? 'Testing...' : 'Test Connection'}
+        {loading ? "Testing..." : "Test Connection"}
       </Button>
-      
+
       {result && (
-        <Alert severity={result.success ? 'success' : 'error'}>
+        <Alert severity={result.success ? "success" : "error"}>
           {result.message}
         </Alert>
       )}
