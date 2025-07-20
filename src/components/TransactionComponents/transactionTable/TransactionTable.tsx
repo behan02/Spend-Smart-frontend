@@ -1,8 +1,9 @@
-import { Box, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography, useMediaQuery } from "@mui/material";
+import { Box, Button, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography, useMediaQuery } from "@mui/material";
 import { DeleteOutline } from "@mui/icons-material";
 import theme from "../../../assets/styles/theme";
 import { useEffect, useState } from "react";
 import CategoryIcons, { iconType } from "../../../assets/categoryIcons/CategoryIcons";
+import { set } from "date-fns";
 
 interface Transaction {
   id: number;
@@ -14,18 +15,53 @@ interface Transaction {
   userId: number;  
 }
 
-const TransactionTable: React.FC = () => {
+interface TransactionTableProps {
+  typeFilter: string;
+  categoryFilter: string;
+  addfiltersuccessfully: boolean;
+  setAddfiltersuccessfully: (clicked: boolean) => void;
+  addtransactionsuccessfully: boolean;
+  setAddtransactionsuccessfully: (clicked: boolean) => void;
+  date: string;
+  startDate: string;
+  endDate: string;
+  sortApplied: boolean;
+  setSortApplied: (clicked: boolean) => void;
+  sortOption: string;
+  addRecurringTransactionSuccessfully: boolean;
+  setAddRecurringTransactionSuccessfully: (clicked: boolean) => void;
+}
+
+const TransactionTable: React.FC<TransactionTableProps> = ({
+  typeFilter, 
+  categoryFilter, 
+  addfiltersuccessfully, 
+  setAddfiltersuccessfully, 
+  addtransactionsuccessfully, 
+  setAddtransactionsuccessfully, 
+  date, 
+  startDate, 
+  endDate, 
+  sortApplied, 
+  setSortApplied, 
+  sortOption, 
+  addRecurringTransactionSuccessfully, 
+  setAddRecurringTransactionSuccessfully}) => {
+    
   // Media query to check if the screen width is less than or equal to "laptop"
   const isTabletOrDesktop: boolean = useMediaQuery(theme.breakpoints.down("laptop"));
 
   // State to store the list of transactions
   const [transactionList, setTransactionList] = useState<Transaction[]>([]);
 
+  // State to control how many transactions to show
+  const [showAll, setShowAll] = useState<boolean>(false);
+
   // Fetch transactions from the API
   useEffect(() => {
     async function fetchTransactions(){
       try{
-        const response = await fetch("https://localhost:7211/api/Transaction/GetTransaction");
+        const response = await fetch(`https://localhost:7211/api/Transaction/GetTransaction?type=${typeFilter}&category=${categoryFilter}&date=${date}&startDate=${startDate}&endDate=${endDate}&sorting=${sortOption}`);
         if(!response.ok){
           throw new Error("Failed to fetch transactions");
         }
@@ -37,7 +73,32 @@ const TransactionTable: React.FC = () => {
     }
 
     fetchTransactions();
-  },[]);
+
+    if(addtransactionsuccessfully || addfiltersuccessfully || sortApplied) {
+      fetchTransactions();
+      setAddtransactionsuccessfully(false);
+      setAddfiltersuccessfully(false);
+      setSortApplied(false);
+      setAddRecurringTransactionSuccessfully(false);
+    }
+  },[addtransactionsuccessfully, addfiltersuccessfully, sortApplied, addRecurringTransactionSuccessfully]);
+
+  // useEffect(() => {
+  //   async function fetchTransactions(){
+  //     try{
+  //       const response = await fetch(`https://localhost:7211/api/Transaction/GetTransaction?filterOn=${filterOn}&filterQuery=Expense`);
+  //       if(!response.ok){
+  //         throw new Error("Failed to fetch transactions");
+  //       }
+  //       const data = await response.json();
+  //       setTransactionList(data);
+  //     }catch(error){
+  //       console.error("Error fetching transactions:", error);
+  //     }
+  //   }
+
+  //   fetchTransactions();
+  // },[]);
 
   // Function to delete a transaction by ID
   async function deleteTransaction(id: number) {
@@ -58,11 +119,22 @@ const TransactionTable: React.FC = () => {
       console.error("Error deleting transaction:", error);
     }
   }
+  // Get the transactions to display (limit to 10 if showAll is false)
+  const getTransactionsToDisplay = () => {
+    return showAll ? transactionList : transactionList.slice(0, 8);
+  };
+
+  // Toggle view more/less
+  const handleViewToggle = () => {
+    setShowAll(!showAll);
+  };
+
+  const transactionsToDisplay = getTransactionsToDisplay();
 
   return (
     <ThemeProvider theme={theme}>
       { /* Desktop and Tablet view */ }
-      <Box mt="30px" sx={{
+      <Box sx={{
         [theme.breakpoints.between("mobile","tablet")]: {
           display: "none", // Hide table for mobile view
         }
@@ -80,7 +152,7 @@ const TransactionTable: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {transactionList.map((list: Transaction, index: number) => (
+              {transactionsToDisplay.map((list: Transaction, index: number) => (
                 <TableRow 
                   key={index} 
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -129,7 +201,27 @@ const TransactionTable: React.FC = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        {/* View More/Less Button for Desktop/Tablet */}
+        {transactionList.length > 8 && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <Button 
+              variant="outlined" 
+              onClick={handleViewToggle}
+              disableRipple
+              sx={{
+                borderRadius: "20px",
+                textTransform: "none",
+                px: 3,
+                py: 1
+              }}
+            >
+              {showAll ? "View Less" : `View More (${transactionList.length - 8} more)`}
+            </Button>
+          </Box>
+        )}
       </Box>
+
+      
 
       {/* Mobile view */}
       <Box mt="30px" sx={{
@@ -180,6 +272,23 @@ const TransactionTable: React.FC = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        {/* View More/Less Button for Mobile */}
+        {transactionList.length > 10 && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <Button 
+              variant="outlined" 
+              onClick={handleViewToggle}
+              sx={{
+                borderRadius: "20px",
+                textTransform: "none",
+                px: 3,
+                py: 1
+              }}
+            >
+              {showAll ? "View Less" : `View More (${transactionList.length - 10} more)`}
+            </Button>
+          </Box>
+        )}
       </Box>
     </ThemeProvider>
   )

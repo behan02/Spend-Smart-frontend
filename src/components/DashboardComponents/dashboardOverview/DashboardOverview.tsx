@@ -121,7 +121,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({data}) => {
                 },
               }}
               >
-                LKR {data[item.key as keyof typeof data] ?? 0}
+                LKR {new Intl.NumberFormat('en-LK').format(data[item.key as keyof typeof data] ?? 0)}
               </Typography>
               <Box sx={{
                 display: "flex",
@@ -134,7 +134,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({data}) => {
                   mt: "5px",
                 }
               }}>
-                {item.difference < 0 ? 
+                {/* {item.difference < 0 ? 
                   <Typography variant="body1" color="#EE3838" fontWeight="bold" sx={{
                     [theme.breakpoints.between("mobile","desktop")]: {
                       fontSize: "14px",
@@ -156,7 +156,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({data}) => {
                   },
                 }}>
                   than last month
-                </Typography>
+                </Typography> */}
               </Box>
             </Box>
           </Grid>

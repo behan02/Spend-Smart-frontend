@@ -6,9 +6,11 @@ import { useEffect, useState } from "react";
 interface TransactionFormProps {
     addTransaction: boolean;
     setAddTransaction: (clicked: boolean) => void;
+    addtransactionsuccessfully: boolean;
+    setAddtransactionsuccessfully: (clicked: boolean) => void;
 }
 
-const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, setAddTransaction}) => {
+const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, setAddTransaction, addtransactionsuccessfully, setAddtransactionsuccessfully}) => {
     // State to manage the form inputs
     const [type, setType] = useState("");
     const [amount, setAmount] = useState('');
@@ -23,7 +25,7 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
     useEffect(() => {
         async function fetchCategories() {
             try{
-                const response = await fetch(`https://localhost:7211/api/Category/GetCategories/${type}`);
+                const response = await fetch(`https://localhost:7211/api/Category/GetCategories?type=${type}`);
                 if(!response.ok){
                     throw new Error("Failed to fetch categories");
                 }
@@ -63,6 +65,7 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
             const data = await response.json();
             console.log("Transaction added successfully:", data);
             alert("Transaction added successfully!");
+            setAddtransactionsuccessfully(true);
             setAddTransaction(false); // Close the modal
         }catch(error){
             console.error("Error adding transaction:", error);

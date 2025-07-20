@@ -45,7 +45,7 @@ const DashboardBargraph: React.FC = () => {
             size="small"
             sx={{borderRadius: "15px"}}
           >
-            <MenuItem value="Weekly">Weekly</MenuItem>
+            {/* <MenuItem value="Weekly">Weekly</MenuItem> */}
             <MenuItem value="Monthly">Monthly</MenuItem>
             <MenuItem value="Yearly">Yearly</MenuItem>
           </Select>

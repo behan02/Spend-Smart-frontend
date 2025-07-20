@@ -9,6 +9,7 @@ import HouseIcon from '@mui/icons-material/House';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import MenuIcon from '@mui/icons-material/Menu';
+import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import { OverridableComponent } from '@mui/material/OverridableComponent';
 import { SvgIconTypeMap } from '@mui/material';
 
@@ -71,6 +72,11 @@ const CategoryIcons: iconType[] = [
         category: "Bill",
         icon: ReceiptIcon,
         color: "crimson",
+    },
+    {
+        category: "Entertainment",
+        icon: SportsEsportsIcon,
+        color: "#3D74B6"
     },
     {
         category: "Other",

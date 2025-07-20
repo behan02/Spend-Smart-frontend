@@ -1,8 +1,32 @@
 import { Box, Card, Typography } from "@mui/material";
 import { PieChart } from "@mui/x-charts";
 import { dataset } from "./dataset";
+import { useEffect, useState } from "react";
 
 const DashboardPiechart = () => {
+
+    const [data, setData] = useState<any[]>([]);
+
+    let userId: Number = 1;
+
+    useEffect(() => {
+        async function fetchPieChartData() {
+            try {
+                const response = await fetch(`https://localhost:7211/api/Dashboard/Piechart/${userId}`);
+                if (!response.ok) {
+                    throw new Error("Failed to fetch pie chart data");
+                }
+                const result = await response.json();
+                setData(result);
+                console.log(result);
+                // Assuming the result is in the same format as dataset
+            } catch (error: any) {
+                console.error(error);
+            }
+        }
+        fetchPieChartData();
+    },[])
+
   return (
     // <Box 
     //     bgcolor="#fff" 
@@ -22,7 +46,7 @@ const DashboardPiechart = () => {
             <PieChart 
                 series={[
                     {
-                        data: dataset,
+                        data: data,
                         innerRadius: 50,
                         outerRadius: 120,
                         paddingAngle: 0.5,
