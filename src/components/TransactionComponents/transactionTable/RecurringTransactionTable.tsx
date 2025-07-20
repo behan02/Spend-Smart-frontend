@@ -60,47 +60,18 @@ interface RecurringTransactionsDisplayProps {
 }
 
 const RecurringTransactionsDisplay: React.FC<RecurringTransactionsDisplayProps> = ({addRecurringTransactionSuccessfully, setAddRecurringTransactionSuccessfully}) => {
-  const [expandedCard, setExpandedCard] = useState<number | null>(null);
-   
-//   const getCategoryIcon = (category: string) => {
-//     const iconMap: { [key: string]: JSX.Element } = {
-//       'Housing': <Home />,
-//       'Transportation': <DirectionsCar />,
-//       'Food': <Restaurant />,
-//       'Healthcare': <LocalHospital />,
-//       'Education': <School />,
-//       'Salary': <TrendingUp />,
-//       'Investment': <AccountBalance />
-//     };
-//     return iconMap[category] || <AttachMoney />;
-//   };
+  // Store expanded card IDs in an array
+  const [expandedCards, setExpandedCards] = useState<number[]>([]);
+  const [recurringTransactionList, setRecurringTransactionList] = useState<RecurringTransaction[]>([]);
 
-//   const getCategoryColor = (category: string) => {
-//     const colorMap: { [key: string]: string } = {
-//       'Housing': '#FF6B6B',
-//       'Transportation': '#4ECDC4',
-//       'Food': '#45B7D1',
-//       'Healthcare': '#96CEB4',
-//       'Education': '#FFEAA7',
-//       'Salary': '#6C5CE7',
-//       'Investment': '#A29BFE'
-//     };
-//     return colorMap[category] || '#95A5A6';
-//   };
-
+  // Toggle expand/collapse for a card
   const handleExpandClick = (id: number) => {
-    setExpandedCard(expandedCard === id ? null : id);
+    setExpandedCards((prev) =>
+      prev.includes(id)
+        ? prev.filter(cardId => cardId !== id) // Collapse if already expanded
+        : [...prev, id] // Expand if not expanded
+    );
   };
-
-//   const handleAutoDeductToggle = (id: string) => {
-//     setTransactions(prev => 
-//       prev.map(transaction => 
-//         transaction.id === id 
-//           ? { ...transaction, autoDeduct: !transaction.autoDeduct }
-//           : transaction
-//       )
-//     );
-//   };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -116,8 +87,6 @@ const RecurringTransactionsDisplay: React.FC<RecurringTransactionsDisplayProps> 
       day: 'numeric'
     });
   };
-
-  const [recurringTransactionList, setRecurringTransactionList] = useState<RecurringTransaction[]>([]);
 
   useEffect(() => {
       async function fetchRecurringTransactions(){
@@ -162,7 +131,6 @@ const RecurringTransactionsDisplay: React.FC<RecurringTransactionsDisplayProps> 
   }
 
   return (
-    // <Container sx={{ py: 4 }}>
     <Box sx={{mt: "40px"}}>
       <Paper elevation={0} sx={{ mb: 4, p: 2, borderRadius: "10px", background: 'linear-gradient(135deg, #023E8A 0%, #667eea 100%)' }}>
         <Typography variant="h5" component="h1" sx={{ color: 'white', fontWeight: 'bold' }}>
@@ -175,12 +143,12 @@ const RecurringTransactionsDisplay: React.FC<RecurringTransactionsDisplayProps> 
 
       <Grid container spacing={3}>
         {recurringTransactionList.map((transaction) => (
-        //   <Grid item xs={12} md={6} lg={4} key={transaction.id}>
-        <Grid size={{mobile:12, desktop:4, laptop:6}} key={transaction.id}>
+          // <Grid item xs={12} md={6} lg={4} key={transaction.id}>
+          <Grid size={{mobile:12, desktop:4, laptop:6}} key={transaction.id}>
             <Card 
               elevation={3}
               sx={{ 
-                height: '100%',
+                // height: '100%',
                 transition: 'all 0.3s ease',
                 borderRadius: '10px',
                 '&:hover': {
@@ -235,7 +203,7 @@ const RecurringTransactionsDisplay: React.FC<RecurringTransactionsDisplayProps> 
                     onClick={() => handleExpandClick(transaction.id)}
                     sx={{ ml: 1 }}
                   >
-                    {expandedCard === transaction.id ? <ExpandLess /> : <ExpandMore />}
+                    {expandedCards.includes(transaction.id) ? <ExpandLess /> : <ExpandMore />}
                   </IconButton>
                 </Box>
 
@@ -271,7 +239,7 @@ const RecurringTransactionsDisplay: React.FC<RecurringTransactionsDisplayProps> 
                   label="Auto Deduct"
                 /> */}
 
-                <Collapse in={expandedCard === transaction.id} timeout="auto" unmountOnExit>
+                <Collapse in={expandedCards.includes(transaction.id)} timeout="auto" unmountOnExit>
                   <Divider sx={{ my: 2 }} />
                   <Grid container spacing={2}>
                     <Grid size={{mobile:6, desktop:6, laptop:6}}>
