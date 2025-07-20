@@ -18,6 +18,7 @@ import {
 import Logo from "../../assets/images/logo/Logo.png";
 import React from "react";
 import { Link } from "react-router-dom";
+import theme from "../../assets/styles/theme";
 
 // ✅ Define a type for menu items
 interface MenuItem {
@@ -46,6 +47,10 @@ const Sidebar: React.FC = () => {
         width: 280,
         height: 1117,
         flexShrink: 0,
+        [theme.breakpoints.between("mobile","laptop")]: {
+          display: "none",
+
+        },
         [`& .MuiDrawer-paper`]: {
           width: 280,
           boxSizing: "border-box",

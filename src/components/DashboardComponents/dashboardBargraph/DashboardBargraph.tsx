@@ -1,53 +1,68 @@
 import { Box, Card, FormControl, MenuItem, Select, SelectChangeEvent, Typography } from "@mui/material";
 import { BarChart } from "@mui/x-charts";
-import { dataset } from "./dataset";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const DashboardBargraph: React.FC = () => {
 
-  const [age, setAge] = useState<string>("");
+  //State to manage the selected time period for the bar graph
+  const [timeperiod, setTimeperiod] = useState<string>("Monthly");
+  const [data, setData] = useState<any[]>([]);
 
   const handleChange = (e: SelectChangeEvent) => {
-    setAge(e.target.value);
+    setTimeperiod(e.target.value);
   }
 
+  let userId: Number = 1;
+
+  useEffect(() => {
+    async function fetchBarGraphData(){
+      try{
+        const response = await fetch(`https://localhost:7211/api/Dashboard/Bargraph/${userId}/${timeperiod}`);
+        if(!response.ok){
+          throw new Error("Failed to fetch bar graph data");
+        }
+        const result = await response.json();
+        console.log(result);
+        setData(result);
+      }catch(error: any){
+        console.error(error);
+      }
+    }
+    fetchBarGraphData();
+  },[timeperiod]);
+
   return (
-    // <Box
-    //     bgcolor= "#fff"
-    //     width= "100%"
-    //     borderRadius= "15px"
-    //     padding= "20px"
-    //     height= "100%"
-    // >
     <Card sx={{ p: "20px", borderRadius: "15px", height: "100%"}}>
+      {/* Header with title and select dropdown for time period */}
       <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
         <Typography variant="h5" component="p" fontWeight="bold">Statistics</Typography>
         <FormControl sx={{ m: 1, minWidth: 120 }}>
           <Select
-            value={age}
+            value={timeperiod}
             onChange={handleChange}
             displayEmpty
             inputProps={{ 'aria-label': 'Without label' }}
             size="small"
             sx={{borderRadius: "15px"}}
           >
-            <MenuItem value="Weekly">Weekly</MenuItem>
-            <MenuItem value="">Monthly</MenuItem>
+            {/* <MenuItem value="Weekly">Weekly</MenuItem> */}
+            <MenuItem value="Monthly">Monthly</MenuItem>
             <MenuItem value="Yearly">Yearly</MenuItem>
           </Select>
         </FormControl>
       </Box>
-        <BarChart
-            dataset={dataset}
-            xAxis={[{ scaleType: 'band', dataKey: 'month' }]}
-            series={[
-                { dataKey: 'income', label: 'Income', color: "#0077B6"},
-                { dataKey: 'expense', label: 'Expense', color: "#00B4D8"},
-            ]}
-            borderRadius={8}
-            // width={800}
-            height={350}
-        />
+
+      {/* Bar chart section */}
+      <BarChart
+          dataset={data} // Data for the bar chart
+          xAxis={[{ scaleType: 'band', dataKey: "period", }]} // X-axis data          
+          series={[
+              { dataKey: 'income', label: 'Income', color: "#0077B6"},
+              { dataKey: 'expense', label: 'Expense', color: "#00B4D8"},
+          ]}
+          borderRadius={8}
+          height={350}
+      />
     </Card>
   )
 }

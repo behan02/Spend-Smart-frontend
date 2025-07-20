@@ -20,8 +20,8 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import Logo from "../assets/images/logo/Logo.png";
-import VerifyEmailImage from "../assets/images/verifyEmail.svg";
+import Logo from "../../assets/images/logo/Logo.png";
+import VerifyEmailImage from "../../assets/images/verifyEmail.svg";
 
 // Enhanced animations
 const pulseAnimation = keyframes`
@@ -47,7 +47,7 @@ const errorShake = keyframes`
   75% { transform: translateX(5px); }
 `;
 
-const VerifyEmail: React.FC = () => {
+const AdminVerifyEmail: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
@@ -82,7 +82,7 @@ const VerifyEmail: React.FC = () => {
       const timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
-            navigate("/");
+            navigate("/admin/login");
             return 0;
           }
           return prev - 1;
@@ -97,7 +97,7 @@ const VerifyEmail: React.FC = () => {
       if (hasVerified) return;
       
       try {
-        const res = await axios.get("https://localhost:7211/api/user/auth/verify-email", {
+        const res = await axios.get("https://localhost:7211/api/admin/auth/verify-email", {
           params: { email, token },
         });
         
@@ -266,7 +266,7 @@ const VerifyEmail: React.FC = () => {
           
           // Background changes based on screen size
           background: {
-            xs: "linear-gradient(135deg, #023E8A 0%, #0077B6 50%, #00B4D8 100%)", // Custom gradient for small screens
+            xs: "linear-gradient(135deg, #023E8A 0%, #0077B6 50%, #00B4D8 100%)", // Gradient background for small screens
             md: "#fff" // White background for larger screens
           },
           
@@ -340,7 +340,7 @@ const VerifyEmail: React.FC = () => {
                   px: { xs: 1, sm: 0 },
                 }}
               >
-                User Account Setup
+                Admin Account Setup
               </Typography>
             </Box>
           </Grow>
@@ -450,7 +450,7 @@ const VerifyEmail: React.FC = () => {
                   </Typography>
                 </Box>
                 <Button
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate("/admin/login")}
                   variant="contained"
                   size="large"
                   fullWidth
@@ -519,7 +519,7 @@ const VerifyEmail: React.FC = () => {
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <Button
-                      onClick={() => navigate("/register")}
+                      onClick={() => navigate("/admin/register")}
                       variant="outlined"
                       size="large"
                       fullWidth
@@ -575,4 +575,4 @@ const VerifyEmail: React.FC = () => {
   );
 };
 
-export default VerifyEmail;
+export default AdminVerifyEmail;

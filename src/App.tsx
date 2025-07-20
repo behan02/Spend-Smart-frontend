@@ -12,6 +12,9 @@ import ForgetPassword from "./pages/ForgetPassword";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ReportGenerate from "./pages/Report/ReportGenerate";
 import VerifyEmail  from "./pages/VerifyEmail";
+import AdminForgetPassword from "./pages/AdminRegister/AdminForgetPassword"; 
+import AdminResetPassword from "./pages/AdminRegister/AdminResetPassword";
+import AdminVerifyEmail from "./pages/AdminRegister/AdminVerification"; // Ensure this import matches the file structure
 
 
 function App() {
@@ -33,6 +36,9 @@ function App() {
         {/* Add the route for Admin Site*/}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/register" element={<AdminRegister />} />
+        <Route path="/admin/forgetpassword" element={<AdminForgetPassword />} />
+        <Route path="/admin/resetpassword" element={<AdminResetPassword />} />
+        <Route path="/admin/verification" element={<AdminVerifyEmail />} />
 
       </Routes>
     </Router>

@@ -9,6 +9,7 @@ import HouseIcon from '@mui/icons-material/House';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import MenuIcon from '@mui/icons-material/Menu';
+import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import { OverridableComponent } from '@mui/material/OverridableComponent';
 import { SvgIconTypeMap } from '@mui/material';
 
@@ -25,7 +26,7 @@ const CategoryIcons: iconType[] = [
     {
         category: "Salary",
         icon: PaidIcon,
-        color: "yellow",
+        color: "teal",
     },
     {
         category: "Business",
@@ -65,12 +66,17 @@ const CategoryIcons: iconType[] = [
     {
         category: "Shopping",
         icon: ShoppingCartIcon,
-        color: "teal",
+        color: "#D50B8B",
     },
     {
-        category: "Bills",
+        category: "Bill",
         icon: ReceiptIcon,
-        color: "cyan",
+        color: "crimson",
+    },
+    {
+        category: "Entertainment",
+        icon: SportsEsportsIcon,
+        color: "#3D74B6"
     },
     {
         category: "Other",

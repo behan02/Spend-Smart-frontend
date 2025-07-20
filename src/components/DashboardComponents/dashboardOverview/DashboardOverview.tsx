@@ -56,18 +56,31 @@
 import { Box, Typography, Grid, ThemeProvider } from "@mui/material";
 import { overviewList } from "./overview";
 import theme from "../../../assets/styles/theme";
+import React from "react";
 
-const DashboardOverview = () => {
+interface DashboardOverviewProps {
+  data: {
+    income: number;
+    expense: number;
+    balance: number;
+  };
+}
+
+const DashboardOverview: React.FC<DashboardOverviewProps> = ({data}) => {
+
   return (
     <ThemeProvider theme={theme}>
     <Box>
+      {/* Overview Title */}
       <Typography variant="h5" mb={3} sx={{
         [theme.breakpoints.between("mobile","tablet")]: {
-          fontSize: "20px",
+          fontSize: "20px", // Adjust font size for smaller screens
         },
       }}>
         Overview
       </Typography>
+
+      {/* Grid Container for Overview Cards */}
       <Grid container spacing={3}>
         {overviewList.map((item) => (
           <Grid size={{mobile:6, tablet:6, laptop:3, desktop:3}} key={item.name}>
@@ -108,7 +121,7 @@ const DashboardOverview = () => {
                 },
               }}
               >
-                LKR {item.amount}
+                LKR {new Intl.NumberFormat('en-LK').format(data[item.key as keyof typeof data] ?? 0)}
               </Typography>
               <Box sx={{
                 display: "flex",
@@ -121,7 +134,7 @@ const DashboardOverview = () => {
                   mt: "5px",
                 }
               }}>
-                {item.difference < 0 ? 
+                {/* {item.difference < 0 ? 
                   <Typography variant="body1" color="#EE3838" fontWeight="bold" sx={{
                     [theme.breakpoints.between("mobile","desktop")]: {
                       fontSize: "14px",
@@ -143,7 +156,7 @@ const DashboardOverview = () => {
                   },
                 }}>
                   than last month
-                </Typography>
+                </Typography> */}
               </Box>
             </Box>
           </Grid>
