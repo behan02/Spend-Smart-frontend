@@ -170,8 +170,7 @@ const BudgetPage: React.FC = () => {
                       totalAmount: selectedBudget.totalBudgetAmount || 0,
                       spentAmount: selectedBudget.totalSpentAmount || 0,
                       remainingAmount: (selectedBudget.totalBudgetAmount || 0) - (selectedBudget.totalSpentAmount || 0),
-                      progress: selectedBudget.progressPercentage || 0,
-                      categories: [] // We'll need to load this separately or modify the API
+                      progress: selectedBudget.progressPercentage || 0
                     } : null}
                     onEdit={handleEditBudget}
                     onDelete={handleDeleteBudget}

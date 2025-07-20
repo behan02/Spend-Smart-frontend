@@ -10,7 +10,6 @@ import {
   DialogActions, 
   Button
 } from '@mui/material';
-import { getCategoryIconAndColor } from '../../utils/categoryUtils';
 
 interface Budget {
   id: number;
@@ -20,13 +19,6 @@ interface Budget {
   spentAmount: number;
   remainingAmount: number;
   progress: number;
-  categories: Array<{
-    id: number;
-    name: string;
-    allocatedAmount: number;
-    spentAmount: number;
-    icon?: string;
-  }>;
   description?: string;
   remainingDays?: number;
 }
@@ -185,69 +177,6 @@ const BudgetDetails: React.FC<BudgetDetailsProps> = ({ budget, onEdit, onDelete,
             </Typography>
           </Box>
         </Box>
-
-        {/* Categories Section */}
-        {budget.categories && budget.categories.length > 0 && (
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h6" sx={{ 
-              fontWeight: 'bold',
-              color: '#1F2937',
-              fontSize: '18px',
-              mb: 2
-            }}>
-              Categories
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              {budget.categories.map((category) => {
-                const { icon, color } = getCategoryIconAndColor(category.name);
-                return (
-                  <Box 
-                    key={category.id}
-                    sx={{ 
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
-                      backgroundColor: '#F9FAFB',
-                      px: 2,
-                      py: 1,
-                      borderRadius: '8px',
-                      border: `1px solid ${color}20`, // Add subtle border with category color
-                      '&:hover': {
-                        backgroundColor: `${color}10`, // Light background on hover
-                      }
-                    }}
-                  >
-                    <Typography sx={{ 
-                      fontSize: '16px',
-                      color: color // Use category color for the icon
-                    }}>
-                      {icon}
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontSize: '14px', fontWeight: 500 }}>
-                      {category.name}
-                    </Typography>
-                    <Typography variant="body2" sx={{ fontSize: '14px', color: '#6B7280' }}>
-                      ${category.spentAmount.toFixed(2)} / ${category.allocatedAmount.toFixed(2)}
-                    </Typography>
-                  </Box>
-                );
-              })}
-            </Box>
-          </Box>
-        )}
-
-        {/* Remaining Days */}
-        {budget.remainingDays && (
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Typography variant="body2" sx={{ 
-              color: '#1976D2',
-              fontWeight: 'bold',
-              fontSize: '16px'
-            }}>
-              {budget.remainingDays} days left
-            </Typography>
-          </Box>
-        )}
 
         {/* Action Buttons */}
         <Box sx={{ 
