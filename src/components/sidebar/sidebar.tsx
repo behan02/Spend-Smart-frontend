@@ -63,9 +63,8 @@ const Sidebar: React.FC = () => {
       
       <List>
         {menuItems.map((item) => (
-          <Link to={item.path} style={{ textDecoration: "none" }}>
+          <Link key={item.text} to={item.path} style={{ textDecoration: "none" }}>
           <ListItemButton
-            key={item.text}
             sx={{
               color: "white",
               backgroundColor: "#023e8a",
