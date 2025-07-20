@@ -35,14 +35,14 @@ const UserSettings: React.FC = () => {
   // ✅ FIX: Proper ref type for Avatar (should be HTMLDivElement or remove if not used)
   const fileInputRef = React.useRef<HTMLDivElement>(null);
   const [profileImageUrl, setProfileImageUrl] = useState<string | undefined>(undefined);
-  
-  const API_BASE_URL = "https://localhost:7211/api";
+
+  const API_BASE_URL = "http://localhost:5110/api";
   const currentUserId = 1;
 
   const [userData, setUserData] = useState<UserData>({
     userId: 1,
-    name: "Lakshan Rajapaksha",
-    email: "lakshan@example.com",
+    name: "",
+    email: "",
   });
 
   useEffect(() => {

@@ -1,128 +1,61 @@
 import axios from 'axios';
 
-// Base URL for your API - using Vite environment variables
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://localhost:7211/api';
+const API_BASE_URL = 'http://localhost:5110/api';
 
-console.log('🔧 API Base URL:', API_BASE_URL);
-
-// Create axios instance with default configuration
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 10000, // 10 seconds timeout
-});
-
-// Request interceptor for debugging
-apiClient.interceptors.request.use(
-  (config) => {
-    console.log('🚀 Making request to:', (config.baseURL ?? '') + (config.url ?? ''));
-    console.log('📦 Request data:', config.data);
-    console.log('📋 Request headers:', config.headers);
-    
-    // Add authorization token if available
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    console.error('❌ Request error:', error);
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor for debugging
-apiClient.interceptors.response.use(
-  (response) => {
-    console.log('✅ Response received:', response.status, response.statusText);
-    console.log('📄 Response data:', response.data);
-    return response;
-  },
-  (error) => {
-    console.error('❌ Response error:', error);
-    
-    if (error.response) {
-      // Server responded with error status
-      console.error('🔴 Server Error Details:');
-      console.error('Status:', error.response.status);
-      console.error('Status Text:', error.response.statusText);
-      console.error('Response Data:', error.response.data);
-      console.error('Response Headers:', error.response.headers);
-    } else if (error.request) {
-      // Request was made but no response received
-      console.error('🔴 Network Error Details:');
-      console.error('Request:', error.request);
-      console.error('This usually means CORS issue or server is not running');
-    } else {
-      // Something else happened
-      console.error('🔴 Unknown Error:', error.message);
-    }
-    
-    if (error.response?.status === 401) {
-      // Handle unauthorized access
-      localStorage.removeItem('authToken');
-    }
-    return Promise.reject(error);
-  }
-);
-
-// Data Transfer Objects (matching your backend DTOs)
-export interface UpdateUserNameDto {
+export interface UpdateNameRequest {
   userId: number;
   userName: string;
 }
 
-export interface UpdateUserEmailDto {
+export interface UpdateEmailRequest {
   userId: number;
   email: string;
 }
 
-// API Response interfaces
-export interface ApiResponse<T = any> {
+export interface ApiResponse {
+  success: boolean;
   message: string;
-  data?: T;
+  [key: string]: any;
 }
 
-// User service functions
-export const userService = {
-  // Test connection
-  testConnection: async (): Promise<ApiResponse> => {
+class UserService {
+  async updateUserName(request: UpdateNameRequest): Promise<ApiResponse> {
     try {
-      console.log('🧪 Testing API connection...');
-      const response = await apiClient.get('/user/test');
+      const response = await axios.put(`${API_BASE_URL}/user/update-name`, request, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       return response.data;
-    } catch (error) {
-      console.error('❌ Connection test failed:', error);
-      throw error;
+    } catch (error: any) {
+      console.error('Error updating user name:', error);
+      throw new Error(error.response?.data?.message || 'Failed to update name');
     }
-  },
+  }
 
-  // Update user name
-  updateUserName: async (dto: UpdateUserNameDto): Promise<ApiResponse> => {
+  async updateUserEmail(request: UpdateEmailRequest): Promise<ApiResponse> {
     try {
-      console.log('📝 Updating user name...', dto);
-      const response = await apiClient.put('/user/update-name', dto);
+      const response = await axios.put(`${API_BASE_URL}/user/update-email`, request, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       return response.data;
-    } catch (error) {
-      console.error('❌ Error updating user name:', error);
-      throw error;
+    } catch (error: any) {
+      console.error('Error updating user email:', error);
+      throw new Error(error.response?.data?.message || 'Failed to update email');
     }
-  },
+  }
 
-  // Update user email
-  updateUserEmail: async (dto: UpdateUserEmailDto): Promise<ApiResponse> => {
+  async getUserProfile(userId: number): Promise<any> {
     try {
-      console.log('📧 Updating user email...', dto);
-      const response = await apiClient.put('/user/update-email', dto);
+      const response = await axios.get(`${API_BASE_URL}/user/${userId}`);
       return response.data;
-    } catch (error) {
-      console.error('❌ Error updating user email:', error);
-      throw error;
+    } catch (error: any) {
+      console.error('Error getting user profile:', error);
+      throw new Error(error.response?.data?.message || 'Failed to get user profile');
     }
-  },
-};
+  }
+}
 
-export default userService;
+export const userService = new UserService();
