@@ -55,23 +55,36 @@ const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        "https://localhost:7211/api/user/auth/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
-      );
+      const response = await fetch("https://localhost:7211/api/user/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Login failed");
       }
 
+      console.log("response:", response);
+
       const data = await response.json();
-      localStorage.setItem("authToken", data.token);
-      localStorage.setItem("user", JSON.stringify(data));
+
+      console.log("data:", data);
+
+      const token = data.token;
+
+      console.log("Token:", token);
+
+      // ✅ Decode token payload
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const userId = payload.userId; // `nameid` from ClaimTypes.NameIdentifier
+      console.log("User ID:", userId);
+      // ✅ Save token and user ID
+      localStorage.setItem("authToken", token);
+      localStorage.setItem("userId", userId);
+      localStorage.setItem("userName", payload.unique_name); // optional
+
       navigate("/dashboard");
     } catch (err: any) {
       alert(`Error: ${err.message}`);
