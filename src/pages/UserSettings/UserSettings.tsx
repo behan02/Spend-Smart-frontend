@@ -44,8 +44,8 @@ const UserSettings: React.FC = () => {
 
   const [userData, setUserData] = useState<UserData>({
     userId: 2,
-    name: "Lakshan Rajapaksha",
-    email: "lakshan@example.com",
+    name: "",
+    email: "",
   });
 
   useEffect(() => {

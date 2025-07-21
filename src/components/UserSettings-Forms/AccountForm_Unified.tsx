@@ -6,11 +6,11 @@ import {
   Alert,
   CircularProgress,
   Box,
-  Button,
 } from "@mui/material";
 import axios from "axios";
 import { getApiBaseUrl } from "../../Utils/apiUtils";
 import { userService, UpdateUserNameDto } from "../../Services/userService";
+import PageButton from "../Button/PageButton";
 
 interface AccountFormProps {
   userId: number;
@@ -49,10 +49,12 @@ const AccountForm: React.FC<AccountFormProps> = ({
   const [errors, setErrors] = useState({
     name: "",
     email: "",
+    general: "",
   });
   const [success, setSuccess] = useState({
     name: "",
     email: "",
+    general: "",
   });
 
   // Load email change status on component mount
@@ -93,14 +95,16 @@ const AccountForm: React.FC<AccountFormProps> = ({
       [field]: value,
     }));
 
-    // Clear previous errors and success messages for the specific field
+    // Clear previous errors and success messages
     setErrors((prev) => ({
       ...prev,
       [field]: "",
+      general: "",
     }));
     setSuccess((prev) => ({
       ...prev,
       [field]: "",
+      general: "",
     }));
   };
 
@@ -147,10 +151,12 @@ const AccountForm: React.FC<AccountFormProps> = ({
     setErrors({
       name: "",
       email: "",
+      general: "",
     });
     setSuccess({
       name: "",
       email: "",
+      general: "",
     });
 
     // Validation
@@ -238,11 +244,15 @@ const AccountForm: React.FC<AccountFormProps> = ({
         }
       }
 
-      // Set success messages - always show individual messages
-      if (results.nameSuccess) {
+      // Set success messages
+      if (results.nameSuccess && results.emailSuccess) {
+        setSuccess((prev) => ({
+          ...prev,
+          general: `Name updated successfully! ${results.emailMessage}`,
+        }));
+      } else if (results.nameSuccess) {
         setSuccess((prev) => ({ ...prev, name: results.nameMessage }));
-      }
-      if (results.emailSuccess) {
+      } else if (results.emailSuccess) {
         setSuccess((prev) => ({ ...prev, email: results.emailMessage }));
       }
 
@@ -251,15 +261,17 @@ const AccountForm: React.FC<AccountFormProps> = ({
         onUpdateSuccess();
       }
     } catch (error) {
-      // Individual errors are already handled above for each operation
-      console.error("Unexpected error in handleSaveChanges:", error);
+      setErrors((prev) => ({
+        ...prev,
+        general: "An unexpected error occurred. Please try again.",
+      }));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Stack spacing={3} sx={{ ml: 15 }}>
+    <Stack spacing={3}>
       {/* Show pending email change notice */}
       {pendingEmailChange.hasPendingChange && (
         <Alert severity="info">
@@ -272,49 +284,24 @@ const AccountForm: React.FC<AccountFormProps> = ({
         </Alert>
       )}
 
+      {/* General success message */}
+      {success.general && <Alert severity="success">{success.general}</Alert>}
+
+      {/* General error message */}
+      {errors.general && <Alert severity="error">{errors.general}</Alert>}
+
       {/* Name Field */}
       <Box>
-        <Typography sx={{ fontSize: 15, mb: 1 }}>Full Name</Typography>
+        <Typography variant="body2" color="text.secondary" mb={1}>
+          Full Name
+        </Typography>
         <TextField
+          fullWidth
           placeholder="Enter your full name"
           value={formData.name}
           onChange={(e) => handleInputChange("name", e.target.value)}
           error={!!errors.name}
           disabled={loading}
-          sx={{
-            width: 500,
-            ml: 0,
-            "& .MuiOutlinedInput-root": {
-              height: 48,
-              borderRadius: "8px",
-              backgroundColor: "#f8f9fa",
-              "& fieldset": {
-                borderColor: "#e0e0e0",
-                borderWidth: "1px",
-              },
-              "&:hover fieldset": {
-                borderColor: "#1976d2",
-                borderWidth: "2px",
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "#1976d2",
-                borderWidth: "2px",
-                boxShadow: "0 0 0 3px rgba(25, 118, 210, 0.1)",
-              },
-              "&.Mui-error fieldset": {
-                borderColor: "#d32f2f",
-              },
-            },
-            "& .MuiInputBase-input": {
-              padding: "12px 14px",
-              fontSize: "14px",
-              color: "#333",
-              "&::placeholder": {
-                color: "#999",
-                opacity: 1,
-              },
-            },
-          }}
         />
         {errors.name && (
           <Alert severity="error" sx={{ mt: 1 }}>
@@ -330,48 +317,17 @@ const AccountForm: React.FC<AccountFormProps> = ({
 
       {/* Email Field */}
       <Box>
-        <Typography sx={{ fontSize: 15, mb: 1 }}>Email</Typography>
+        <Typography variant="body2" color="text.secondary" mb={1}>
+          Email
+        </Typography>
         <TextField
+          fullWidth
           type="email"
           placeholder="Enter your email address"
           value={formData.email}
           onChange={(e) => handleInputChange("email", e.target.value)}
           error={!!errors.email}
           disabled={loading}
-          sx={{
-            width: 500,
-            ml: 0,
-            "& .MuiOutlinedInput-root": {
-              height: 48,
-              borderRadius: "8px",
-              backgroundColor: "#f8f9fa",
-              "& fieldset": {
-                borderColor: "#e0e0e0",
-                borderWidth: "1px",
-              },
-              "&:hover fieldset": {
-                borderColor: "#1976d2",
-                borderWidth: "2px",
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "#1976d2",
-                borderWidth: "2px",
-                boxShadow: "0 0 0 3px rgba(25, 118, 210, 0.1)",
-              },
-              "&.Mui-error fieldset": {
-                borderColor: "#d32f2f",
-              },
-            },
-            "& .MuiInputBase-input": {
-              padding: "12px 14px",
-              fontSize: "14px",
-              color: "#333",
-              "&::placeholder": {
-                color: "#999",
-                opacity: 1,
-              },
-            },
-          }}
         />
         {errors.email && (
           <Alert severity="error" sx={{ mt: 1 }}>
@@ -386,24 +342,16 @@ const AccountForm: React.FC<AccountFormProps> = ({
       </Box>
 
       {/* Unified Save Changes Button */}
-      <Box sx={{ display: "flex", justifyContent: "flex-start", mt: 3 }}>
-        <Button
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
+        <PageButton
+          text={getButtonText()}
           onClick={handleSaveChanges}
           type="button"
-          variant="contained"
-          color="primary"
           disabled={isSaveDisabled()}
           startIcon={
             loading ? <CircularProgress size={20} color="inherit" /> : undefined
           }
-          sx={{
-            width: 150,
-            borderRadius: 2,
-            ml: 95,
-          }}
-        >
-          {getButtonText()}
-        </Button>
+        />
       </Box>
     </Stack>
   );
