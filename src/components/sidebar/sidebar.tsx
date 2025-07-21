@@ -35,7 +35,7 @@ const menuItems: MenuItem[] = [
   { text: "Goals", icon: <Flag />, path: "/goals" },
   { text: "Transaction", icon: <Receipt />, path: "/transaction" },
   { text: "Settings", icon: <Settings />, path: "/settings" },
-  { text: "Logout", icon: <ExitToApp />, path: "/logout" },
+  { text: "Logout", icon: <ExitToApp />, path: "/" },
 ];
 
 // ✅ Sidebar component typed
