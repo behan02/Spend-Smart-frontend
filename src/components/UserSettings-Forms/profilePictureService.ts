@@ -39,6 +39,7 @@ class ProfilePictureService {
 
   constructor() {
     this.baseUrl = `${getApiBaseUrl()}/ProfilePicture`;
+    console.log('ProfilePictureService initialized with base URL:', this.baseUrl);
   }
 
   /**
@@ -180,7 +181,9 @@ class ProfilePictureService {
    */
   async getProfilePictureUrl(userId: number): Promise<ProfilePictureUrlResponse> {
     try {
-      const response = await axios.get(`${this.baseUrl}/url/${userId}`);
+      const url = `${this.baseUrl}/url/${userId}`;
+      console.log('Getting profile picture from URL:', url);
+      const response = await axios.get(url);
       return response.data;
     } catch (error) {
       throw new Error(handleApiError(error));

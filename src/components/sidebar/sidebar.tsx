@@ -60,7 +60,6 @@ const Sidebar: React.FC = () => {
         anchor="left"
         open={open}
         onClose={toggleDrawer(false)}
-        onOpen={toggleDrawer(true)}
         ModalProps={{ keepMounted: true }} // better performance on mobile
         sx={{
           [`& .MuiDrawer-paper`]: {
@@ -108,4 +107,3 @@ const Sidebar: React.FC = () => {
 };
 
 export default Sidebar;
-

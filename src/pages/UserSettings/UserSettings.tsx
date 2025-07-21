@@ -19,6 +19,7 @@ import ProfilePictureUpload from "../../components/UserSettings-Forms/Profilepic
 import AccountForm from "../../components/UserSettings-Forms/AccountForm";
 import Passwordchange from "../../components/UserSettings-Forms/Passwordchange";
 import PageButton from "../../components/Button/PageButton";
+import { getApiBaseUrl } from "../../Utils/apiUtils";
 
 interface UserData {
   userId: number;
@@ -31,16 +32,18 @@ const UserSettings: React.FC = () => {
   const isSmallScreen = useMediaQuery(
     theme.breakpoints.down("md" as import("@mui/material/styles").Breakpoint)
   );
-  
+
   // ✅ FIX: Proper ref type for Avatar (should be HTMLDivElement or remove if not used)
   const fileInputRef = React.useRef<HTMLDivElement>(null);
-  const [profileImageUrl, setProfileImageUrl] = useState<string | undefined>(undefined);
-  
-  const API_BASE_URL = "https://localhost:7211/api";
-  const currentUserId = 1;
+  const [profileImageUrl, setProfileImageUrl] = useState<string | undefined>(
+    undefined
+  );
+
+  const API_BASE_URL = getApiBaseUrl();
+  const currentUserId = 2;
 
   const [userData, setUserData] = useState<UserData>({
-    userId: 1,
+    userId: 2,
     name: "Lakshan Rajapaksha",
     email: "lakshan@example.com",
   });
@@ -51,12 +54,19 @@ const UserSettings: React.FC = () => {
 
   const loadProfilePicture = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/ProfilePicture/url/${currentUserId}`);
+      const url = `${API_BASE_URL}/ProfilePicture/url/${currentUserId}`;
+      console.log("Loading profile picture from URL:", url);
+      const response = await axios.get(url);
       if (response.data.profilePictureUrl) {
         setProfileImageUrl(response.data.profilePictureUrl);
       }
     } catch (error) {
-      console.error('Error loading profile picture:', error);
+      console.warn(
+        "Could not load profile picture from server, using default:",
+        error
+      );
+      // Gracefully handle the error - don't break the UI
+      setProfileImageUrl(undefined);
     }
   };
 
@@ -101,9 +111,9 @@ const UserSettings: React.FC = () => {
                 bottom: -40,
                 left: 24,
                 border: "4px solid white",
-                backgroundColor: profileImageUrl ? 'transparent' : '#e0e0e0',
-                color: '#666',
-                fontSize: '14px',
+                backgroundColor: profileImageUrl ? "transparent" : "#e0e0e0",
+                color: "#666",
+                fontSize: "14px",
               }}
             >
               {!profileImageUrl && "👤"}
@@ -112,7 +122,9 @@ const UserSettings: React.FC = () => {
 
           <Box sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
             <Box sx={{ mt: 6 }}>
-              <ProfilePictureUpload onImageUpdate={handleProfilePictureUpdate} />
+              <ProfilePictureUpload
+                onImageUpdate={handleProfilePictureUpdate}
+              />
             </Box>
 
             <Typography variant="h6" mt={2} ml={1}>
@@ -125,7 +137,9 @@ const UserSettings: React.FC = () => {
               Profile Settings
             </Typography>
 
-            <Box sx={{ borderRadius: 2, backgroundColor: "#FFFFFF", mb: 3, p: 2 }}>
+            <Box
+              sx={{ borderRadius: 2, backgroundColor: "#FFFFFF", mb: 3, p: 2 }}
+            >
               <Typography variant="subtitle1" mb={2}>
                 Account
               </Typography>
@@ -137,22 +151,65 @@ const UserSettings: React.FC = () => {
               />
             </Box>
 
-            <Box sx={{ borderRadius: 2, backgroundColor: "#FFFFFF", mb: 3, p: 2 }}>
+            <Box
+              sx={{ borderRadius: 2, backgroundColor: "#FFFFFF", mb: 3, p: 2 }}
+            >
               <Typography variant="subtitle1" mb={2}>
                 Password
               </Typography>
 
-              <Box sx={{ display: "flex", gap: 3, alignItems: "flex-start", flexDirection: { xs: "column", lg: "row" }, minHeight: { lg: "350px" } }}>
-                <Box sx={{ flex: { xs: 1, lg: "1 1 60%" }, minWidth: { lg: "400px" } }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 3,
+                  alignItems: "flex-start",
+                  flexDirection: { xs: "column", lg: "row" },
+                  minHeight: { lg: "350px" },
+                }}
+              >
+                <Box
+                  sx={{
+                    flex: { xs: 1, lg: "1 1 60%" },
+                    minWidth: { lg: "400px" },
+                  }}
+                >
                   <Passwordchange />
                 </Box>
 
-                <Box sx={{ flex: { xs: 1, lg: "1 1 40%" }, display: "flex", justifyContent: "center", alignItems: "center", minHeight: { xs: "200px", sm: "250px", md: "300px", lg: "350px" }, width: "100%" }}>
-                  <Box component="img" src={ResetPwdImage} alt="pwd Reset" sx={{ width: "100%", maxWidth: { xs: 250, sm: 300, md: 350, lg: 400 }, height: 350, objectFit: "contain" }} />
+                <Box
+                  sx={{
+                    flex: { xs: 1, lg: "1 1 40%" },
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    minHeight: {
+                      xs: "200px",
+                      sm: "250px",
+                      md: "300px",
+                      lg: "350px",
+                    },
+                    width: "100%",
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={ResetPwdImage}
+                    alt="pwd Reset"
+                    sx={{
+                      width: "100%",
+                      maxWidth: { xs: 250, sm: 300, md: 350, lg: 400 },
+                      height: 350,
+                      objectFit: "contain",
+                    }}
+                  />
                 </Box>
               </Box>
 
-              <PageButton text="Save Changes" onClick={() => alert("Password updated!")} type="button" />
+              <PageButton
+                text="Save Changes"
+                onClick={() => alert("Password updated!")}
+                type="button"
+              />
             </Box>
           </Box>
 
