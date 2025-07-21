@@ -149,6 +149,77 @@
   100% { transform: rotate(360deg); }
 }
 
+/* Email Verification Status Styles */
+.email-verification-status {
+  margin-top: 10px;
+  padding: 12px;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+}
+
+.verification-info {
+  margin-bottom: 10px;
+}
+
+.verification-pending {
+  color: #856404 !important;
+  font-weight: bold;
+  display: block;
+  margin: 0;
+}
+
+.verification-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.resend-btn, .cancel-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s;
+  font-weight: bold;
+}
+
+.resend-btn {
+  background: #007bff;
+  color: white;
+}
+
+.resend-btn:hover {
+  background: #0056b3;
+}
+
+.resend-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #c82333;
+}
+
+.cancel-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Warning message style */
+.message.warning {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+
 /* Debug info styling (for learning purposes) */
 .debug-info {
   margin-top: 30px;
@@ -184,5 +255,13 @@
   
   .form-header h2 {
     font-size: 20px;
+  }
+  
+  .verification-actions {
+    flex-direction: column;
+  }
+  
+  .resend-btn, .cancel-btn {
+    width: 100%;
   }
 }

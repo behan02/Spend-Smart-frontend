@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { 
   Box, 
   Container, 
-  Typography, 
-  Breadcrumbs, 
+  Typography,  
   Paper, 
   Tabs, 
   Tab, 
@@ -113,10 +112,7 @@ const ManageUsersPage = () => {
         <Topbar />
         <Container maxWidth="xl" sx={{ mt: 4, padding: 0 }}>
           
-          {/* Breadcrumb */}
-          <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
-            <Typography color="text.primary">Manage Users</Typography>
-          </Breadcrumbs>
+         
 
           {/* Page Title */}
           <Typography variant="h4" sx={{ mb: 4 }}>

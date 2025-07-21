@@ -25,11 +25,18 @@ const LoginFrequencyChart = () => {
         // Fallback to demo data in case of error
         console.log('Using fallback demo data');
         setData([
-          { month: 'JAN', logins: 400 },
-          { month: 'FEB', logins: 500 },
+          { month: 'JAN', logins: 420 },
+          { month: 'FEB', logins: 380 },
           { month: 'MAR', logins: 450 },
           { month: 'APR', logins: 480 },
           { month: 'MAY', logins: 520 },
+          { month: 'JUN', logins: 550 },
+          { month: 'JUL', logins: 600 },
+          { month: 'AUG', logins: 580 },
+          { month: 'SEP', logins: 510 },
+          { month: 'OCT', logins: 490 },
+          { month: 'NOV', logins: 460 },
+          { month: 'DEC', logins: 440 },
         ]);
       } finally {
         setLoading(false);

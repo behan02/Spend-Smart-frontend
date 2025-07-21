@@ -25,13 +25,18 @@ const StatisticsChart = () => {
         // Fallback to demo data in case of error
         console.log('Using fallback demo data for statistics chart');
         setData([
-          { month: 'May', activeUsers: 1250, newRegistrations: 180 },
-          { month: 'Jun', activeUsers: 1320, newRegistrations: 220 },
-          { month: 'Jul', activeUsers: 1380, newRegistrations: 195 },
-          { month: 'Aug', activeUsers: 1410, newRegistrations: 210 },
-          { month: 'Sep', activeUsers: 1450, newRegistrations: 185 },
-          { month: 'Oct', activeUsers: 1480, newRegistrations: 200 },
-          { month: 'Nov', activeUsers: 1520, newRegistrations: 225 },
+          { month: 'Jan', activeUsers: 1180, newRegistrations: 150 },
+          { month: 'Feb', activeUsers: 1220, newRegistrations: 165 },
+          { month: 'Mar', activeUsers: 1280, newRegistrations: 190 },
+          { month: 'Apr', activeUsers: 1320, newRegistrations: 205 },
+          { month: 'May', activeUsers: 1380, newRegistrations: 220 },
+          { month: 'Jun', activeUsers: 1450, newRegistrations: 240 },
+          { month: 'Jul', activeUsers: 1520, newRegistrations: 260 },
+          { month: 'Aug', activeUsers: 1490, newRegistrations: 245 },
+          { month: 'Sep', activeUsers: 1430, newRegistrations: 215 },
+          { month: 'Oct', activeUsers: 1390, newRegistrations: 195 },
+          { month: 'Nov', activeUsers: 1350, newRegistrations: 175 },
+          { month: 'Dec', activeUsers: 1320, newRegistrations: 160 },
         ]);
       } finally {
         setLoading(false);
@@ -62,7 +67,7 @@ const StatisticsChart = () => {
             <Tooltip />
             <Legend />
             <Bar dataKey="activeUsers" fill="#0D47A1" name="Active Users" />
-            <Bar dataKey="newRegistrations" fill="#e53935" name="New Registrations" />
+            <Bar dataKey="newRegistrations" fill="#28baefff" name="New Registrations" />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -77,7 +82,7 @@ const StatisticsChart = () => {
         <Tooltip />
         <Legend />
         <Bar dataKey="activeUsers" fill="#0D47A1" name="Active Users" />
-        <Bar dataKey="newRegistrations" fill="#e53935" name="New Registrations" />
+        <Bar dataKey="newRegistrations" fill="#74d9f2ff" name="New Registrations" />
       </BarChart>
     </ResponsiveContainer>
   );

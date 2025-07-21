@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Box, Container, Typography, Switch, FormControlLabel, Select, MenuItem, Button, TextField, Avatar, Stack, Alert } from '@mui/material';
 import Sidebar from '../components/Sidebar/Sidebar';
 import Topbar from '../components/Topbar/Topbar';
+import MonthlyReportCard from '../components/MonthlyReportCard/MonthlyReportCard';
 import { adminApi } from '../services/adminApi';
 import { useAdminProfile } from '../contexts/AdminProfileContext';
 
@@ -23,10 +24,17 @@ const SystemSettingsPage = () => {
   // Separate state for email update input (empty by default)
   const [emailUpdateInput, setEmailUpdateInput] = useState('');
   
+  // Additional clean email state to force fresh input
+  const [cleanEmailInput, setCleanEmailInput] = useState('');
+  
   const [currentAdminId, setCurrentAdminId] = useState<number | null>(null); // Track which admin we're working with
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState(''); // 'success' or 'error'
+  
+  // Email verification states
+  const [emailVerificationPending, setEmailVerificationPending] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState('');
   
   // Profile picture state (now using context)
   // const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null); // Removed - using context
@@ -35,8 +43,47 @@ const SystemSettingsPage = () => {
 
   // Load admin data when component mounts
   useEffect(() => {
+    // Reset all form fields when component mounts (including navigation)
+    console.log('SystemSettings: Resetting form fields on mount');
+    setAdminData(prev => ({
+      ...prev,
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    }));
+    setNameUpdateInput('');
+    setEmailUpdateInput('');
+    setCleanEmailInput(''); // Clear the clean email input too
+    setMessage('');
+    setMessageType('');
+    
     loadAdminData(); // Re-enabled automatic loading
   }, []);
+
+  // Additional effect to ensure email field is cleared when admin data changes
+  useEffect(() => {
+    if (currentAdminId) {
+      console.log('SystemSettings: Admin ID changed, clearing email input');
+      setEmailUpdateInput('');
+      setNameUpdateInput('');
+      setCleanEmailInput(''); // Clear clean email too
+      
+      // Force a second clear after a small delay to handle any async state updates
+      setTimeout(() => {
+        console.log('SystemSettings: Force clearing email input again');
+        setEmailUpdateInput('');
+        setNameUpdateInput('');
+        setCleanEmailInput(''); // Clear clean email too
+      }, 200);
+    }
+  }, [currentAdminId]);
+
+  // Force clear email field whenever adminData.email changes - DISABLED FOR EMAIL VERIFICATION
+  // useEffect(() => {
+  //   console.log('SystemSettings: Admin email loaded, ensuring update field stays empty');
+  //   setEmailUpdateInput('');
+  //   setCleanEmailInput(''); // Clear clean email too
+  // }, [adminData.email]);
 
   const loadAdminData = async () => {
     try {
@@ -58,7 +105,11 @@ const SystemSettingsPage = () => {
       setAdminData(prev => ({
         ...prev,
         name: adminInfo.name || '',
-        email: adminInfo.email || ''
+        email: adminInfo.email || '',
+        // Explicitly keep password fields empty
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
       }));
       
       // Profile picture is automatically loaded by the context
@@ -200,7 +251,7 @@ const SystemSettingsPage = () => {
 
     // Check if there are any changes to make
     const isChangingName = nameUpdateInput.trim() !== '';
-    const isChangingEmail = emailUpdateInput.trim() !== '';
+    const isChangingEmail = cleanEmailInput.trim() !== '';
     const isChangingPassword = !!adminData.newPassword;
     
     if (!isChangingName && !isChangingEmail && !isChangingPassword) {
@@ -228,34 +279,46 @@ const SystemSettingsPage = () => {
       // Use existing state data instead of making an extra API call
       const updateData = {
         name: isChangingName ? nameUpdateInput.trim() : adminData.name,
-        email: isChangingEmail ? emailUpdateInput.trim() : adminData.email,
+        email: isChangingEmail ? cleanEmailInput.trim() : adminData.email,
         ...(isChangingPassword && adminData.currentPassword && { currentPassword: adminData.currentPassword }),
         ...(adminData.newPassword && { password: adminData.newPassword })
       };
 
-      // Single API call - much faster!
-      await adminApi.updateAdmin(currentAdminId, updateData);
-      setMessage('Admin profile updated successfully!');
-      setMessageType('success');
+      // Single API call - now handles email verification response
+      const response = await adminApi.updateAdmin(currentAdminId, updateData);
       
-      // Update displayed name and email if they were changed
-      if (isChangingName) {
-        setAdminData(prev => ({
-          ...prev,
-          name: nameUpdateInput.trim()
-        }));
+      // Check if email verification is required
+      if (response.emailVerificationRequired) {
+        setEmailVerificationPending(true);
+        setPendingEmail(response.pendingEmail || cleanEmailInput.trim());
+        setMessage(`Email verification sent to ${response.pendingEmail || cleanEmailInput.trim()}. Please check your email to verify the new address.`);
+        setMessageType('info');
+      } else {
+        setMessage(response.message || 'Admin profile updated successfully!');
+        setMessageType('success');
+        
+        // Update displayed name and email if they were changed (only if no verification required)
+        if (isChangingName) {
+          setAdminData(prev => ({
+            ...prev,
+            name: nameUpdateInput.trim()
+          }));
+        }
+        
+        if (isChangingEmail) {
+          setAdminData(prev => ({
+            ...prev,
+            email: cleanEmailInput.trim()
+          }));
+        }
       }
       
-      if (isChangingEmail) {
-        setAdminData(prev => ({
-          ...prev,
-          email: emailUpdateInput.trim()
-        }));
+      // Clear form fields after successful update (only if no verification pending)
+      if (!response.emailVerificationRequired) {
+        setNameUpdateInput(''); // Clear name update input
+        setEmailUpdateInput(''); // Clear email update input
+        setCleanEmailInput(''); // Clear clean email input
       }
-      
-      // Clear form fields after successful update
-      setNameUpdateInput(''); // Clear name update input
-      setEmailUpdateInput(''); // Clear email update input
       setAdminData(prev => ({
         ...prev,
         currentPassword: '',
@@ -304,21 +367,8 @@ const SystemSettingsPage = () => {
             />
           </Box>
 
-          {/* User Interface color theme */}
-          <Box sx={{ backgroundColor: '#fff', p: 4, borderRadius: 3, mb: 4 }}>
-            <Typography variant="h6" gutterBottom>User Interface Color Theme</Typography>
-            <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-              Choose a color theme for the user interface
-            </Typography>
-            <Select
-              defaultValue="darkBlue"
-              sx={{ width: 200 }}
-            >
-              <MenuItem value="darkBlue">Dark Blue</MenuItem>
-              <MenuItem value="lightBlue">Light Blue</MenuItem>
-              <MenuItem value="white">Dark Green</MenuItem>
-            </Select>
-          </Box>
+                   {/* Monthly Report Generation */}
+          <MonthlyReportCard onReportGenerated={(data) => console.log('Report generated:', data)} />
 
           {/* Profile Settings - Now Connected to Backend! */}
           <Box sx={{ backgroundColor: '#fff', p: 4, borderRadius: 3 }}>
@@ -377,6 +427,7 @@ const SystemSettingsPage = () => {
 
             <Stack spacing={3}>
               <TextField 
+                key={`name-update-${currentAdminId}`}
                 fullWidth 
                 label="Update Admin Name" 
                 variant="outlined" 
@@ -393,13 +444,16 @@ const SystemSettingsPage = () => {
                 placeholder="Enter new admin name..."
               />
               <TextField 
+                key={`email-update-clean-${Date.now()}`}
                 fullWidth 
                 label="Update Email Address" 
                 variant="outlined" 
                 type="email"
-                value={emailUpdateInput}
+                value={cleanEmailInput}
+                defaultValue=""
                 onChange={(e) => {
-                  setEmailUpdateInput(e.target.value);
+                  setCleanEmailInput(e.target.value);
+                  setEmailUpdateInput(e.target.value); // Keep both in sync
                   // Clear messages when user starts typing
                   if (message) {
                     setMessage('');
@@ -408,7 +462,21 @@ const SystemSettingsPage = () => {
                 }}
                 disabled={loading}
                 placeholder="Enter new email address..."
+                inputProps={{
+                  autoComplete: 'new-email',
+                  'data-form-type': 'other'
+                }}
               />
+              
+              {/* Email Verification Status */}
+              {emailVerificationPending && (
+                <Alert severity="info" sx={{ mt: 1 }}>
+                  Email verification pending for: <strong>{pendingEmail}</strong>
+                  <br />
+                  Please check your email to verify the new address.
+                </Alert>
+              )}
+              
               <TextField 
                 fullWidth 
                 label="Current Password" 

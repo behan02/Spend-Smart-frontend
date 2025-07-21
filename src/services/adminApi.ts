@@ -17,6 +17,13 @@ export interface AdminProfileUpdateDto {
   password?: string; // Optional - only if changing password
 }
 
+// Email verification response interface
+export interface EmailVerificationResponse {
+  message: string;
+  emailVerificationRequired?: boolean;
+  pendingEmail?: string;
+}
+
 export interface Admin {
   id: number;
   name: string;
@@ -96,11 +103,12 @@ export const adminApi = {
     }
   },
 
-  // PUT update admin - Returns void (204 No Content)
-  updateAdmin: async (id: number, adminData: AdminProfileUpdateDto): Promise<void> => {
+  // PUT update admin - Now returns email verification response
+  updateAdmin: async (id: number, adminData: AdminProfileUpdateDto): Promise<EmailVerificationResponse> => {
     try {
-      await apiClient.put(`/AdminProfile/${id}`, adminData);
-      // PUT returns 204 No Content, so no data to return
+      const response = await apiClient.put(`/AdminProfile/${id}`, adminData);
+      // Backend now returns 200 OK with verification info instead of 204 No Content
+      return response.data;
     } catch (error) {
       console.error(`Error updating admin ${id}:`, error);
       throw error;
