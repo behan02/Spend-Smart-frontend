@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { Box, Card, IconButton, Typography } from '@mui/material';
+import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 
 interface SavingRecord {
   id: number;
@@ -23,168 +23,133 @@ const OptimizedProgressBarChart: React.FC<ProgressBarChartProps> = ({
   goalDeadline,
   goalCreationDate
 }) => {
-  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(new Date());
+  const [currentPeriodStart, setCurrentPeriodStart] = useState<Date>(new Date());
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
-  const [weeks, setWeeks] = useState<Date[]>([]);
+  const [periods, setPeriods] = useState<Date[]>([]);
 
-  // Generate all weeks between goal creation and deadline
-  const generateWeeks = () => {
+  const getWeekStart = (date: Date): Date => {
+    const weekStart = new Date(date);
+    weekStart.setDate(date.getDate() - date.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+    return weekStart;
+  };
+
+  // Generate all 14-day periods between goal creation and deadline
+  const generatePeriods = () => {
     if (!goalDeadline) return [];
     
-    // Use goal creation date as start, or today if not provided
     const startDate = goalCreationDate ? new Date(goalCreationDate) : new Date();
     const endDate = new Date(goalDeadline);
     
-    // Get the start of the week (Sunday) for the start date
     const startOfWeek = new Date(startDate);
     startOfWeek.setDate(startDate.getDate() - startDate.getDay());
     
-    const weeks = [];
+    const periods = [];
     let currentDate = new Date(startOfWeek);
     
     while (currentDate <= endDate) {
-      weeks.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() + 7);
+      periods.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 14);
     }
     
-    return weeks;
+    return periods;
   };
 
-  // Find the week that contains the most recent transaction
-  const findMostRecentTransactionWeek = (weeks: Date[], records: SavingRecord[]): Date => {
+  // Find the period that contains the most recent transaction
+  const findMostRecentTransactionPeriod = (periods: Date[], records: SavingRecord[]): Date => {
     if (records.length === 0) {
-      // No transactions - prioritize current week if it exists, otherwise the last week
       const currentDate = new Date();
       const currentWeekStart = getWeekStart(currentDate);
       
-      // Check if current week is in our weeks array
-      const currentWeekInArray = weeks.find(week => 
-        week.getTime() === currentWeekStart.getTime()
-      );
+      const currentPeriodInArray = periods.find(period => {
+        const periodEnd = new Date(period);
+        periodEnd.setDate(period.getDate() + 13);
+        return currentWeekStart >= period && currentWeekStart <= periodEnd;
+      });
       
-      if (currentWeekInArray) {
-        console.log('No transactions, but current week is in range:', currentWeekStart.toDateString());
+      if (currentPeriodInArray) {
         return currentWeekStart;
       } else {
-        // Return the most recent week (last in array)
-        const lastWeek = weeks[weeks.length - 1] || new Date();
-        console.log('No transactions, returning last week:', lastWeek.toDateString());
-        return lastWeek;
+        return periods[periods.length - 1] || new Date();
       }
     }
 
-    // Sort records by date (most recent first)
     const sortedRecords = [...records].sort((a, b) => b.date.getTime() - a.date.getTime());
     const mostRecentRecord = sortedRecords[0];
 
-    console.log('Most recent transaction date:', mostRecentRecord.date.toDateString());
-
-    // Find which week contains this record
-    for (const week of weeks) {
-      const weekEnd = new Date(week);
-      weekEnd.setDate(week.getDate() + 6);
+    for (const period of periods) {
+      const periodEnd = new Date(period);
+      periodEnd.setDate(period.getDate() + 13);
       
-      if (mostRecentRecord.date >= week && mostRecentRecord.date <= weekEnd) {
-        console.log('Found matching week for transaction:', week.toDateString());
-        return week;
+      if (mostRecentRecord.date >= period && mostRecentRecord.date <= periodEnd) {
+        return period;
       }
     }
 
-    // If not found, return the last week (most recent)
-    const fallbackWeek = weeks[weeks.length - 1] || new Date();
-    console.log('Transaction week not found, using last week:', fallbackWeek.toDateString());
-    return fallbackWeek;
+    return periods[periods.length - 1] || new Date();
   };
 
-  // Initialize weeks and current week
+  // Initialize periods and current period
   useEffect(() => {
-    console.log('=== INITIALIZING WEEKS ===');
-    console.log('Goal Creation Date:', goalCreationDate);
-    console.log('Goal Deadline:', goalDeadline);
+    const generatedPeriods = generatePeriods();
+    setPeriods(generatedPeriods);
     
-    const generatedWeeks = generateWeeks();
-    console.log('Generated weeks:', generatedWeeks.length, generatedWeeks.map(w => w.toDateString()));
-    setWeeks(generatedWeeks);
-    
-    if (generatedWeeks.length > 0) {
-      // Always start with the most recent week (current week or week with most recent transaction)
+    if (generatedPeriods.length > 0) {
       const currentDate = new Date();
       const currentWeekStart = getWeekStart(currentDate);
       
-      // Check if current week is within our range
-      const isCurrentWeekInRange = generatedWeeks.some(week => 
-        week.getTime() === currentWeekStart.getTime()
-      );
+      const isCurrentPeriodInRange = generatedPeriods.some(period => {
+        const periodEnd = new Date(period);
+        periodEnd.setDate(period.getDate() + 13);
+        return currentWeekStart >= period && currentWeekStart <= periodEnd;
+      });
       
-      let initialWeek: Date;
-      if (isCurrentWeekInRange) {
-        // If current week is in range, use it
-        initialWeek = currentWeekStart;
-        console.log('Using current week:', initialWeek.toDateString());
+      let initialPeriod: Date;
+      if (isCurrentPeriodInRange) {
+        initialPeriod = currentWeekStart;
       } else {
-        // Otherwise find the most recent transaction week or use the last week
         if (savingRecords.length > 0) {
-          initialWeek = findMostRecentTransactionWeek(generatedWeeks, savingRecords);
-          console.log('Using most recent transaction week:', initialWeek.toDateString());
+          initialPeriod = findMostRecentTransactionPeriod(generatedPeriods, savingRecords);
         } else {
-          // No transactions, use the last week (most recent)
-          initialWeek = generatedWeeks[generatedWeeks.length - 1];
-          console.log('No transactions, using last week:', initialWeek.toDateString());
+          initialPeriod = generatedPeriods[generatedPeriods.length - 1];
         }
       }
       
-      setCurrentWeekStart(initialWeek);
+      setCurrentPeriodStart(initialPeriod);
     }
   }, [goalDeadline, goalCreationDate]);
 
-  // Update current week when savingRecords change (but not on initial load)
+  // Update current period when savingRecords change
   useEffect(() => {
-    console.log('=== SAVING RECORDS CHANGED ===');
-    console.log('Saving records:', savingRecords.length);
-    console.log('Weeks:', weeks.length);
-    
-    if (weeks.length > 0 && savingRecords.length > 0) {
-      const recentWeek = findMostRecentTransactionWeek(weeks, savingRecords);
-      console.log('Setting current week to most recent transaction week:', recentWeek.toDateString());
-      setCurrentWeekStart(recentWeek);
+    if (periods.length > 0 && savingRecords.length > 0) {
+      const recentPeriod = findMostRecentTransactionPeriod(periods, savingRecords);
+      setCurrentPeriodStart(recentPeriod);
     }
   }, [savingRecords]);
 
-  const currentWeekIndex = weeks.findIndex(week => 
-    week.getTime() === currentWeekStart.getTime()
-  );
-
-  console.log('=== CURRENT STATE ===');
-  console.log('Current week index:', currentWeekIndex);
-  console.log('Total weeks:', weeks.length);
-  console.log('Current week start:', currentWeekStart.toDateString());
-  console.log('Can go previous:', currentWeekIndex > 0);
-  console.log('Can go next:', currentWeekIndex < weeks.length - 1);
-
-  // Generate 7 days for current week
-  const generateWeekDays = () => {
+  // Generate 14 days for current period
+  const generate14Days = () => {
     const days = [];
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(currentWeekStart);
-      day.setDate(currentWeekStart.getDate() + i);
+    for (let i = 0; i < 14; i++) {
+      const day = new Date(currentPeriodStart);
+      day.setDate(currentPeriodStart.getDate() + i);
       days.push(day);
     }
     return days;
   };
 
-  const weekDays = generateWeekDays();
+  const periodDays = generate14Days();
 
-  // Process chart data for current week
-  const processWeekData = () => {
+  // Process chart data for current period
+  const processPeriodData = () => {
     if (!savingRecords || savingRecords.length === 0) {
       return {
-        seriesData: new Array(7).fill(0),
-        cumulativeData: new Array(7).fill(0)
+        seriesData: new Array(14).fill(0),
+        cumulativeData: new Array(14).fill(0)
       };
     }
 
-    // Create data for each day of the week
-    const weekData = weekDays.map(day => {
+    const periodData = periodDays.map(day => {
       const dayRecords = savingRecords.filter(record => {
         const recordDate = new Date(record.date);
         return recordDate.toDateString() === day.toDateString();
@@ -196,399 +161,344 @@ const OptimizedProgressBarChart: React.FC<ProgressBarChartProps> = ({
       };
     });
 
-    const seriesData = weekData.map(d => d.amount);
-    
-    // Calculate total saved from ALL records (not just current week)
+    const seriesData = periodData.map(d => d.amount);
     const totalSaved = savingRecords.reduce((sum, record) => sum + record.amount, 0);
     const cumulativeData = [totalSaved];
 
     return { seriesData, cumulativeData };
   };
 
-  const { seriesData, cumulativeData } = processWeekData();
+  const { seriesData, cumulativeData } = processPeriodData();
   
   const totalSaved = cumulativeData && cumulativeData.length > 0 ? cumulativeData[0] : 0;
   const progressPercentage = goalTargetAmount > 0 ? (totalSaved / goalTargetAmount) * 100 : 0;
 
-  // Calculate max value for scaling bars
   const maxAmountFromData = seriesData && seriesData.length > 0 ? Math.max(...seriesData) : 0;
-  const maxAmount = Math.max(maxAmountFromData, 100);
+  const maxAmount = Math.max(maxAmountFromData, 1000);
 
-  // Navigation functions
-  const goToPreviousWeek = () => {
-    console.log('Previous week clicked');
-    console.log('Current week index:', currentWeekIndex);
-    console.log('Weeks length:', weeks.length);
-    
-    if (currentWeekIndex > 0 && weeks.length > 0) {
-      const newWeekStart = weeks[currentWeekIndex - 1];
-      console.log('Setting new week start:', newWeekStart);
-      setCurrentWeekStart(newWeekStart);
-    }
-  };
-
-  const goToNextWeek = () => {
-    console.log('Next week clicked');
-    console.log('Current week index:', currentWeekIndex);
-    console.log('Weeks length:', weeks.length);
-    
-    if (currentWeekIndex < weeks.length - 1 && weeks.length > 0) {
-      const newWeekStart = weeks[currentWeekIndex + 1];
-      console.log('Setting new week start:', newWeekStart);
-      setCurrentWeekStart(newWeekStart);
-    }
-  };
-
-  const formatWeekRange = () => {
-    if (!weekDays || weekDays.length < 7) return 'Loading...';
-    const startDate = weekDays[0];
-    const endDate = weekDays[6];
+  const formatPeriodRange = () => {
+    if (!periodDays || periodDays.length < 14) return 'Loading...';
+    const startDate = periodDays[0];
+    const endDate = periodDays[13];
     return `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
   };
 
+  const currentPeriodIndex = periods.findIndex(period => 
+    period.getTime() === currentPeriodStart.getTime()
+  );
+
+  // Navigation functions
+  const goToPreviousPeriod = () => {
+    if (currentPeriodIndex > 0) {
+      setCurrentPeriodStart(periods[currentPeriodIndex - 1]);
+    }
+  };
+
+  const goToNextPeriod = () => {
+    if (currentPeriodIndex < periods.length - 1) {
+      setCurrentPeriodStart(periods[currentPeriodIndex + 1]);
+    }
+  };
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        goToPreviousPeriod();
+      } else if (e.key === 'ArrowRight') {
+        goToNextPeriod();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [currentPeriodIndex, periods.length]);
+
   return (
-    <div style={{ 
-      padding: '24px', 
-      width: '100%',
-      height: '400px',
-      display: 'flex',
-      flexDirection: 'column'
+    <Card sx={{ 
+      p: "24px", 
+      borderRadius: "15px", 
+      height: "100%",
+      minHeight: "380px",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
     }}>
       {/* Header */}
-      <div style={{
+      <Box sx={{
         display: "flex", 
         justifyContent: "space-between", 
-        alignItems: "center", 
-        marginBottom: '20px',
-        paddingBottom: '16px',
-        borderBottom: '1px solid #e2e8f0'
+        alignItems: "flex-start", 
+        mb: 3,
+        pb: 2,
+        borderBottom: '1px solid #f0f0f0'
       }}>
-        <div>
-          <h3 style={{ 
-            margin: 0,
+        <Box>
+          <Typography variant="h6" sx={{ 
             fontWeight: "600",
             color: "#1e293b",
             fontSize: '18px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
+            mb: 0.5
           }}>
-            📊 Saving Progress
-          </h3>
-          <p style={{ 
-            margin: '4px 0 0 0',
-            fontSize: '14px',
-            color: '#64748b'
-          }}>
-            🗓️ Week: {formatWeekRange()}
-          </p>
-          <p style={{ 
-            margin: '2px 0 0 0',
-            fontSize: '12px',
-            color: '#94a3b8'
-          }}>
-            Week {currentWeekIndex + 1} of {weeks.length} • Use arrows to navigate
-          </p>
-        </div>
+            Saving Progress
+          </Typography>
+        </Box>
         
-        {/* Progress indicator */}
-        <div style={{
-          textAlign: 'right'
-        }}>
-          <div style={{ 
-            fontSize: '28px',
-            fontWeight: "700",
-            color: progressPercentage >= 100 ? '#10b981' : '#0b00dd',
-            margin: 0
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
+          {/* Period Date Range */}
+          <Typography variant="body2" sx={{ 
+            color: '#64748b',
+            fontSize: '14px',
+            fontWeight: '500'
           }}>
-            {progressPercentage.toFixed(0)}%
-          </div>
-          <div style={{ fontSize: '13px', color: '#94a3b8' }}>
-            Complete
-          </div>
-        </div>
-      </div>
+            {formatPeriodRange()}
+          </Typography>
+          
+          {/* Navigation Arrows */}
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <IconButton 
+              onClick={goToPreviousPeriod}
+              disabled={currentPeriodIndex === 0}
+              sx={{ 
+                opacity: currentPeriodIndex === 0 ? 0.3 : 0.7,
+                '&:hover': { opacity: 1 },
+                padding: '4px'
+              }}
+            >
+              <ChevronLeft fontSize="small" />
+            </IconButton>
+            <IconButton 
+              onClick={goToNextPeriod}
+              disabled={currentPeriodIndex === periods.length - 1}
+              sx={{ 
+                opacity: currentPeriodIndex === periods.length - 1 ? 0.3 : 0.7,
+                '&:hover': { opacity: 1 },
+                padding: '4px'
+              }}
+            >
+              <ChevronRight fontSize="small" />
+            </IconButton>
+          </Box>
+        </Box>
+      </Box>
 
       {/* Chart Container */}
-      <div style={{
-        backgroundColor: "#ffffff",
-        borderRadius: '12px',
-        padding: '24px',
-        flex: 1,
-        border: '1px solid #e2e8f0',
-        position: 'relative',
+      <Box sx={{
+        height: '260px',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        position: 'relative'
       }}>
-        {/* Chart with Axes */}
-        <div style={{ 
-          height: '260px',
+        {/* Y-axis label */}
+        <Typography sx={{
+          position: 'absolute',
+          left: '-35px',
+          top: '40%',
+          transform: 'rotate(-90deg)',
+          fontSize: '14px',
+          color: '#374151',
+          fontWeight: '600',
+          whiteSpace: 'nowrap',
+          letterSpacing: '0.5px'
+        }}>
+          Amount
+        </Typography>
+
+        {/* Chart area */}
+        <Box sx={{
           display: 'flex',
-          flexDirection: 'column',
-          marginTop: '10px',
+          alignItems: 'flex-end',
+          height: '200px',
+          pl: '50px',
+          pr: '20px',
+          pb: '30px',
           position: 'relative'
         }}>
-          {/* Y-axis label */}
-          <div style={{
+          {/* Y-axis labels */}
+          <Box sx={{
             position: 'absolute',
-            left: '-35px',
-            top: '50%',
-            transform: 'rotate(-90deg) translateY(-50%)',
-            transformOrigin: 'center',
-            fontSize: '12px',
-            color: '#64748b',
-            fontWeight: '500',
-            whiteSpace: 'nowrap'
+            left: '0',
+            top: '0',
+            bottom: '30px',
+            width: '40px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
           }}>
-            Amount (LKR)
-          </div>
+            {[4, 3, 2, 1, 0].map((level) => (
+              <Typography key={level} sx={{
+                fontSize: '12px',
+                color: '#6b7280',
+                textAlign: 'right',
+                pr: 1,
+                fontWeight: '500'
+              }}>
+                {Math.round((maxAmount * level) / 4).toLocaleString()}
+              </Typography>
+            ))}
+          </Box>
 
-          {/* Chart area */}
-          <div style={{
+          {/* Grid lines */}
+          <Box sx={{
+            position: 'absolute',
+            left: '50px',
+            right: '0px',
+            top: '0',
+            bottom: '30px',
+            pointerEvents: 'none'
+          }}>
+            {[4, 3, 2, 1].map((level) => (
+              <Box key={level} sx={{
+                position: 'absolute',
+                top: `${(4 - level) * 25}%`,
+                left: 0,
+                right: 0,
+                height: '1px',
+                backgroundColor: '#f3f4f6',
+                opacity: 0.8
+              }} />
+            ))}
+          </Box>
+
+          {/* Bars */}
+          <Box sx={{
             display: 'flex',
             alignItems: 'flex-end',
-            height: '200px',
-            paddingLeft: '60px',
-            paddingRight: '20px',
-            paddingBottom: '40px',
-            position: 'relative'
+            height: '100%',
+            flex: 1,
+            gap: '2px',
+            justifyContent: 'space-between'
           }}>
-            {/* Y-axis labels */}
-            <div style={{
-              position: 'absolute',
-              left: '0',
-              top: '0',
-              bottom: '40px',
-              width: '50px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between'
-            }}>
-              {[4, 3, 2, 1, 0].map((level) => (
-                <div key={level} style={{
-                  fontSize: '11px',
-                  color: '#64748b',
-                  textAlign: 'right',
-                  paddingRight: '10px'
+            {seriesData && seriesData.map((amount, index) => {
+              const barHeight = maxAmount > 0 ? (amount / maxAmount) * 150 : 0;
+              const isHovered = hoveredBar === index;
+              const isEven = index % 2 === 0;
+              const barColor = isEven ? '#0b87daff' : '#0c41e0ff';
+              
+              return (
+                <Box key={index} sx={{ 
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  flex: 1,
+                  position: 'relative',
+                  minWidth: '16px',
+                  maxWidth: '24px'
                 }}>
-                  {Math.round((maxAmount * level) / 4)}
-                </div>
-              ))}
-            </div>
-
-            {/* Grid lines */}
-            <div style={{
-              position: 'absolute',
-              left: '60px',
-              right: '20px',
-              top: '0',
-              bottom: '40px',
-              pointerEvents: 'none'
-            }}>
-              {[4, 3, 2, 1, 0].map((level) => (
-                <div key={level} style={{
-                  position: 'absolute',
-                  top: `${(4 - level) * 25}%`,
-                  left: 0,
-                  right: 0,
-                  height: '1px',
-                  backgroundColor: level === 0 ? '#e2e8f0' : '#f8fafc'
-                }} />
-              ))}
-            </div>
-
-            {/* Bars */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'flex-end',
-              height: '100%',
-              flex: 1,
-              gap: '12px',
-              paddingLeft: '60px'
-            }}>
-              {seriesData && seriesData.map((amount, index) => {
-                const barHeight = maxAmount > 0 ? (amount / maxAmount) * 160 : 0;
-                const isHovered = hoveredBar === index;
-                
-                return (
-                  <div key={index} style={{ 
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    flex: 1,
-                    position: 'relative',
-                    minWidth: '50px'
-                  }}>
-                    {/* Tooltip */}
-                    {amount > 0 && isHovered && (
-                      <div style={{
+                  {/* Tooltip */}
+                  {amount > 0 && isHovered && (
+                    <Box sx={{
+                      position: 'absolute',
+                      bottom: `${barHeight + 25}px`,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      backgroundColor: '#1f2937',
+                      color: 'white',
+                      px: 1.5,
+                      py: 1,
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      whiteSpace: 'nowrap',
+                      zIndex: 10,
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                      fontWeight: '600',
+                      '&::after': {
+                        content: '""',
                         position: 'absolute',
-                        bottom: `${barHeight + 20}px`,
+                        top: '100%',
                         left: '50%',
                         transform: 'translateX(-50%)',
-                        backgroundColor: '#1e293b',
-                        color: 'white',
-                        padding: '8px 12px',
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                        whiteSpace: 'nowrap',
-                        zIndex: 10,
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
-                      }}>
-                        LKR {amount.toLocaleString()}
-                      </div>
-                    )}
-                    
-                    {/* Bar */}
-                    <div 
-                      style={{
-                        width: '100%',
-                        maxWidth: '60px',
-                        height: `${Math.max(barHeight, 4)}px`,
-                        backgroundColor: amount > 0 ? (isHovered ? '#0900bb' : '#0b00dd') : '#e2e8f0',
-                        borderRadius: '6px 6px 0 0',
-                        transition: 'all 0.3s ease',
-                        boxShadow: amount > 0 ? (isHovered ? '0 4px 12px rgba(11, 0, 221, 0.4)' : '0 2px 8px rgba(11, 0, 221, 0.2)') : 'none',
-                        cursor: amount > 0 ? 'pointer' : 'default',
-                        transform: isHovered ? 'translateY(-3px)' : 'translateY(0)',
-                        border: amount > 0 ? '2px solid rgba(11, 0, 221, 0.3)' : 'none'
-                      }}
-                      onMouseEnter={() => setHoveredBar(index)}
-                      onMouseLeave={() => setHoveredBar(null)}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+                        width: 0,
+                        height: 0,
+                        borderLeft: '4px solid transparent',
+                        borderRight: '4px solid transparent',
+                        borderTop: '4px solid #1f2937'
+                      }
+                    }}>
+                      LKR {amount.toLocaleString()}
+                    </Box>
+                  )}
+                  
+                  {/* Bar */}
+                  <Box 
+                    sx={{
+                      width: '28px',
+                      height: `${Math.max(barHeight, 2)}px`,
+                      backgroundColor: amount > 0 ? barColor : '#e5e7eb',
+                      borderRadius: '8px 8px 0 0',
+                      transition: 'all 0.5s ease',
+                      cursor: amount > 0 ? 'pointer' : 'default',
+                      transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
+                      opacity: amount > 0 ? 1 : 0.4,
+                      '&:hover': {
+                        transform: amount > 0 ? 'translateY(-2px)' : 'translateY(0)',
+                        boxShadow: amount > 0 ? `0 4px 8px ${barColor}40` : 'none'
+                      }
+                    }}
+                    onMouseEnter={() => setHoveredBar(index)}
+                    onMouseLeave={() => setHoveredBar(null)}
+                  />
+                </Box>
+              );
+            })}
+          </Box>
+        </Box>
 
-          {/* X-axis labels with navigation arrows */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            paddingLeft: '60px',
-            paddingRight: '20px',
-            gap: '12px',
-            position: 'relative'
+        {/* X-axis labels */}
+        <Box sx={{
+          display: 'flex',
+          pl: '50px',
+          pr: '20px',
+          gap: '2px',
+          mt: 0.5,
+          justifyContent: 'space-between'
+        }}>
+          {periodDays.map((day, index) => {
+            const dayName = day.toLocaleDateString('en-US', { weekday: 'short' });
+            const dayDate = day.getDate();
+            
+            return (
+              <Box key={index} sx={{
+                flex: 1,
+                textAlign: 'center',
+                fontSize: '11px',
+                color: '#6b7280',
+                fontWeight: '500',
+                minWidth: '16px',
+                maxWidth: '24px'
+              }}>
+                <Typography sx={{ 
+                  fontSize: '10px', 
+                  fontWeight: '600',
+                  color: '#374151',
+                  mb: 0.2
+                }}>
+                  {dayName}
+                </Typography>
+                <Typography sx={{ 
+                  fontSize: '9px', 
+                  color: '#9ca3af'
+                }}>
+                  {dayDate}
+                </Typography>
+              </Box>
+            );
+          })}
+        </Box>
+
+        {/* X-axis label */}
+        <Box sx={{
+          textAlign: 'center',
+          mt: 1.5
+        }}>
+          <Typography sx={{
+            fontSize: '14px',
+            color: '#374151',
+            fontWeight: '600'
           }}>
-            {/* Left Arrow */}
-            <button
-              onClick={goToPreviousWeek}
-              disabled={currentWeekIndex <= 0}
-              style={{
-                position: 'absolute',
-                left: '15px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                border: '2px solid #e2e8f0',
-                backgroundColor: currentWeekIndex <= 0 ? '#f8fafc' : '#ffffff',
-                color: currentWeekIndex <= 0 ? '#cbd5e1' : '#475569',
-                cursor: currentWeekIndex <= 0 ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: currentWeekIndex <= 0 ? 'none' : '0 2px 8px rgba(0,0,0,0.15)',
-                transition: 'all 0.2s ease',
-                zIndex: 10
-              }}
-              onMouseEnter={(e) => {
-                if (currentWeekIndex > 0) {
-                  e.currentTarget.style.backgroundColor = '#f1f5f9';
-                  e.currentTarget.style.transform = 'translateY(-50%) scale(1.05)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (currentWeekIndex > 0) {
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                  e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
-                }
-              }}
-            >
-              <ArrowBackIosIcon 
-                sx={{ 
-                  fontSize: '16px',
-                  color: currentWeekIndex <= 0 ? '#cbd5e1' : '#475569'
-                }} 
-              />
-            </button>
-
-            {/* Day labels */}
-            <div style={{
-              display: 'flex',
-              gap: '12px',
-              flex: 1,
-              justifyContent: 'space-between'
-            }}>
-              {weekDays.map((day, index) => {
-                const dayName = day.toLocaleDateString('en-US', { weekday: 'short' });
-                const dayDate = day.getDate();
-                
-                return (
-                  <div key={index} style={{
-                    flex: 1,
-                    textAlign: 'center',
-                    fontSize: '12px',
-                    color: '#475569',
-                    fontWeight: '500',
-                    minWidth: '50px'
-                  }}>
-                    <div style={{ fontWeight: '600', marginBottom: '2px' }}>{dayName}</div>
-                    <div style={{ fontSize: '10px', color: '#64748b' }}>{dayDate}</div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Right Arrow */}
-            <button
-              onClick={goToNextWeek}
-              disabled={currentWeekIndex >= weeks.length - 1}
-              style={{
-                position: 'absolute',
-                right: '15px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                border: '2px solid #e2e8f0',
-                backgroundColor: currentWeekIndex >= weeks.length - 1 ? '#f8fafc' : '#ffffff',
-                color: currentWeekIndex >= weeks.length - 1 ? '#cbd5e1' : '#475569',
-                cursor: currentWeekIndex >= weeks.length - 1 ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: currentWeekIndex >= weeks.length - 1 ? 'none' : '0 2px 8px rgba(0,0,0,0.15)',
-                transition: 'all 0.2s ease',
-                zIndex: 10
-              }}
-              onMouseEnter={(e) => {
-                if (currentWeekIndex < weeks.length - 1) {
-                  e.currentTarget.style.backgroundColor = '#f1f5f9';
-                  e.currentTarget.style.transform = 'translateY(-50%) scale(1.05)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (currentWeekIndex < weeks.length - 1) {
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                  e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
-                }
-              }}
-            >
-              <ArrowForwardIosIcon 
-                sx={{ 
-                  fontSize: '16px',
-                  color: currentWeekIndex >= weeks.length - 1 ? '#cbd5e1' : '#475569'
-                }} 
-              />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+            Savings per Day
+          </Typography>
+        </Box>
+      </Box>
+    </Card>
   );
 };
 
