@@ -197,7 +197,6 @@ const ManageUsersTable: React.FC<ManageUsersTableProps> = ({
           <TableHead>
             <TableRow>
               <TableCell><Typography fontWeight="bold">Username</Typography></TableCell>
-              <TableCell><Typography fontWeight="bold">Full Name</Typography></TableCell>
               <TableCell><Typography fontWeight="bold">Email</Typography></TableCell>
               <TableCell><Typography fontWeight="bold">Status</Typography></TableCell>
               <TableCell><Typography fontWeight="bold">Last Login</Typography></TableCell>
@@ -210,7 +209,6 @@ const ManageUsersTable: React.FC<ManageUsersTableProps> = ({
               filteredUsers.map((user) => (
                 <TableRow key={user.id} hover>
                   <TableCell>{user.userName}</TableCell>
-                  <TableCell>{user.fullName || '-'}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{getStatusChip(user.status, user.isActive)}</TableCell>
                   <TableCell>{user.lastLoginDisplay}</TableCell>
@@ -297,10 +295,6 @@ const ManageUsersTable: React.FC<ManageUsersTableProps> = ({
             <Box display="flex" flexDirection="column" gap={2} mt={1}>
               <Typography variant="body1">
                 <strong>Username:</strong> {selectedUser.userName}
-              </Typography>
-              
-              <Typography variant="body1">
-                <strong>Full Name:</strong> {selectedUser.fullName || 'Not provided'}
               </Typography>
               
               <Typography variant="body1">

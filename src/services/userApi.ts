@@ -2,8 +2,6 @@
 export interface UserResponse {
   id: number;
   userName: string;
-  firstName?: string;
-  lastName?: string;
   email: string;
   currency: string;
   createdAt: string;
@@ -11,7 +9,6 @@ export interface UserResponse {
   isActive: boolean;
   status: string;
   updatedAt?: string;
-  fullName: string;
   lastLoginDisplay: string;
   statusBadgeColor: string;
 }

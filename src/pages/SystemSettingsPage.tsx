@@ -444,13 +444,11 @@ const SystemSettingsPage = () => {
                 placeholder="Enter new admin name..."
               />
               <TextField 
-                key={`email-update-clean-${Date.now()}`}
                 fullWidth 
                 label="Update Email Address" 
                 variant="outlined" 
                 type="email"
                 value={cleanEmailInput}
-                defaultValue=""
                 onChange={(e) => {
                   setCleanEmailInput(e.target.value);
                   setEmailUpdateInput(e.target.value); // Keep both in sync
