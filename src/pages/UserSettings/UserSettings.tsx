@@ -38,11 +38,11 @@ const UserSettings: React.FC = () => {
     undefined
   );
 
-  const API_BASE_URL = "http://localhost:5110/api";
+  const API_BASE_URL = "https://localhost:7211/api";
   const currentUserId = 1;
 
   const [userData, setUserData] = useState<UserData>({
-    userId: 1,
+    userId: 1, // TEMPORARY: Changed from 8 to 1 to match currentUserId used for profile picture
     name: "",
     email: "",
   });
@@ -170,7 +170,8 @@ const UserSettings: React.FC = () => {
                     minWidth: { lg: "400px" },
                   }}
                 >
-                  <Passwordchange />
+                  {/* TEMPORARY: Pass userId = 1 for development (same as currentUserId used for profile picture) */}
+                  <Passwordchange userId={1} />
                 </Box>
 
                 <Box
@@ -202,11 +203,12 @@ const UserSettings: React.FC = () => {
                 </Box>
               </Box>
 
-              <PageButton
+              {/* Remove duplicate Save Changes button - Passwordchange component has its own submit button */}
+              {/* <PageButton
                 text="Save Changes"
                 onClick={() => alert("Password updated!")}
                 type="button"
-              />
+              /> */}
             </Box>
           </Box>
 

@@ -13,7 +13,7 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({ onImageUpda
     const [uploading, setUploading] = useState(false);
     const [message, setMessage] = useState<string>("");
 
-    const currentUserId = 1;
+    const currentUserId = 8;
 
     useEffect(() => {
         loadCurrentProfilePicture();
