@@ -11,12 +11,14 @@ import DashboardTransaction from "../../components/DashboardComponents/dashboard
 import Grid from '@mui/material/Grid';
 import Sidebar from "../../components/sidebar/sidebar";
 import { useEffect, useState } from "react";
+import { useUser } from "../../context/UserContext";
 
 const Dashboard = () => {
 
   const [dashboardData, setDashboardData] = useState<any>();
   const [loading, setLoading] = useState<boolean>(true);
-  let userId: Number = 1;
+  const { userId } = useUser();
+  console.log("User ID from context:", userId);
 
   useEffect(() => {
     async function fetchDashboardData(){

@@ -2,6 +2,7 @@ import { Close } from "@mui/icons-material";
 import { Box, Button, FormControl, IconButton, InputLabel, MenuItem, Modal, Paper, Select, TextareaAutosize, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../../../assets/styles/theme";
 import { useEffect, useState } from "react";
+import { useUser } from "../../../context/UserContext";
 
 interface TransactionFormProps {
     addTransaction: boolean;
@@ -17,6 +18,8 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
     const [categoryID, setCategoryID] = useState('');
     const [date, setDate] = useState('');
     const [description, setDescription] = useState('');
+    const { userId } = useUser(); // Get userId from UserContext
+    console.log("User ID from context:", userId);
 
     // State to store fetched categories
     const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
@@ -48,7 +51,7 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
             amount: parseFloat(amount),
             date: date,
             description: description,
-            userId: 1,
+            userId:userId, // Include userId in the transaction data
         };
 
         try{

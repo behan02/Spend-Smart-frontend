@@ -2,6 +2,7 @@ import { Close } from "@mui/icons-material";
 import { Box, Button, Checkbox, FormControl, FormControlLabel, IconButton, InputLabel, MenuItem, Modal, Paper, Select, TextField, ThemeProvider, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import theme from "../../../assets/styles/theme";
+import { useUser } from "../../../context/UserContext";
 
 
 interface RecurringTransactionProps {
@@ -23,6 +24,8 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
     const [description, setDescription] = useState("");
 
     const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
+    const { userId } = useUser();
+    console.log("User ID from context:", userId);
 
     useEffect(() => {
         async function fetchCategories() {
@@ -60,7 +63,7 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
             endDate: endDate ? endDate : null,
             occurrences: occurrences ? parseInt(occurrences) : null,
             autoDeduct: autoDeduct,
-            userId: 1,
+            userId: userId
         };
 
         try{

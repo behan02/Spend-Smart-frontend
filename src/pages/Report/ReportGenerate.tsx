@@ -16,6 +16,7 @@ import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import Sidebar from "../../components/sidebar/sidebar";
 import axios from "axios";
+import { useUser } from "../../context/UserContext"; // ✅ added import
 
 // API Configuration
 const API_BASE_URL = "https://localhost:7211/api";
@@ -30,10 +31,8 @@ const ReportGenerate: React.FC = () => {
   const [isReportVisible, setIsReportVisible] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [testUserId, setTestUserIdState] = useState<number>(
-    parseInt(localStorage.getItem("testUserId") || "1")
-  );
   const theme = useTheme();
+  const { userId } = useUser(); // ✅ using user ID from sessionStorage
 
   // API Functions
   const testConnection = async (): Promise<{
@@ -92,9 +91,6 @@ const ReportGenerate: React.FC = () => {
         return;
       }
 
-      // Update test user ID in localStorage
-      localStorage.setItem("testUserId", testUserId.toString());
-
       // Test API connection before generating report
       console.log("Testing API connection...");
       const connectionTest = await testConnection();
@@ -109,7 +105,7 @@ const ReportGenerate: React.FC = () => {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       setIsReportVisible(true);
-      console.log("Report generation triggered for user:", testUserId);
+      console.log("Report generation triggered for user:", userId);
     } catch (err: any) {
       console.error("Report generation error:", err);
       setError(err.message || "An error occurred while generating the report");
@@ -125,30 +121,6 @@ const ReportGenerate: React.FC = () => {
     setError(null);
   };
 
-  const handleUserIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(event.target.value) || 1;
-    setTestUserIdState(value);
-  };
-
-  const handleTestConnection = async () => {
-    setIsLoading(true);
-    try {
-      const result = await testConnection();
-      if (result.success) {
-        setError(null);
-        alert(`✅ ${result.message}`);
-      } else {
-        setError(result.message);
-        alert(`❌ ${result.message}`);
-      }
-    } catch (error) {
-      const message = "Failed to test connection";
-      setError(message);
-      alert(`❌ ${message}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleQuickDateRange = (range: string) => {
     const now = dayjs();
@@ -221,50 +193,7 @@ const ReportGenerate: React.FC = () => {
           sx={{ mb: 3, textAlign: "center" }}
         />
 
-        {/* Development Controls */}
-        <Paper
-          elevation={1}
-          sx={{
-            p: 2,
-            mb: 3,
-            bgcolor: "info.light",
-            color: "info.contrastText",
-          }}
-        >
-          <Typography variant="subtitle2" sx={{ mb: 2 }}>
-            🔧 Development Mode - Testing Controls
-          </Typography>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              flexWrap: "wrap",
-            }}
-          >
-            <TextField
-              label="Test User ID"
-              type="number"
-              value={testUserId}
-              onChange={handleUserIdChange}
-              size="small"
-              sx={{ width: "150px" }}
-              inputProps={{ min: 1 }}
-            />
-            <Button
-              variant="contained"
-              size="small"
-              onClick={handleTestConnection}
-              disabled={isLoading}
-              sx={{ bgcolor: "primary.main", color: "white" }}
-            >
-              Test API Connection
-            </Button>
-            <Typography variant="body2" sx={{ ml: 1 }}>
-              Backend: {API_BASE_URL}
-            </Typography>
-          </Box>
-        </Paper>
+        
 
         {/* Date Selection */}
         <Box
@@ -432,7 +361,7 @@ const ReportGenerate: React.FC = () => {
               endDate={endDate?.format("YYYY-MM-DD") ?? ""}
               key={`${startDate?.format("YYYY-MM-DD")}-${endDate?.format(
                 "YYYY-MM-DD"
-              )}-${testUserId}`} // Force re-render on date/user change
+              )}-${userId}`} // ✅ uses authenticated user ID
             />
           ) : (
             <Box
@@ -458,8 +387,6 @@ const ReportGenerate: React.FC = () => {
                 Current selection: {startDate?.format("MMM DD, YYYY")} to{" "}
                 {endDate?.format("MMM DD, YYYY")}
               </Typography>
-
-              
             </Box>
           )}
         </Box>

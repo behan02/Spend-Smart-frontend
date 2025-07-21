@@ -78,12 +78,12 @@ const LoginForm = () => {
 
       // ✅ Decode token payload
       const payload = JSON.parse(atob(token.split(".")[1]));
-      const userId = payload.userId; // `nameid` from ClaimTypes.NameIdentifier
+      const userId = payload.userId; 
       console.log("User ID:", userId);
       // ✅ Save token and user ID
-      localStorage.setItem("authToken", token);
-      localStorage.setItem("userId", userId);
-      localStorage.setItem("userName", payload.unique_name); // optional
+      sessionStorage.setItem("authToken", token);
+      sessionStorage.setItem("userId", userId);
+      sessionStorage.setItem("userName", payload.unique_name); // optional
 
       navigate("/dashboard");
     } catch (err: any) {

@@ -1,18 +1,21 @@
 import { Box, Card, FormControl, MenuItem, Select, SelectChangeEvent, Typography } from "@mui/material";
 import { BarChart } from "@mui/x-charts";
 import { useEffect, useState } from "react";
+import React from "react";
+import { useUser } from "../../../context/UserContext";
 
 const DashboardBargraph: React.FC = () => {
 
   //State to manage the selected time period for the bar graph
   const [timeperiod, setTimeperiod] = useState<string>("Monthly");
   const [data, setData] = useState<any[]>([]);
+  const { userId } = useUser();
 
   const handleChange = (e: SelectChangeEvent) => {
     setTimeperiod(e.target.value);
   }
 
-  let userId: Number = 1;
+  
 
   useEffect(() => {
     async function fetchBarGraphData(){
