@@ -22,8 +22,6 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import BlockIcon from '@mui/icons-material/Block';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { userApi, UserResponse } from '../../services/userApi';
 
 interface ManageUsersTableProps {
@@ -115,34 +113,6 @@ const ManageUsersTable: React.FC<ManageUsersTableProps> = ({
     }
   };
 
-  const handleSuspend = async (id: number, userName: string) => {
-    if (window.confirm(`Are you sure you want to suspend user "${userName}"? They will not be able to access their account.`)) {
-      try {
-        setLoading(true);
-        await userApi.suspendUser(id);
-        await loadUsers();
-      } catch (err: any) {
-        console.error('Error suspending user:', err);
-        setError(`Failed to suspend user: ${err.message}`);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  const handleActivate = async (id: number, _userName: string) => {
-    try {
-      setLoading(true);
-      await userApi.activateUser(id);
-      await loadUsers();
-    } catch (err: any) {
-      console.error('Error activating user:', err);
-      setError(`Failed to activate user: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const getStatusChip = (status: string, isActive: boolean) => {
     let color: 'success' | 'warning' | 'error' | 'default' = 'default';
     
@@ -224,30 +194,6 @@ const ManageUsersTable: React.FC<ManageUsersTableProps> = ({
                           <VisibilityIcon />
                         </IconButton>
                       </Tooltip>
-                      
-                      {user.status === 'Suspended' ? (
-                        <Tooltip title="Activate User">
-                          <IconButton 
-                            color="success" 
-                            size="small"
-                            onClick={() => handleActivate(user.id, user.userName)}
-                            disabled={loading}
-                          >
-                            <CheckCircleIcon />
-                          </IconButton>
-                        </Tooltip>
-                      ) : (
-                        <Tooltip title="Suspend User">
-                          <IconButton 
-                            color="warning" 
-                            size="small"
-                            onClick={() => handleSuspend(user.id, user.userName)}
-                            disabled={loading}
-                          >
-                            <BlockIcon />
-                          </IconButton>
-                        </Tooltip>
-                      )}
                       
                       <Tooltip title="Delete User (Permanent)">
                         <IconButton 
