@@ -246,15 +246,15 @@ const UserSettings: React.FC = () => {
               alt="profile-picture"
               src={profileImageUrl}
               sx={{
-                width: 100,
-                height: 100,
+                width: 120,
+                height: 120,
                 position: "absolute",
                 bottom: -40,
                 left: 24,
                 border: "4px solid white",
                 backgroundColor: profileImageUrl ? "transparent" : "#e0e0e0",
                 color: "#666",
-                fontSize: "14px",
+                fontSize: "16px",
               }}
             >
               {!profileImageUrl && "👤"}
