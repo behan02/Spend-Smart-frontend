@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Goal as BaseGoal } from '../../services/goalService';
 
-// Extended Goal interface with remainingDays property
+// Extend the Goal interface to include remainingDays
 interface Goal extends BaseGoal {
-  remainingDays: number;
+  remainingDays?: number;
 }
 
 // Material UI style icons as SVG components

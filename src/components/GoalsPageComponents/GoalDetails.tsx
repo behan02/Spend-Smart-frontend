@@ -32,6 +32,7 @@ interface GoalDetailsProps {
 
 const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onViewDetails }) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   if (!goal) {
     return (
@@ -75,14 +76,23 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
 
   return (
     <>
-      <Paper elevation={0} sx={{ 
-        p: 4,
-        border: '1px solid #E5E7EB',
-        borderRadius: 2,
-        height: 'fit-content',
-        minHeight: '400px',
-        backgroundColor: '#fff'
-      }}>
+      <Paper 
+        elevation={0} 
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        sx={{ 
+          p: 4,
+          border: '1px solid #E5E7EB',
+          borderRadius: 2,
+          height: 'fit-content',
+          minHeight: '400px',
+          backgroundColor: '#fff',
+          transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
+          boxShadow: isHovered 
+            ? '0 8px 25px rgba(0,0,0,0.12)' 
+            : '0 2px 8px rgba(0,0,0,0.04)',
+          transition: 'all 0.3s ease'
+        }}>
         {/* Header Section with Spend and Goals */}
         <Box sx={{ 
           display: 'flex', 
@@ -121,17 +131,19 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
         <Box sx={{ mb: 4 }}>
           <Box sx={{ 
             width: '100%', 
-            height: 8, 
+            height: isHovered ? 10 : 8, 
             backgroundColor: '#E5E7EB',
             borderRadius: 4,
             overflow: 'hidden',
-            mb: 2
+            mb: 2,
+            transition: 'height 0.3s ease'
           }}>
             <Box sx={{ 
               width: `${goal.progress}%`, 
               height: '100%',
               backgroundColor: 'rgb(11, 0, 221)',
-              transition: 'width 0.3s ease'
+              transition: 'width 0.5s ease',
+              boxShadow: isHovered ? '0 0 8px rgba(11, 0, 221, 0.3)' : 'none'
             }} />
           </Box>
           
@@ -177,12 +189,13 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
               cursor: 'pointer',
               fontWeight: 600,
               fontSize: '16px',
-               fontFamily: '"Inter", "Roboto", "Arial", sans-serif',
-              transition: 'all 0.2s ease',
+              fontFamily: '"Inter", "Roboto", "Arial", sans-serif',
+              transition: 'all 0.3s ease',
+              transform: isHovered ? 'scale(1.05)' : 'scale(1)',
               '&:hover': {
                 backgroundColor: '#1E40AF',
-                transform: 'translateY(-1px)',
-                boxShadow: '0 4px 12px rgba(29, 78, 216, 0.3)'
+                transform: 'scale(1.08) translateY(-1px)',
+                boxShadow: '0 6px 20px rgba(29, 78, 216, 0.4)'
               }
             }}
           >
@@ -207,10 +220,11 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
+                transition: 'all 0.3s ease',
                 '&:hover': {
                   backgroundColor: '#E5E7EB',
-                  transform: 'translateY(-1px)'
+                  transform: 'translateY(-2px) scale(1.05)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                 }
               }}
             >
@@ -232,10 +246,11 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
+                transition: 'all 0.3s ease',
                 '&:hover': {
                   backgroundColor: '#FEE2E2',
-                  transform: 'translateY(-1px)'
+                  transform: 'translateY(-2px) scale(1.05)',
+                  boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)'
                 }
               }}
             >
