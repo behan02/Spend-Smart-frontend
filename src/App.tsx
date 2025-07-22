@@ -7,6 +7,7 @@ import GoalDetailsPage from "./pages/Goals/GoalDetailsPage";
 import Transaction from "./pages/Transaction/Transaction";
 import UserLogin from "./pages/UserLogin/UserLogin";
 import UserRegister from "./pages/UserRegister/UserRegister";
+import AdminLogin from "./pages/AdminLogin/AdminLogin";
 import AdminRegister from "./pages/AdminRegister/AdminRegister";
 import ForgetPassword from "./pages/ForgetPassword";
 import ResetPasswordPage from "./pages/ResetPasswordPage";

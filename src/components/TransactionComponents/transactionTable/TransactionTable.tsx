@@ -4,6 +4,7 @@ import theme from "../../../assets/styles/theme";
 import { useEffect, useState } from "react";
 import CategoryIcons, { iconType } from "../../../assets/categoryIcons/CategoryIcons";
 import { set } from "date-fns";
+import { useUser } from "../../../context/UserContext";
 
 interface Transaction {
   id: number;
@@ -53,6 +54,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
 
   // State to store the list of transactions
   const [transactionList, setTransactionList] = useState<Transaction[]>([]);
+  const { userId } = useUser(); // Get user ID from context
 
   // State to control how many transactions to show
   const [showAll, setShowAll] = useState<boolean>(false);
@@ -64,7 +66,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
     }).format(amount);
   };
 
-  let userId: number = 1; // Assuming a static user ID for now
+ 
 
   // Fetch transactions from the API
   useEffect(() => {

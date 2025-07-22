@@ -1,39 +1,47 @@
-// src/context/UserContext.tsx
-import React, { createContext, useContext, useEffect, useState } from "react";
+// UserContext.tsx
+import { createContext, useContext, useState, useEffect } from "react";
 
 interface UserContextType {
-  userId: string | null;
-  setUserId: (id: string | null) => void;
+  userId: number | null;
+  setUserId: (id: number | null) => void;
+  clearUserId: () => void; // add clearUserId method
 }
 
-const UserContext = createContext<UserContextType | undefined>(undefined);
+const UserContext = createContext<UserContextType>({
+  userId: null,
+  setUserId: () => {},
+  clearUserId: () => {},
+});
 
-export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [userId, setUserId] = useState<string | null>(() => {
-    return sessionStorage.getItem("userId");
-  });
-  console.log("Initial User ID from sessionStorage:", userId);
+export const UserProvider = ({ children }: { children: React.ReactNode }) => {
+  const [userId, setUserId] = useState<number | null>(null);
 
+  // Load from sessionStorage on mount
   useEffect(() => {
-    if (userId) {
-      sessionStorage.setItem("userId", userId);
+    const storedId = sessionStorage.getItem("userId");
+    if (storedId) setUserId(parseInt(storedId));
+  }, []);
+
+  // Sync userId state to sessionStorage
+  useEffect(() => {
+    if (userId !== null) {
+      sessionStorage.setItem("userId", userId.toString());
     } else {
       sessionStorage.removeItem("userId");
     }
   }, [userId]);
 
+  // clearUserId method
+  const clearUserId = () => {
+    setUserId(null);
+    sessionStorage.removeItem("userId");
+  };
+
   return (
-    <UserContext.Provider value={{ userId, setUserId }}>
+    <UserContext.Provider value={{ userId, setUserId, clearUserId }}>
       {children}
     </UserContext.Provider>
   );
 };
 
-// ✅ Custom hook for easy usage
-export const useUser = () => {
-  const context = useContext(UserContext);
-  if (!context) {
-    throw new Error("useUser must be used within a UserProvider");
-  }
-  return context;
-};
+export const useUser = () => useContext(UserContext);

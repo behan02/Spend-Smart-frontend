@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Define your API base URL
-const API_BASE_URL = 'http://localhost:5110/api'; // Match your backend port
+const API_BASE_URL = 'https://localhost:7211/api'; // Match your backend port
 
 // Define SavingRecord interface matching the backend model
 export interface SavingRecord {

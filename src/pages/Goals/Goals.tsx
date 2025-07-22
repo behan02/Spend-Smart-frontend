@@ -11,6 +11,9 @@ import theme from '../../assets/styles/theme';
 import { goalService, GoalFormData } from '../../services/goalService';
 import { savingRecordService } from '../../services/savingRecordService';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../context/UserContext';
+
+
 
 
 interface Goal {
@@ -36,6 +39,8 @@ const Goals: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const userId = useUser(); // Get user ID from context
+  
 
   // Helper function to calculate remaining days
   const calculateRemainingDays = (endDate?: string): number => {
@@ -79,8 +84,11 @@ const Goals: React.FC = () => {
     loadGoals();
   }, []);
 
+  
+
   // Reload goals when the page becomes visible (for navigation back scenarios)
   useEffect(() => {
+     
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         console.log('🔄 Page became visible, reloading goals for fresh progress data...');
@@ -101,6 +109,31 @@ const Goals: React.FC = () => {
       window.removeEventListener('focus', handleFocus);
     };
   }, []);
+
+  useEffect(() => {
+  const fetchGoals = async () => {
+    if (!userId) {
+      console.warn("No userId found in context.");
+      return;
+    }
+
+    try {
+      console.log("Fetching goals for userId:", userId);
+      const response = await fetch(`https://localhost:7211/api/Goals/goal/${userId}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch goals");
+      }
+      const data = await response.json();
+      setGoals(data);
+    } catch (error) {
+      console.error("Error fetching goals:", error);
+    }
+  };
+
+  fetchGoals();
+}, [userId]);
+
+  
 
   const loadGoals = async () => {
     try {

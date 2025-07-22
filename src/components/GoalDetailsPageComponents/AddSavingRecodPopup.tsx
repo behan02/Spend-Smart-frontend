@@ -12,6 +12,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { SavingRecord } from './SavingRecord';
 import { Goal } from '../../services/goalService';
+import { useUser } from '../../context/UserContext';
 
 interface AddSavingRecodPopupProps {
   open: boolean;
@@ -35,6 +36,7 @@ const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
   const [time, setTime] = useState('');
   const [description, setDescription] = useState('');
   const [validationError, setValidationError] = useState('');
+  const userId = useUser(); // Get user ID from context
 
   useEffect(() => {
     if (open) {

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Define your API base URL
-const API_BASE_URL = 'http://localhost:5110/api'; // This should match your backend's actual port 
+const API_BASE_URL = 'https://localhost:7211/api'; // This should match your backend's actual port 
 
 // Define Goal interface matching the backend model
 export interface Goal {
@@ -37,20 +37,16 @@ const apiClient = axios.create({
 // Goal service methods
 export const goalService = {
   // Get all goals
-  getAll: async (): Promise<Goal[]> => {
-    const response = await apiClient.get<Goal[]>('/goals');
+  getAll: async (userId: number): Promise<Goal[]> => {
+    const response = await apiClient.get<Goal[]>(`/goals?userId=${userId}`);
     return response.data;
   },
 
-  // Get goal by id
-  getById: async (id: number): Promise<Goal> => {
-    const response = await apiClient.get<Goal>(`/goals/${id}`);
-    return response.data;
-  },
-
-  // Create new goal
-  create: async (goalData: GoalFormData): Promise<Goal> => {
-    const response = await apiClient.post<Goal>('/goals', goalData);
+  create: async (goalData: GoalFormData, userId: number): Promise<Goal> => {
+    const response = await apiClient.post<Goal>('/goals', {
+      ...goalData,
+      userId,
+    });
     return response.data;
   },
 
