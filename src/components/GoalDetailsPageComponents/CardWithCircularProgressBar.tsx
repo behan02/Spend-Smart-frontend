@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { Goal } from '../../services/goalService';
+import { Goal as BaseGoal } from '../../services/goalService';
+
+// Extended Goal interface with remainingDays property
+interface Goal extends BaseGoal {
+  remainingDays: number;
+}
 
 // Material UI style icons as SVG components
 const TrendingUpIcon = () => (
@@ -31,13 +36,11 @@ const ScheduleIcon = ({ size = 16, color = "currentColor" }) => (
   </svg>
 );
 
-
-
 interface SavingRecord {
   id: number;
   amount: number;
-  date: string; // Date part as string
-  time?: string; // Time part as string
+  date: string;
+  time?: string;
   description?: string;
   goalId: number;
 }
@@ -46,6 +49,164 @@ interface CardWithCircularProgressBarProps {
   goal: Goal;
   savingRecords: SavingRecord[];
 }
+
+// Enhanced Goal Status Algorithm
+const calculateGoalStatus = (goal: Goal) => {
+  const currentAmount = goal.currentAmount;
+  const targetAmount = goal.targetAmount;
+  const remainingDays = goal.remainingDays || 0;
+  
+  // Calculate progress percentages
+  const amountProgress = targetAmount > 0 ? (currentAmount / targetAmount) * 100 : 0;
+  
+  // Calculate timeline progress (assuming goal has a total duration)
+  // We need to derive total duration from remaining days and current progress
+  // For this calculation, we'll assume the goal started when currentAmount was 0
+  // and estimate total duration based on current progress and remaining days
+  
+  let timelineProgress = 0;
+  let totalDuration = 0;
+  
+  if (remainingDays >= 0) {
+    // If we know remaining days, we can estimate total duration
+    // Using a simple estimation: if we have some progress, we can estimate how long it took
+    if (amountProgress > 0 && remainingDays > 0) {
+      // Estimate total duration based on current progress rate
+      const estimatedTotalDays = (remainingDays * 100) / (100 - amountProgress);
+      totalDuration = estimatedTotalDays;
+      const elapsedDays = totalDuration - remainingDays;
+      timelineProgress = (elapsedDays / totalDuration) * 100;
+    } else if (remainingDays === 0) {
+      // Goal deadline has passed
+      timelineProgress = 100;
+      totalDuration = 1; // Avoid division by zero
+    } else if (amountProgress === 0) {
+      // No progress yet, assume just started
+      timelineProgress = 5; // Assume minimal time has passed
+      totalDuration = remainingDays / 0.95; // Rough estimate
+    }
+  }
+  
+  // Ensure values are within bounds
+  const clampedAmountProgress = Math.max(0, Math.min(100, amountProgress));
+  const clampedTimelineProgress = Math.max(0, Math.min(100, timelineProgress));
+  
+  // Calculate the difference between amount progress and timeline progress
+  const progressDifference = clampedAmountProgress - clampedTimelineProgress;
+  
+  // Enhanced status determination algorithm
+  const getGoalStatus = () => {
+    // Goal completed
+    if (clampedAmountProgress >= 100) {
+      if (remainingDays > 0) {
+        return {
+          status: 'Completed Early',
+          color: '#10B981', // Green
+          priority: 'excellent'
+        };
+      } else {
+        return {
+          status: 'Completed',
+          color: '#10B981', // Green
+          priority: 'excellent'
+        };
+      }
+    }
+    
+    // Goal overdue
+    if (remainingDays <= 0 && clampedAmountProgress < 100) {
+      return {
+        status: 'Overdue',
+        color: '#DC2626', // Red
+        priority: 'urgent'
+      };
+    }
+    
+    // Very close to deadline
+    if (remainingDays <= 7 && remainingDays > 0) {
+      if (clampedAmountProgress >= 90) {
+        return {
+          status: 'Almost Done',
+          color: '#10B981', // Green
+          priority: 'good'
+        };
+      } else if (clampedAmountProgress >= 70) {
+        return {
+          status: 'Final Push',
+          color: '#F59E0B', // Yellow
+          priority: 'warning'
+        };
+      } else {
+        return {
+          status: 'Critical',
+          color: '#EF4444', // Red
+          priority: 'urgent'
+        };
+      }
+    }
+    
+    // Progress-based status (for non-critical timelines)
+    if (progressDifference >= 15) {
+      // Significantly ahead of schedule
+      return {
+        status: 'Ahead of Schedule',
+        color: '#059669', // Dark green
+        priority: 'excellent'
+      };
+    } else if (progressDifference >= 5) {
+      // Slightly ahead
+      return {
+        status: 'Ahead',
+        color: '#10B981', // Green
+        priority: 'good'
+      };
+    } else if (progressDifference >= -5) {
+      // On track (within 5% tolerance)
+      return {
+        status: 'On Track',
+        color: '#3B82F6', // Blue
+        priority: 'good'
+      };
+    } else if (progressDifference >= -15) {
+      // Slightly behind
+      return {
+        status: 'Behind Schedule',
+        color: '#F59E0B', // Orange
+        priority: 'warning'
+      };
+    } else if (progressDifference >= -25) {
+      // Significantly behind
+      return {
+        status: 'Falling Behind',
+        color: '#EF4444', // Red
+        priority: 'urgent'
+      };
+    } else {
+      // Very far behind
+      return {
+        status: 'Needs Attention',
+        color: '#DC2626', // Dark red
+        priority: 'critical'
+      };
+    }
+  };
+  
+  const statusInfo = getGoalStatus();
+  
+  return {
+    ...statusInfo,
+    amountProgress: clampedAmountProgress,
+    timelineProgress: clampedTimelineProgress,
+    progressDifference,
+    remainingDays,
+    debugInfo: {
+      amountProgress: clampedAmountProgress.toFixed(1),
+      timelineProgress: clampedTimelineProgress.toFixed(1),
+      progressDifference: progressDifference.toFixed(1),
+      totalDuration: totalDuration.toFixed(1)
+    }
+  };
+};
 
 const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = ({
   goal,
@@ -61,38 +222,21 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
   // so we use the goal's currentAmount directly to avoid double counting
   const currentSavedAmount = goal.currentAmount;
   
-  // Calculate progress percentage
-  const progressPercentage = goal.targetAmount > 0 
-    ? Math.min(100, Math.round((currentSavedAmount / goal.targetAmount) * 100))
-    : 0;
+  // Use the enhanced algorithm to get goal status
+  const goalStatusInfo = calculateGoalStatus(goal);
   
-  // Calculate remaining days
-  const remainingDays = goal.remainingDays || 0;
+  // Calculate progress percentage for the circle
+  const progressPercentage = Math.min(100, Math.round(goalStatusInfo.amountProgress));
+  
+  // Calculate remaining amount
   const remainingAmount = Math.max(0, goal.targetAmount - currentSavedAmount);
 
   // Circle properties
-  const radius = 90; // Changed from 55 to match the SVG circle radius
+  const radius = 90;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = progressPercentage === 100 
     ? 0 
     : circumference - (progressPercentage / 100) * circumference;
-
-  // Status based on progress
-  const getStatusColor = () => {
-    if (progressPercentage >= 100) return '#10B981';
-    if (progressPercentage >= 75) return '#059669';
-    if (progressPercentage >= 50) return '#3B82F6';
-    if (progressPercentage >= 25) return '#F59E0B';
-    return '#EF4444';
-  };
-
-  const getStatusText = () => {
-    if (progressPercentage >= 100) return 'Completed';
-    if (progressPercentage >= 75) return 'Almost There';
-    if (progressPercentage >= 50) return 'On Track';
-    if (progressPercentage >= 25) return 'Getting Started';
-    return 'Just Started';
-  };
 
   return (
     <div 
@@ -155,18 +299,18 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
             </div>
             <div style={{
               padding: '4px 12px',
-              backgroundColor: getStatusColor() + '15',
+              backgroundColor: goalStatusInfo.color + '15',
               borderRadius: '20px',
-              border: `1px solid ${getStatusColor()}30`
+              border: `1px solid ${goalStatusInfo.color}30`
             }}>
               <span style={{ 
-                color: getStatusColor(),
+                color: goalStatusInfo.color,
                 fontSize: '11px',
                 fontWeight: '600',
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px'
               }}>
-                {getStatusText()}
+                {goalStatusInfo.status}
               </span>
             </div>
           </div>
@@ -196,15 +340,13 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
             </p>
           )}
         </div>
-
-        
       </div>
 
       {/* Main Content */}
       <div style={{ 
         display: 'flex', 
         alignItems: 'center', 
-        justifyContent: 'space-between', // Align items to opposite sides
+        justifyContent: 'space-between',
         gap: '32px', 
         flex: 1,
         minHeight: '240px'
@@ -216,16 +358,16 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
           alignItems: 'center', 
           justifyContent: 'center',
           flexShrink: 0,
-          flex: 1 // Take up remaining space
+          flex: 1
         }}>
           {/* Outer glow effect */}
           <div style={{
             position: 'absolute',
-            width: '220px', // Enlarged width
-            height: '220px', // Enlarged height
+            width: '220px',
+            height: '220px',
             borderRadius: '50%',
-            background: `conic-gradient(from 0deg, ${getStatusColor()}20 0deg, ${getStatusColor()}10 ${progressPercentage * 3.6}deg, transparent ${progressPercentage * 3.6}deg)`,
-            filter: 'blur(10px)', // Adjusted blur for larger size
+            background: `conic-gradient(from 0deg, ${goalStatusInfo.color}20 0deg, ${goalStatusInfo.color}10 ${progressPercentage * 3.6}deg, transparent ${progressPercentage * 3.6}deg)`,
+            filter: 'blur(10px)',
             opacity: 0.6
           }} />
           
@@ -234,7 +376,7 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
             <circle
               cx="100"
               cy="100"
-              r="90" // Enlarged radius
+              r="90"
               stroke="rgba(229, 231, 235, 0.8)"
               strokeWidth="6"
               fill="transparent"
@@ -243,8 +385,8 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
             <circle
               cx="100"
               cy="100"
-              r="90" // Enlarged radius
-              stroke={getStatusColor()}
+              r="90"
+              stroke={goalStatusInfo.color}
               strokeWidth="6"
               fill="transparent"
               strokeDasharray={circumference}
@@ -267,9 +409,9 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
             justifyContent: 'center'
           }}>
             <div style={{ 
-              fontSize: '32px', // Enlarged font size
+              fontSize: '32px',
               fontWeight: "800",
-              color: getStatusColor(),
+              color: goalStatusInfo.color,
               lineHeight: 1,
               margin: 0,
               fontFamily: '"Inter", system-ui, sans-serif'
@@ -278,7 +420,7 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
             </div>
             <div style={{ 
               color: '#9CA3AF',
-              fontSize: '12px', // Adjusted font size
+              fontSize: '12px',
               fontWeight: '600',
               marginTop: '2px',
               textTransform: 'uppercase',
@@ -291,7 +433,7 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
 
         {/* Statistics Grid */}
         <div style={{ 
-          flex: 1, // Align to the right side
+          flex: 1,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
@@ -308,7 +450,7 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
             transition: 'all 0.3s ease',
             transform: isHovered ? 'scale(1.02)' : 'scale(1)',
             flex: '1',
-            width: '100%', // Full width
+            width: '100%',
             height: '60px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
@@ -342,7 +484,7 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
             transition: 'all 0.3s ease',
             transform: isHovered ? 'scale(1.02)' : 'scale(1)',
             flex: '1',
-            width: '100%', // Full width
+            width: '100%',
             height: '60px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
@@ -369,20 +511,20 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
 
           {/* Days Remaining */}
           <div style={{
-            background: remainingDays <= 30 
+            background: goal.remainingDays <= 30 
               ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(252, 165, 165, 0.05) 100%)'
               : 'linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(251, 191, 36, 0.05) 100%)',
             borderRadius: '10px',
             padding: '10px',
-            border: `1px solid ${remainingDays <= 30 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)'}`,
+            border: `1px solid ${goal.remainingDays <= 30 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)'}`,
             transition: 'all 0.3s ease',
             transform: isHovered ? 'scale(1.02)' : 'scale(1)',
             flex: '1',
-            width: '100%', // Full width
+            width: '100%',
             height: '60px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-              <ScheduleIcon size={14} color={remainingDays <= 30 ? '#EF4444' : '#F59E0B'} />
+              <ScheduleIcon size={14} color={goal.remainingDays <= 30 ? '#EF4444' : '#F59E0B'} />
               <span style={{ 
                 color: '#6B7280',
                 fontSize: '10px',
@@ -394,12 +536,12 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
               </span>
             </div>
             <div style={{ 
-              color: remainingDays <= 30 ? '#EF4444' : '#1F2937',
+              color: goal.remainingDays <= 30 ? '#EF4444' : '#1F2937',
               fontSize: '18px',
               fontWeight: '700',
               fontFamily: '"Inter", system-ui, sans-serif'
             }}>
-              {remainingDays} Days
+              {goal.remainingDays} Days
             </div>
           </div>
         </div>
@@ -423,9 +565,15 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
               {remainingAmount > 0 ? `${remainingAmount.toLocaleString()} LKR remaining` : 'Goal achieved!'}
             </span>
           </div>
-          <span style={{ fontSize: '12px', color: '#9CA3AF', fontFamily: '"Inter", system-ui, sans-serif' }}>
-            {savingRecords.length} transactions
-          </span>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+            <span style={{ fontSize: '12px', color: '#9CA3AF', fontFamily: '"Inter", system-ui, sans-serif' }}>
+              {savingRecords.length} transactions
+            </span>
+            {/* Debug info - remove in production */}
+            <span style={{ fontSize: '10px', color: '#D1D5DB', fontFamily: 'monospace' }}>
+              Progress Diff: {goalStatusInfo.progressDifference.toFixed(1)}%
+            </span>
+          </div>
         </div>
       )}
     </div>
