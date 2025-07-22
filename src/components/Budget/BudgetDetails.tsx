@@ -11,30 +11,36 @@ import {
   Button
 } from '@mui/material';
 
-interface Goal {
+interface Budget {
   id: number;
   name: string;
-  savedAmount: number;
-  targetAmount: number;
+  type: 'monthly' | 'annually';
+  totalAmount: number;
+  spentAmount: number;
+  remainingAmount: number;
   progress: number;
-  deadline?: Date;
+  categories: Array<{
+    id: number;
+    name: string;
+    allocatedAmount: number;
+    spentAmount: number;
+    icon?: string;
+  }>;
   description?: string;
   remainingDays?: number;
 }
 
-interface GoalDetailsProps {
-  goal: Goal | null;
+interface BudgetDetailsProps {
+  budget: Budget | null;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
   onViewDetails: (id: number) => void;
-  hasRecords?: boolean; // New prop to check if goal has saving records
 }
 
-const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onViewDetails }) => {
+const BudgetDetails: React.FC<BudgetDetailsProps> = ({ budget, onEdit, onDelete, onViewDetails }) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
 
-  if (!goal) {
+  if (!budget) {
     return (
       <Paper elevation={0} sx={{ 
         p: 4,
@@ -47,7 +53,7 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
         backgroundColor: '#F9FAFB'
       }}>
         <Typography variant="body1" color="textSecondary">
-          Select a goal to view details
+          Select a budget to view details
         </Typography>
       </Paper>
     );
@@ -62,38 +68,62 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
   };
 
   const handleConfirmDelete = () => {
-    onDelete(goal.id);
+    onDelete(budget.id);
     setDeleteDialogOpen(false);
   };
 
   const handleEdit = () => {
-    onEdit(goal.id);
+    onEdit(budget.id);
   };
 
   const handleViewDetails = () => {
-    onViewDetails(goal.id);
+    onViewDetails(budget.id);
+  };
+
+  const getProgressColor = (progress: number) => {
+    if (progress >= 90) return '#DC2626'; // Red for overspending
+    if (progress >= 70) return '#F59E0B'; // Orange for warning
+    return '#22C55E'; // Green for good
   };
 
   return (
     <>
-      <Paper 
-        elevation={0} 
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        sx={{ 
-          p: 4,
-          border: '1px solid #E5E7EB',
-          borderRadius: 2,
-          height: 'fit-content',
-          minHeight: '400px',
-          backgroundColor: '#fff',
-          transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
-          boxShadow: isHovered 
-            ? '0 8px 25px rgba(0,0,0,0.12)' 
-            : '0 2px 8px rgba(0,0,0,0.04)',
-          transition: 'all 0.3s ease'
+      <Paper elevation={0} sx={{ 
+        p: 4,
+        border: '1px solid #E5E7EB',
+        borderRadius: 2,
+        height: 'fit-content',
+        minHeight: '400px',
+        backgroundColor: '#fff'
+      }}>
+        {/* Header Section with Budget Name and Type */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          mb: 3
         }}>
-        {/* Header Section with Spend and Goals */}
+          <Typography variant="h4" sx={{ 
+            fontWeight: 'bold',
+            color: '#1F2937',
+            fontSize: '28px'
+          }}>
+            {budget.name}
+          </Typography>
+          <Typography variant="body2" sx={{ 
+            backgroundColor: '#E3F2FD',
+            color: '#1976D2',
+            px: 2,
+            py: 0.5,
+            borderRadius: '12px',
+            fontSize: '14px',
+            fontWeight: 600
+          }}>
+            {budget.type.charAt(0).toUpperCase() + budget.type.slice(1)}
+          </Typography>
+        </Box>
+
+        {/* Spent and Budget Section */}
         <Box sx={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
@@ -102,27 +132,27 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
         }}>
           <Box>
             <Typography variant="body2" color="textSecondary" sx={{ mb: 1, fontSize: '14px' }}>
-              Spend
+              Spent
             </Typography>
             <Typography variant="h4" sx={{ 
               fontWeight: 'bold',
-              color: '#1F2937',
+              color: getProgressColor(budget.progress),
               fontSize: '32px'
             }}>
-              {goal.savedAmount.toFixed(2)} LKR
+              ${budget.spentAmount.toFixed(2)}
             </Typography>
           </Box>
           
           <Box sx={{ textAlign: 'right' }}>
             <Typography variant="body2" color="textSecondary" sx={{ mb: 1, fontSize: '14px' }}>
-              Goals
+              Budget
             </Typography>
             <Typography variant="h4" sx={{ 
               fontWeight: 'bold',
               color: '#1F2937',
               fontSize: '32px'
             }}>
-              {goal.targetAmount.toFixed(2)} LKR
+              ${budget.totalAmount.toFixed(2)}
             </Typography>
           </Box>
         </Box>
@@ -131,42 +161,83 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
         <Box sx={{ mb: 4 }}>
           <Box sx={{ 
             width: '100%', 
-            height: isHovered ? 10 : 8, 
+            height: 8, 
             backgroundColor: '#E5E7EB',
             borderRadius: 4,
             overflow: 'hidden',
-            mb: 2,
-            transition: 'height 0.3s ease'
+            mb: 2
           }}>
             <Box sx={{ 
-              width: `${goal.progress}%`, 
+              width: `${Math.min(budget.progress, 100)}%`, 
               height: '100%',
-              backgroundColor: 'rgb(11, 0, 221)',
-              transition: 'width 0.5s ease',
-              boxShadow: isHovered ? '0 0 8px rgba(11, 0, 221, 0.3)' : 'none'
+              backgroundColor: getProgressColor(budget.progress),
+              transition: 'width 0.3s ease'
             }} />
           </Box>
           
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="body2" color="textSecondary" sx={{ fontSize: '14px' }}>
-              {goal.progress}%
+              {budget.progress}%
             </Typography>
             <Typography variant="body2" color="textSecondary" sx={{ fontSize: '14px' }}>
-              {100 - goal.progress}%
+              ${budget.remainingAmount.toFixed(2)} remaining
             </Typography>
           </Box>
         </Box>
 
-        {/* Days Left */}
-        <Box sx={{ textAlign: 'center', mb: 4,mr:12 }}>
-          <Typography variant="h5" sx={{ 
-            color: ' rgb(11, 0, 221)', 
-            fontWeight: 'bold',
-            fontSize: '22px'
-          }}>
-            {goal.remainingDays !== undefined ? `${goal.remainingDays} days left` : ''}
-          </Typography>
-        </Box>
+        {/* Categories Section */}
+        {budget.categories && budget.categories.length > 0 && (
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" sx={{ 
+              fontWeight: 'bold',
+              color: '#1F2937',
+              fontSize: '18px',
+              mb: 2
+            }}>
+              Categories
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+              {budget.categories.map((category) => (
+                <Box 
+                  key={category.id}
+                  sx={{ 
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    backgroundColor: '#F9FAFB',
+                    px: 2,
+                    py: 1,
+                    borderRadius: '8px',
+                    border: '1px solid #E5E7EB'
+                  }}
+                >
+                  <Typography sx={{ fontSize: '16px' }}>
+                    {category.icon || '📊'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontSize: '14px', fontWeight: 500 }}>
+                    {category.name}
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontSize: '14px', color: '#6B7280' }}>
+                    ${category.spentAmount.toFixed(2)} / ${category.allocatedAmount.toFixed(2)}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {/* Remaining Days */}
+        {budget.remainingDays && (
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <Typography variant="body2" sx={{ 
+              color: '#1976D2',
+              fontWeight: 'bold',
+              fontSize: '16px'
+            }}>
+              {budget.remainingDays} days left
+            </Typography>
+          </Box>
+        )}
 
         {/* Action Buttons */}
         <Box sx={{ 
@@ -187,15 +258,15 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
               color: '#fff',
               borderRadius: '25px',
               cursor: 'pointer',
-              fontWeight: 600,
+              fontWeight: 700,
               fontSize: '16px',
               fontFamily: '"Inter", "Roboto", "Arial", sans-serif',
-              transition: 'all 0.3s ease',
-              transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+              letterSpacing: '0.5px',
+              transition: 'all 0.2s ease',
               '&:hover': {
                 backgroundColor: '#1E40AF',
-                transform: 'scale(1.08) translateY(-1px)',
-                boxShadow: '0 6px 20px rgba(29, 78, 216, 0.4)'
+                transform: 'translateY(-1px)',
+                boxShadow: '0 4px 12px rgba(29, 78, 216, 0.3)'
               }
             }}
           >
@@ -220,11 +291,10 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
+                transition: 'all 0.2s ease',
                 '&:hover': {
                   backgroundColor: '#E5E7EB',
-                  transform: 'translateY(-2px) scale(1.05)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  transform: 'translateY(-1px)'
                 }
               }}
             >
@@ -246,11 +316,10 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
+                transition: 'all 0.2s ease',
                 '&:hover': {
                   backgroundColor: '#FEE2E2',
-                  transform: 'translateY(-2px) scale(1.05)',
-                  boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)'
+                  transform: 'translateY(-1px)'
                 }
               }}
             >
@@ -279,7 +348,7 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
         </DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ color: '#6B7280' }}>
-            Are you sure you want to delete the goal "{goal.name}"? This action cannot be undone.
+            Are you sure you want to delete the budget for "{budget.name}"? This action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ p: 3, pt: 1 }}>
@@ -315,4 +384,4 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
   );
 };
 
-export default GoalDetails;
+export default BudgetDetails;
