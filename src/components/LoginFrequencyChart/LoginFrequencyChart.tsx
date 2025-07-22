@@ -20,24 +20,9 @@ const LoginFrequencyChart = () => {
       } catch (err) {
         console.error('Error fetching login frequency:', err);
         const errorMessage = err instanceof Error ? err.message : 'Failed to load login frequency data';
-        console.log('Full error details:', err);
         setError(`API Error: ${errorMessage}`);
-        // Fallback to demo data in case of error
-        console.log('Using fallback demo data');
-        setData([
-          { month: 'JAN', logins: 420 },
-          { month: 'FEB', logins: 380 },
-          { month: 'MAR', logins: 450 },
-          { month: 'APR', logins: 480 },
-          { month: 'MAY', logins: 520 },
-          { month: 'JUN', logins: 550 },
-          { month: 'JUL', logins: 600 },
-          { month: 'AUG', logins: 580 },
-          { month: 'SEP', logins: 510 },
-          { month: 'OCT', logins: 490 },
-          { month: 'NOV', logins: 460 },
-          { month: 'DEC', logins: 440 },
-        ]);
+        // NO fallback data - show real data only
+        setData([]);
       } finally {
         setLoading(false);
       }
@@ -57,17 +42,9 @@ const LoginFrequencyChart = () => {
   if (error) {
     return (
       <div style={{ padding: '16px' }}>
-        <Alert severity="warning" style={{ marginBottom: '16px' }}>
-          {error}
+        <Alert severity="error">
+          {error} - Please check your backend connection and database.
         </Alert>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="logins" stroke="#0D47A1" strokeWidth={2} />
-          </LineChart>
-        </ResponsiveContainer>
       </div>
     );
   }
@@ -76,7 +53,7 @@ const LoginFrequencyChart = () => {
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={data}>
         <XAxis dataKey="month" />
-        <YAxis />
+        <YAxis domain={[0, 20]} ticks={[0, 5, 10, 15, 20]} />
         <Tooltip />
         <Line type="monotone" dataKey="logins" stroke="#0D47A1" strokeWidth={2} />
       </LineChart>

@@ -114,10 +114,9 @@ const ManageUsersTable: React.FC<ManageUsersTableProps> = ({
   };
 
   const getStatusChip = (status: string, isActive: boolean) => {
-    let color: 'success' | 'warning' | 'error' | 'default' = 'default';
+    let color: 'success' | 'warning' | 'default' = 'default';
     
     if (status === 'Active' && isActive) color = 'success';
-    else if (status === 'Suspended') color = 'error';
     else if (status === 'Inactive' || !isActive) color = 'warning';
     
     return (
@@ -157,7 +156,7 @@ const ManageUsersTable: React.FC<ManageUsersTableProps> = ({
             }
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Users register themselves. Admin can view, suspend, or delete accounts.
+            Users register themselves. Admin can view or delete accounts.
           </Typography>
         </Box>
       </Box>

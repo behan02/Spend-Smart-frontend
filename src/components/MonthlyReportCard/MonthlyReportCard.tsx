@@ -41,7 +41,7 @@ const MonthlyReportCard: React.FC<MonthlyReportCardProps> = ({ onReportGenerated
     { value: 12, label: 'December' }
   ];
 
-  const years = [2023, 2024, 2025, 2026]; // Can be expanded
+  const years = [2025, 2026, 2027]; // Updated to show 2025-2027 range
 
   const handleGenerateReport = async () => {
     setLoading(true);
