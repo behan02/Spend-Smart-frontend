@@ -266,13 +266,30 @@ const UserSettings: React.FC = () => {
               />
             </Box>
 
-            <Typography variant="h6" mt={2} ml={1}>
+            <Typography
+              variant="h6"
+              mt={2}
+              ml={3}
+              sx={{
+                fontWeight: "bold",
+                color: "#000000",
+                fontSize: "2rem",
+                letterSpacing: "0.5px",
+              }}
+            >
               {userData.name}
             </Typography>
 
             <Divider sx={{ my: 2 }} />
 
-            <Typography variant="h6" mb={2}>
+            <Typography
+              variant="h6"
+              mb={2}
+              sx={{
+                fontWeight: "bold",
+                fontSize: "1.5rem",
+              }}
+            >
               Profile Settings
             </Typography>
 

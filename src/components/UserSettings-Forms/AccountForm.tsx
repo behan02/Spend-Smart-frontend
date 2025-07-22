@@ -291,7 +291,7 @@ const AccountForm: React.FC<AccountFormProps> = ({
     <Stack spacing={3} sx={{ ml: 15 }}>
       {/* Show pending email change notice */}
       {pendingEmailChange.hasPendingChange && (
-        <Alert severity="info">
+        <Alert severity="info" sx={{ width: 500 }}>
           <Typography variant="body2">
             <strong>Email verification pending:</strong> A verification link has
             been sent to <strong>{pendingEmailChange.pendingEmail}</strong>.
@@ -346,12 +346,12 @@ const AccountForm: React.FC<AccountFormProps> = ({
           }}
         />
         {errors.name && (
-          <Alert severity="error" sx={{ mt: 1 }}>
+          <Alert severity="error" sx={{ mt: 1, width: 500 }}>
             {errors.name}
           </Alert>
         )}
         {success.name && (
-          <Alert severity="success" sx={{ mt: 1 }}>
+          <Alert severity="success" sx={{ mt: 1, width: 500 }}>
             {success.name}
           </Alert>
         )}
@@ -403,12 +403,12 @@ const AccountForm: React.FC<AccountFormProps> = ({
           }}
         />
         {errors.email && (
-          <Alert severity="error" sx={{ mt: 1 }}>
+          <Alert severity="error" sx={{ mt: 1, width: 500 }}>
             {errors.email}
           </Alert>
         )}
         {success.email && (
-          <Alert severity="success" sx={{ mt: 1 }}>
+          <Alert severity="success" sx={{ mt: 1, width: 500 }}>
             {success.email}
           </Alert>
         )}
@@ -416,7 +416,7 @@ const AccountForm: React.FC<AccountFormProps> = ({
         {emailVerificationStatus?.type && (
           <Alert
             severity={emailVerificationStatus.type}
-            sx={{ mt: 1 }}
+            sx={{ mt: 1, width: 500 }}
             onClose={onEmailVerificationStatusClear}
           >
             {emailVerificationStatus.message}

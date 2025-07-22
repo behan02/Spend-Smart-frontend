@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { profilePictureService } from "../UserSettings-Forms/profilePictureService"; // ✅ FIX: Correct path
 
-// ✅ FIX: Proper interface definition
+//Proper interface definition
 interface ProfilePictureUploadProps {
   onImageUpdate?: (imageUrl: string | null) => void;
 }
 
-// ✅ FIX: Add props parameter
+//Add props parameter
 const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
   onImageUpdate,
 }) => {
