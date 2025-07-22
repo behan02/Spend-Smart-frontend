@@ -55,12 +55,12 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
             amount: parseFloat(amount),
             date: date,
             description: description,
-\
+
            
 
         };
 
-        let  userId:userId, // Include userId in the transaction data
+        
         try{
             const response = await fetch(`https://localhost:7211/api/Transaction/CreateTransaction/${userId}`, {
                 method: "POST",
