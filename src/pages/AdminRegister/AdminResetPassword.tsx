@@ -23,13 +23,13 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import UserLeftImage from "../components/LoginComponents/LoginLeftImage";
-import Logo from "../assets/images/logo/Logo.png";
-import ResetPasswordImage from "../assets/images/ResetPassword.png";
+import UserLeftImage from "../../components/LoginComponents/LoginLeftImage";
+import Logo from "../../assets/images/logo/Logo.png";
+import ResetPassword from "../../assets/images/ResetPassword.png";
 import { useSearchParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 
-function ResetPassword() {
+function AdminResetPassword() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
 
@@ -102,7 +102,7 @@ function ResetPassword() {
     if (validateForm()) {
       setIsLoading(true);
       try {
-        const response = await fetch("https://localhost:7211/api/user/auth/reset-password", {
+        const response = await fetch("https://localhost:7211/api/admin/auth/reset-password", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token, newPassword: password }),
@@ -133,11 +133,12 @@ function ResetPassword() {
         xs={0}
         md={6}
         sx={{
-          display: { xs: "none", md: "block" }, // Hide on xs, show on md and up
+          display: { xs: "none", md: "block" }, 
+          flexGrow:1,
         }}
       >
         <UserLeftImage
-          imageSrc={ResetPasswordImage}
+          imageSrc={ResetPassword}
           altText="Reset Password Page Image"
         />
       </Grid>
@@ -156,15 +157,16 @@ function ResetPassword() {
           position: "relative",
           flexGrow: 1,
           
-         
+          // Background changes based on screen size
           background: {
-            background:
-              "linear-gradient(135deg, #023E8A 0%, #0077B6 50%, #00B4D8 100%)", // Gradient background for small screens
-            md: "transparent", 
+            xs: "linear-gradient(135deg, #023E8A 0%, #0077B6 50%, #00B4D8 100%)", // Gradient background for small screens
+            md: "transparent" // Transparent for larger screens
           },
-         
+          
+          // Optional: Add some styling for better mobile experience
           minHeight: "100vh",
           
+          // Add a subtle pattern or overlay for mobile (optional)
           "&::before": {
             content: '""',
             position: "absolute",
@@ -173,7 +175,7 @@ function ResetPassword() {
             right: 0,
             bottom: 0,
             background: {
-              xs: "rgba(255, 255, 255, 0.1)", 
+              xs: "rgba(255, 255, 255, 0.1)", // Light overlay on mobile
               md: "none"
             },
             pointerEvents: "none",
@@ -445,7 +447,7 @@ function ResetPassword() {
                 </Button>
 
                 <Box sx={{ textAlign: "center", mt: { xs: 2, sm: 3 } }}>
-                  <Link to="/" style={{ textDecoration: "none" }}>
+                  <Link to="/admin/login" style={{ textDecoration: "none" }}>
                     <Button
                       startIcon={<ArrowBackIcon />}
                       sx={{
@@ -471,4 +473,4 @@ function ResetPassword() {
   );
 }
 
-export default ResetPassword;
+export default AdminResetPassword;

@@ -18,6 +18,7 @@ import {
 import Logo from "../../assets/images/logo/Logo.png";
 import React from "react";
 import { Link } from "react-router-dom";
+import theme from "../../assets/styles/theme";
 
 // ✅ Define a type for menu items
 interface MenuItem {
@@ -28,13 +29,13 @@ interface MenuItem {
 
 // ✅ Type menuItems
 const menuItems: MenuItem[] = [
-  { text: "Dashboard", icon: <DashboardIcon />, path: "/", },
+  { text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
   { text: "Report", icon: <SummarizeIcon />, path: "/report" },
   { text: "Budget", icon: <AccountBalanceWallet />, path: "/budget" },
   { text: "Goals", icon: <Flag />, path: "/goals" },
   { text: "Transaction", icon: <Receipt />, path: "/transaction" },
   { text: "Settings", icon: <Settings />, path: "/settings" },
-  { text: "Logout", icon: <ExitToApp />, path: "/logout" },
+  { text: "Logout", icon: <ExitToApp />, path: "/" },
 ];
 
 // ✅ Sidebar component typed
@@ -46,6 +47,10 @@ const Sidebar: React.FC = () => {
         width: 280,
         height: 1117,
         flexShrink: 0,
+        [theme.breakpoints.between("mobile","laptop")]: {
+          display: "none",
+
+        },
         [`& .MuiDrawer-paper`]: {
           width: 280,
           boxSizing: "border-box",
