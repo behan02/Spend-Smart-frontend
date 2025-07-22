@@ -20,6 +20,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+import { uploadPDFToFirebase } from "../../Services/firebaseService";
+import { storeReport } from "../../Services/reportsService";
 
 // API Configuration
 const API_BASE_URL = "https://localhost:7211/api";
@@ -377,6 +379,261 @@ function ReportDisplay({ startDate, endDate }: ReportDisplayProps) {
   };
 
   // Enhanced Visual PDF Download Function
+  // Enhanced PDF generation with Firebase upload and database storage
+  const generateAndStorePDF = async (): Promise<boolean> => {
+    try {
+      console.log("🔄 Starting PDF generation with storage...");
+
+      // Show loading notification
+      const loadingElement = document.createElement("div");
+      loadingElement.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #2196f3;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 4px;
+        z-index: 9999;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      `;
+      loadingElement.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 16px; height: 16px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+          Generating & storing PDF...
+        </div>
+        <style>
+          @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        </style>
+      `;
+      document.body.appendChild(loadingElement);
+
+      // Find the main report container
+      const reportElement =
+        document.querySelector("[data-report-container]") ||
+        document.querySelector("main") ||
+        document.querySelector(".MuiBox-root[sx]") ||
+        document.body;
+
+      // Hide export section during capture
+      const exportSection = document
+        .querySelector(".download-btn")
+        ?.closest(".MuiBox-root") as HTMLElement;
+      const originalDisplay = exportSection?.style.display;
+      if (exportSection) {
+        exportSection.style.display = "none";
+      }
+
+      // Capture with balanced quality/size settings
+      const canvas = await html2canvas(reportElement as HTMLElement, {
+        scale: 1.5, // Good quality without huge file size
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        width: 1200,
+        height: 1600,
+        logging: false,
+        imageTimeout: 10000,
+        removeContainer: true,
+        onclone: (clonedDoc) => {
+          // Optimize for charts and graphs
+          const charts = clonedDoc.querySelectorAll(
+            "canvas, svg, .recharts-wrapper, .MuiDataGrid-root"
+          );
+          charts.forEach((chart: any) => {
+            if (chart.style) {
+              chart.style.imageRendering = "optimizeQuality";
+            }
+          });
+        },
+      });
+
+      // Restore export section
+      if (exportSection && originalDisplay !== undefined) {
+        exportSection.style.display = originalDisplay;
+      }
+
+      // Create PDF with compression
+      const pdf = new jsPDF("portrait", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const margin = 10;
+
+      // Compress image for smaller file size
+      const compressionCanvas = document.createElement("canvas");
+      const maxWidth = 800; // Reasonable resolution for readability
+      const scale = Math.min(maxWidth / canvas.width, maxWidth / canvas.height);
+
+      compressionCanvas.width = canvas.width * scale;
+      compressionCanvas.height = canvas.height * scale;
+
+      const ctx = compressionCanvas.getContext("2d")!;
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(
+        canvas,
+        0,
+        0,
+        compressionCanvas.width,
+        compressionCanvas.height
+      );
+
+      const compressedDataUrl = compressionCanvas.toDataURL("image/jpeg", 0.7); // 70% quality
+
+      // Calculate dimensions for PDF
+      const imgWidth = pdfWidth - margin * 2;
+      const imgHeight =
+        (compressionCanvas.height * imgWidth) / compressionCanvas.width;
+
+      // Handle multiple pages if needed
+      let currentY = margin;
+      let remainingHeight = imgHeight;
+
+      while (remainingHeight > 0) {
+        const pageContentHeight = pdfHeight - margin * 2;
+        const heightForThisPage = Math.min(remainingHeight, pageContentHeight);
+
+        pdf.addImage(
+          compressedDataUrl,
+          "JPEG",
+          margin,
+          currentY,
+          imgWidth,
+          heightForThisPage,
+          undefined,
+          "MEDIUM"
+        );
+
+        remainingHeight -= heightForThisPage;
+
+        if (remainingHeight > 0) {
+          pdf.addPage();
+          currentY = margin;
+        }
+      }
+
+      // Convert PDF to blob for Firebase upload
+      const pdfBlob = pdf.output("blob");
+
+      // Update loading message
+      loadingElement.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 16px; height: 16px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+          Uploading to cloud storage...
+        </div>
+      `;
+
+      // Generate filename
+      const timestamp = new Date().toISOString().split("T")[0];
+      const fileName = `SpendSmart-Report-${startDate}-to-${endDate}-${timestamp}.pdf`;
+
+      // Upload to Firebase
+      const userId = 1; // TODO: Get from authentication context
+      const firebaseUrl = await uploadPDFToFirebase(pdfBlob, fileName, userId);
+
+      // Update loading message
+      loadingElement.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 16px; height: 16px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+          Saving to database...
+        </div>
+      `;
+
+      // Store in database
+      await storeReport({
+        reportName: `Financial Report (${startDate} to ${endDate})`,
+        format: "PDF",
+        startDate: startDate,
+        endDate: endDate,
+        firebaseUrl: firebaseUrl,
+        description: `Comprehensive financial report including charts, graphs, and transaction details`,
+        userId: userId,
+      });
+
+      // Also download the file locally
+      pdf.save(fileName);
+
+      // Remove loading element
+      document.body.removeChild(loadingElement);
+
+      // Show success notification
+      const successElement = document.createElement("div");
+      successElement.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4caf50;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 4px;
+        z-index: 9999;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        max-width: 300px;
+      `;
+      successElement.innerHTML = `
+        ✅ PDF generated & stored successfully!
+        <div style="font-size: 12px; margin-top: 4px; opacity: 0.9;">
+          📊 Report saved to cloud storage and available in Reports overview
+        </div>
+      `;
+      document.body.appendChild(successElement);
+
+      setTimeout(() => {
+        if (document.body.contains(successElement)) {
+          document.body.removeChild(successElement);
+        }
+      }, 5000);
+
+      console.log("✅ PDF generated, uploaded, and stored successfully");
+      return true;
+    } catch (error) {
+      console.error("❌ Error generating and storing PDF:", error);
+
+      // Remove loading element if it exists
+      const loadingElements = document.querySelectorAll(
+        '[style*="position: fixed"]'
+      );
+      loadingElements.forEach((el) => {
+        if (document.body.contains(el)) {
+          document.body.removeChild(el);
+        }
+      });
+
+      // Show error notification
+      const errorElement = document.createElement("div");
+      errorElement.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #f44336;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 4px;
+        z-index: 9999;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        max-width: 300px;
+      `;
+      errorElement.innerHTML = `
+        ❌ Failed to generate/store PDF
+        <div style="font-size: 12px; margin-top: 4px; opacity: 0.9;">
+          ${error.message || "Please try again"}
+        </div>
+      `;
+      document.body.appendChild(errorElement);
+
+      setTimeout(() => {
+        if (document.body.contains(errorElement)) {
+          document.body.removeChild(errorElement);
+        }
+      }, 5000);
+
+      return false;
+    }
+  };
+
   const downloadVisualPDF = async () => {
     try {
       console.log("🔄 Starting visual PDF generation...");
@@ -1029,8 +1286,15 @@ function ReportDisplay({ startDate, endDate }: ReportDisplayProps) {
 
       switch (exportFormat) {
         case "PDF":
-          // Try visual capture first
-          success = await downloadVisualPDF();
+          // Try new enhanced PDF generation with storage first
+          console.log("🔄 Generating PDF with cloud storage...");
+          success = await generateAndStorePDF();
+
+          // If enhanced method fails, fall back to simple visual PDF
+          if (!success) {
+            console.log("🔄 Falling back to simple visual PDF...");
+            success = await downloadVisualPDF();
+          }
 
           // If visual capture fails, try container method
           if (!success) {
@@ -1038,7 +1302,7 @@ function ReportDisplay({ startDate, endDate }: ReportDisplayProps) {
             success = await downloadReportContainerPDF();
           }
 
-          // If both visual methods fail, fall back to text-based PDF
+          // If all visual methods fail, fall back to text-based PDF
           if (!success) {
             console.log("🔄 Falling back to text-based PDF...");
             success = downloadSimplePDF();
