@@ -10,6 +10,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import UserSettingsImage from "../../assets/images/settings-header.jpg";
 import ResetPwdImage from "../../assets/images/Reset password-bro.png";
@@ -66,9 +67,52 @@ const UserSettings: React.FC = () => {
   const [passwordSuccess, setPasswordSuccess] = useState<string>("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
+  // Email verification state to pass to AccountForm
+  const [emailVerificationStatus, setEmailVerificationStatus] = useState<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({
+    type: null,
+    message: "",
+  });
+
+  // React Router hooks
+  const location = useLocation();
+  const navigate = useNavigate();
+
   useEffect(() => {
     loadProfilePicture();
-  }, []);
+    handleEmailVerificationCallback();
+  }, [location]);
+
+  // Handle email verification callback from URL parameters
+  const handleEmailVerificationCallback = () => {
+    const urlParams = new URLSearchParams(location.search);
+    const emailVerification = urlParams.get("emailVerification");
+    const customMessage = urlParams.get("message");
+
+    if (emailVerification === "success") {
+      const message =
+        customMessage ||
+        "Email verification is successful! Your email has been updated.";
+      setEmailVerificationStatus({
+        type: "success",
+        message: message,
+      });
+      // Clean up URL by removing the query parameters
+      navigate("/settings", { replace: true });
+    } else if (emailVerification === "error") {
+      const message =
+        customMessage ||
+        "Email verification failed. The link may be expired or invalid.";
+      setEmailVerificationStatus({
+        type: "error",
+        message: message,
+      });
+      // Clean up URL by removing the query parameters
+      navigate("/settings", { replace: true });
+    }
+  };
 
   const loadProfilePicture = async () => {
     try {
@@ -222,6 +266,10 @@ const UserSettings: React.FC = () => {
                 initialName={userData.name}
                 initialEmail={userData.email}
                 onUpdateSuccess={handleUpdateSuccess}
+                emailVerificationStatus={emailVerificationStatus}
+                onEmailVerificationStatusClear={() =>
+                  setEmailVerificationStatus({ type: null, message: "" })
+                }
               />
             </Box>
 

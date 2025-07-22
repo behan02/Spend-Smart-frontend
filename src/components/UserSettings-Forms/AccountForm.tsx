@@ -17,6 +17,11 @@ interface AccountFormProps {
   initialName?: string;
   initialEmail?: string;
   onUpdateSuccess?: () => void;
+  emailVerificationStatus?: {
+    type: "success" | "error" | null;
+    message: string;
+  };
+  onEmailVerificationStatusClear?: () => void;
 }
 
 const AccountForm: React.FC<AccountFormProps> = ({
@@ -24,6 +29,8 @@ const AccountForm: React.FC<AccountFormProps> = ({
   initialName = "",
   initialEmail = "",
   onUpdateSuccess,
+  emailVerificationStatus,
+  onEmailVerificationStatusClear,
 }) => {
   const [formData, setFormData] = useState({
     name: initialName,
@@ -59,6 +66,17 @@ const AccountForm: React.FC<AccountFormProps> = ({
   useEffect(() => {
     loadEmailChangeStatus();
   }, [userId]);
+
+  // Auto-dismiss email verification notification after 10 seconds
+  useEffect(() => {
+    if (emailVerificationStatus?.type && onEmailVerificationStatusClear) {
+      const timer = setTimeout(() => {
+        onEmailVerificationStatusClear();
+      }, 10000); // 10 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, [emailVerificationStatus?.type, onEmailVerificationStatusClear]);
 
   // Update original data when props change
   useEffect(() => {
@@ -381,6 +399,16 @@ const AccountForm: React.FC<AccountFormProps> = ({
         {success.email && (
           <Alert severity="success" sx={{ mt: 1 }}>
             {success.email}
+          </Alert>
+        )}
+        {/* Email Verification Notification */}
+        {emailVerificationStatus?.type && (
+          <Alert
+            severity={emailVerificationStatus.type}
+            sx={{ mt: 1 }}
+            onClose={onEmailVerificationStatusClear}
+          >
+            {emailVerificationStatus.message}
           </Alert>
         )}
       </Box>
