@@ -10,6 +10,7 @@ import HeaderImage from '../../assets/images/goal_page_image.png';
 import Sidebar from '../../components/sidebar/sidebar';
 import theme from '../../assets/styles/theme';
 import { goalService, Goal as GoalType, GoalFormData } from '../../services/goalService';
+import { savingRecordService } from '../../services/savingRecordService';
 import { useNavigate } from 'react-router-dom';
 
 
@@ -71,6 +72,7 @@ const Goals: React.FC = () => {
       }));
       
       setGoals(transformedGoals);
+      
       
       if (transformedGoals.length > 0 && !selectedGoal) {
         setSelectedGoal(transformedGoals[0]);
@@ -185,7 +187,7 @@ const Goals: React.FC = () => {
       
       setGoals([...goals, transformedGoal]);
       setSelectedGoal(transformedGoal);
-      
+     
       console.log('✅ Goal added to frontend state');
       
       // Close the modal
@@ -249,6 +251,7 @@ const Goals: React.FC = () => {
       
       setGoals(updatedGoals);
       setSelectedGoal(updatedGoals.find(g => g.id === goalToEdit.id) || null);
+      
       handleCloseEditModal();
       
     } catch (err: any) {
@@ -281,6 +284,7 @@ const Goals: React.FC = () => {
       const updatedGoals = goals.filter(goal => goal.id !== id);
       setGoals(updatedGoals);
       
+      
       if (selectedGoal && selectedGoal.id === id) {
         setSelectedGoal(updatedGoals.length > 0 ? updatedGoals[0] : null);
       }
@@ -295,9 +299,9 @@ const Goals: React.FC = () => {
   const handleViewGoalDetails = (id: number) => {
     const goalToView = goals.find(goal => goal.id === id);
     if (goalToView) {
-      // Navigate to goal details page with goal data
+      // Navigate to goal details page with goal data 
       navigate(`/goals/${id}`, { 
-        state: { goal: goalToView } 
+          state: { goal: goalToView } 
       });
     }
   };
@@ -429,7 +433,7 @@ const Goals: React.FC = () => {
                     onEdit={handleEditGoal} 
                     onDelete={handleDeleteGoal} 
                     onViewDetails={handleViewGoalDetails} 
-                  />
+/>
                 ) : (
                   <Paper
                     elevation={0}

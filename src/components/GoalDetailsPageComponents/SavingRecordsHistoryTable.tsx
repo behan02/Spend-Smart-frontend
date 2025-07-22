@@ -30,7 +30,8 @@ import {
 interface SavingRecord {
   id: number;
   amount: number;
-  date: string; // ISO string format for API compatibility
+  date: string; // Date part
+  time: string; // Time part  
   description?: string;
   goalId: number;
   userId?: number;
@@ -65,9 +66,19 @@ const SavingRecordsHistoryTable: React.FC<SavingRecordsHistoryTableProps> = ({
     });
   };
 
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', {
+  const formatTime = (timeString: string) => {
+    // timeString is in format "HH:mm:ss" from backend TimeSpan
+    if (!timeString) {
+      return '12:00 AM'; // Fallback for missing time
+    }
+    
+    // Create a temporary date with the time to format it properly
+    const tempDate = new Date(`1970-01-01T${timeString}`);
+    if (isNaN(tempDate.getTime())) {
+      return '12:00 AM'; // Fallback for invalid time
+    }
+    
+    return tempDate.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
@@ -173,7 +184,7 @@ const SavingRecordsHistoryTable: React.FC<SavingRecordsHistoryTableProps> = ({
                   </TableCell>
                   <TableCell>
                     <Typography variant={isTabletOrDesktop ? "body2" : "body1"}>
-                      {formatTime(record.date)}
+                      {formatTime(record.time)}
                     </Typography>
                   </TableCell>
                   <TableCell sx={{ wordBreak: "break-word", whiteSpace: "normal", maxWidth: "250px" }}>
@@ -264,31 +275,6 @@ const SavingRecordsHistoryTable: React.FC<SavingRecordsHistoryTableProps> = ({
               variant="outlined" 
               onClick={handleViewToggle}
               disableRipple
-              sx={{
-                borderRadius: "20px",
-                textTransform: "none",
-                px: 3,
-                py: 1
-              }}
-            >
-              {showAll ? "View Less" : `View More (${records.length - 8} more)`}
-            </Button>
-          </Box>
-        )}
-      </Box>
-
-      {/* Mobile view */}
-      <Box sx={{
-        display: { xs: 'block', md: 'none' },
-        mt: 3
-      }}>
-
-        {/* View More/Less Button for Mobile */}
-        {records.length > 8 && (
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-            <Button 
-              variant="outlined" 
-              onClick={handleViewToggle}
               sx={{
                 borderRadius: "20px",
                 textTransform: "none",

@@ -5,7 +5,8 @@ import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 interface SavingRecord {
   id: number;
   amount: number;
-  date: Date;
+  date: string; // Date part as string
+  time?: string; // Time part as string
   description?: string;
   goalId: number;
 }
@@ -80,7 +81,6 @@ const OptimizedProgressBarChart: React.FC<ProgressBarChartProps> = ({
     for (const period of periods) {
       const periodEnd = new Date(period);
       periodEnd.setDate(period.getDate() + 13);
-      
       if (mostRecentRecord.date >= period && mostRecentRecord.date <= periodEnd) {
         return period;
       }
@@ -169,9 +169,8 @@ const OptimizedProgressBarChart: React.FC<ProgressBarChartProps> = ({
   };
 
   const { seriesData, cumulativeData } = processPeriodData();
-  
-  const totalSaved = cumulativeData && cumulativeData.length > 0 ? cumulativeData[0] : 0;
-  const progressPercentage = goalTargetAmount > 0 ? (totalSaved / goalTargetAmount) * 100 : 0;
+ 
+
 
   const maxAmountFromData = seriesData && seriesData.length > 0 ? Math.max(...seriesData) : 0;
   const maxAmount = Math.max(maxAmountFromData, 1000);

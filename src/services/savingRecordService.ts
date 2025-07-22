@@ -57,14 +57,13 @@ export const savingRecordService = {
   create: async (recordData: SavingRecordFormData): Promise<SavingRecord> => {
     console.log('Creating saving record:', recordData);
     
-    // Format the data for the API
+    // Format the data for the API - backend expects single DateTime
     const createData = {
       amount: recordData.amount,
-      date: recordData.date, // Should be ISO string
+      date: recordData.date, // Should be ISO string that backend can parse as DateTime
       description: recordData.description || '',
       goalId: recordData.goalId,
-      userId: recordData.userId || 1, // Default to user 1 for now
-      time: new Date(recordData.date).toTimeString().split(' ')[0] // Extract time from date
+      userId: recordData.userId || 1 // Default to user 1 for now
     };
 
     const response = await apiClient.post<SavingRecord>('/SavingRecords', createData);

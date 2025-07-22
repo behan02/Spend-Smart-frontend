@@ -4,7 +4,8 @@ import { TableRow, TableCell, Typography } from '@mui/material';
 export interface SavingRecord {
   id: number;
   amount: number;
-  date: string; // ISO string format for API compatibility
+  date: string; // Date part
+  time: string; // Time part
   description?: string;
   goalId: number;
   userId?: number;

@@ -46,7 +46,8 @@ interface Goal {
 interface SavingRecord {
   id: number;
   amount: number;
-  date: Date;
+  date: string; // Date part as string
+  time?: string; // Time part as string
   description?: string;
   goalId: number;
 }

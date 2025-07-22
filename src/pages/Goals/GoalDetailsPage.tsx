@@ -15,11 +15,12 @@ import { savingRecordService, SavingRecordFormData } from '../../services/saving
 import { goalService } from '../../services/goalService';
 import SavingsIcon from '@mui/icons-material/Savings';
 
-// Local interface for component compatibility with Date object
+// Local interface for component compatibility
 interface SavingRecord {
   id: number;
   amount: number;
-  date: Date;
+  date: string; // Date part
+  time: string; // Time part
   description?: string;
   goalId: number;
   userId?: number;
@@ -67,14 +68,9 @@ const GoalDetailsPage: React.FC = () => {
     try {
       const records = await savingRecordService.getByGoalId(goalId);
       
-      // Convert date strings to Date objects for component compatibility
-      const adaptedRecords: SavingRecord[] = records.map(record => ({
-        ...record,
-        date: new Date(record.date)
-      }));
-      
-      console.log('Fetched and adapted records:', adaptedRecords); // Debug log
-      setSavingRecords(adaptedRecords);
+      // Keep records as they come from the API (with separate date and time)
+      console.log('Fetched records:', records); // Debug log
+      setSavingRecords(records);
     } catch (err) {
       console.error('Error fetching saving records:', err);
       setSnackbar({
@@ -122,6 +118,8 @@ const GoalDetailsPage: React.FC = () => {
       // Refresh all records after creating to ensure consistency
       await fetchSavingRecords(goalData.id);
 
+      
+
       setSnackbar({
         open: true,
         message: 'Saving record added successfully!',
@@ -158,6 +156,7 @@ const GoalDetailsPage: React.FC = () => {
       // Refresh all records after deleting
       await fetchSavingRecords(goalData.id);
 
+     
       setSnackbar({
         open: true,
         message: 'Saving record deleted successfully!',
@@ -328,10 +327,7 @@ const GoalDetailsPage: React.FC = () => {
                   </Box>
                 ) : (
                   <SavingRecordsHistoryTable 
-                    records={savingRecords.map(record => ({
-                      ...record,
-                      date: record.date.toISOString()
-                    }))} 
+                    records={savingRecords} 
                     onDeleteRecord={handleDeleteRecord}
                   />
                 )}
@@ -350,10 +346,7 @@ const GoalDetailsPage: React.FC = () => {
         onSave={handleSaveRecord}
         goalId={goalData?.id || 0}
         goal={goalData}
-        savingRecords={savingRecords.map(record => ({
-          ...record,
-          date: record.date.toISOString()
-        }))}
+        savingRecords={savingRecords}
       />
 
       {/* Snackbar for notifications */}

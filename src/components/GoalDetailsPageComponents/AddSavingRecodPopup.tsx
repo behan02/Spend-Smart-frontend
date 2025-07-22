@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   Paper,
@@ -47,6 +47,16 @@ const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
   const [time, setTime] = useState('');
   const [description, setDescription] = useState('');
   const [validationError, setValidationError] = useState('');
+
+  useEffect(() => {
+    if (open) {
+      const now = new Date();
+      const currentDate = now.toISOString().split('T')[0];
+      const currentTime = now.toTimeString().split(' ')[0].slice(0, 5);
+      setDate(currentDate);
+      setTime(currentTime);
+    }
+  }, [open]);
 
   // Calculate current total saved amount
   const getCurrentSavedAmount = () => {
@@ -100,13 +110,13 @@ const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
       return;
     }
 
-    // Combine date and time into a single Date object and convert to ISO string for API
-    const combinedDateTime = new Date(`${date}T${time}`);
-    const isoDateString = combinedDateTime.toISOString();
+    // Combine date and time into a single Date object without timezone conversion
+    // Create the datetime string in local timezone and send as-is to backend
+    const combinedDateTimeString = `${date}T${time}:00`;
 
     const newRecord = {
       amount: numericAmount,
-      date: isoDateString,
+      date: combinedDateTimeString,
       description: description || '',
       goalId: goalId
     };
@@ -212,7 +222,6 @@ const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
             variant="outlined"
             type="date"
             value={date}
-            onChange={(e) => setDate(e.target.value)}
             size="small"
             InputLabelProps={{
               shrink: true,
@@ -223,6 +232,7 @@ const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
                 backgroundColor: '#f8f9fa'
               }
             }}
+            disabled
           />
         </Box>
 
@@ -235,7 +245,6 @@ const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
             variant="outlined"
             type="time"
             value={time}
-            onChange={(e) => setTime(e.target.value)}
             size="small"
             InputLabelProps={{
               shrink: true,
@@ -246,6 +255,7 @@ const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
                 backgroundColor: '#f8f9fa'
               }
             }}
+            disabled
           />
         </Box>
 
@@ -291,21 +301,18 @@ const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
             Cancel
           </Button>
           <Button 
-            variant="contained" 
+            variant="contained"
             onClick={handleSave}
-            disabled={
-              !amount || !date || !time || 
-              (!!validationError && !validationError.includes('Perfect'))
-            }
             sx={{ 
               borderRadius: 3, 
               textTransform: 'none',
               bgcolor: '#0b00dd',
+              color: '#ffffff',
               fontWeight: 600,
               px: 3,
               py: 1,
               '&:hover': {
-                bgcolor: '#0a00bb'
+                bgcolor: '#0a00c9'
               }
             }}
           >
