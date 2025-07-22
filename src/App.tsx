@@ -14,11 +14,16 @@ import ReportGenerate from "./pages/Report/ReportGenerate";
 import VerifyEmail  from "./pages/VerifyEmail";
 import AdminForgetPassword from "./pages/AdminRegister/AdminForgetPassword"; 
 import AdminResetPassword from "./pages/AdminRegister/AdminResetPassword";
-import AdminVerifyEmail from "./pages/AdminRegister/AdminVerification"; // Ensure this import matches the file structure
+import AdminVerifyEmail from "./pages/AdminRegister/AdminVerification"; 
+import { ThemeProvider } from "@mui/material/styles";
+import { CssBaseline } from "@mui/material";
+import theme from "./assets/styles/theme";
 
 
 function App() {
   return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
     <Router>
     
       <Routes>
@@ -42,6 +47,8 @@ function App() {
 
       </Routes>
     </Router>
+    </ThemeProvider>
+
   );
 }
 
