@@ -204,8 +204,11 @@ function ReportDisplay({ startDate, endDate }: ReportDisplayProps) {
 
   // Get test user ID
   const getTestUserId = (): number => {
-    const storedUserId = localStorage.getItem("testUserId");
-    return storedUserId ? parseInt(storedUserId) : 1;
+    const storedUserId = sessionStorage.getItem("userId");
+    if (!storedUserId) {
+      throw new Error("User ID not found in sessionStorage");
+    }
+    return parseInt(storedUserId);
   };
 
   useEffect(() => {

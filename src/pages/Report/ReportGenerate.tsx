@@ -16,6 +16,7 @@ import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import Sidebar from "../../components/sidebar/sidebar";
 import axios from "axios";
+import { useUser } from "../../context/UserContext"; // ✅ added import
 
 // API Configuration
 const API_BASE_URL = "https://localhost:7211/api";
@@ -30,10 +31,8 @@ const ReportGenerate: React.FC = () => {
   const [isReportVisible, setIsReportVisible] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [testUserId, setTestUserIdState] = useState<number>(
-    parseInt(localStorage.getItem("testUserId") || "1")
-  );
   const theme = useTheme();
+  const { userId } = useUser(); // ✅ using user ID from sessionStorage
 
   // API Functions
   const testConnection = async (): Promise<{
@@ -92,9 +91,6 @@ const ReportGenerate: React.FC = () => {
         return;
       }
 
-      // Update test user ID in localStorage
-      localStorage.setItem("testUserId", testUserId.toString());
-
       // Test API connection before generating report
       console.log("Testing API connection...");
       const connectionTest = await testConnection();
@@ -109,7 +105,7 @@ const ReportGenerate: React.FC = () => {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       setIsReportVisible(true);
-      console.log("Report generation triggered for user:", testUserId);
+      console.log("Report generation triggered for user:", userId);
     } catch (err: any) {
       console.error("Report generation error:", err);
       setError(err.message || "An error occurred while generating the report");
@@ -123,31 +119,6 @@ const ReportGenerate: React.FC = () => {
   const handleResetReport = () => {
     setIsReportVisible(false);
     setError(null);
-  };
-
-  const handleUserIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(event.target.value) || 1;
-    setTestUserIdState(value);
-  };
-
-  const handleTestConnection = async () => {
-    setIsLoading(true);
-    try {
-      const result = await testConnection();
-      if (result.success) {
-        setError(null);
-        alert(`✅ ${result.message}`);
-      } else {
-        setError(result.message);
-        alert(`❌ ${result.message}`);
-      }
-    } catch (error) {
-      const message = "Failed to test connection";
-      setError(message);
-      alert(`❌ ${message}`);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleQuickDateRange = (range: string) => {
@@ -197,6 +168,8 @@ const ReportGenerate: React.FC = () => {
           top: 0,
           height: "100vh",
           zIndex: 1200,
+          flexGrow: 1,
+          flexDirection: "column",
         }}
       >
         <Sidebar />
@@ -221,264 +194,233 @@ const ReportGenerate: React.FC = () => {
           sx={{ mb: 3, textAlign: "center" }}
         />
 
-        {/* Development Controls */}
-        <Paper
-          elevation={1}
-          sx={{
-            p: 2,
-            mb: 3,
-            bgcolor: "info.light",
-            color: "info.contrastText",
-          }}
-        >
-          <Typography variant="subtitle2" sx={{ mb: 2 }}>
-            🔧 Development Mode - Testing Controls
-          </Typography>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              flexWrap: "wrap",
-            }}
-          >
-            <TextField
-              label="Test User ID"
-              type="number"
-              value={testUserId}
-              onChange={handleUserIdChange}
-              size="small"
-              sx={{ width: "150px" }}
-              inputProps={{ min: 1 }}
-            />
-            <Button
-              variant="contained"
-              size="small"
-              onClick={handleTestConnection}
-              disabled={isLoading}
-              sx={{ bgcolor: "primary.main", color: "white" }}
-            >
-              Test API Connection
-            </Button>
-            <Typography variant="body2" sx={{ ml: 1 }}>
-              Backend: {API_BASE_URL}
-            </Typography>
-          </Box>
-        </Paper>
-
-        {/* Date Selection */}
         <Box
           sx={{
-            mb: 3,
             display: "flex",
             flexDirection: "column",
+            justifyContent: "center",
             alignItems: "center",
+            alignContent: "center",
+            flexGrow: 1,
+            paddingLeft:30
           }}
         >
-          {/* Quick Date Range Buttons */}
-
-          <Paper
-            elevation={1}
+          {/* Date Selection */}
+          <Box
             sx={{
-              p: 2,
-              mb: 2,
-              width: "100%",
-              maxWidth: "800px",
-              mx: "auto",
-              backgroundColor: "grey.50",
+              mb: 3,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
             }}
           >
-            <Typography
-              variant="body2"
+            {/* Quick Date Range Buttons */}
+
+            <Paper
+              elevation={1}
               sx={{
-                mb: 1.5,
-                fontWeight: 500,
-                textAlign: "center",
-                color: "text.secondary",
+                p: 2,
+                mb: 2,
+                width: "100%",
+                maxWidth: "800px",
+                mx: "auto",
+                backgroundColor: "grey.50",
               }}
             >
-              Quick Date Ranges:
-            </Typography>
-
-            <Box
-              sx={{
-                display: "flex",
-                gap: 1,
-                flexWrap: "wrap",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Chip
-                label="Last 30 Days"
-                variant="outlined"
-                clickable
-                onClick={() => handleQuickDateRange("last30days")}
+              <Typography
+                variant="body2"
                 sx={{
-                  "&:hover": {
-                    backgroundColor: "primary.main",
-                    color: "white",
-                    borderColor: "primary.main",
-                  },
+                  mb: 1.5,
+                  fontWeight: 500,
+                  textAlign: "center",
+                  color: "text.secondary",
                 }}
-              />
+              >
+                Quick Date Ranges:
+              </Typography>
 
-              <Chip
-                label="Last 3 Months"
-                variant="outlined"
-                clickable
-                onClick={() => handleQuickDateRange("last3months")}
+              <Box
                 sx={{
-                  "&:hover": {
-                    backgroundColor: "primary.main",
-                    color: "white",
-                    borderColor: "primary.main",
-                  },
+                  display: "flex",
+                  gap: 1,
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
-              />
+              >
+                <Chip
+                  label="Last 30 Days"
+                  variant="outlined"
+                  clickable
+                  onClick={() => handleQuickDateRange("last30days")}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "primary.main",
+                      color: "white",
+                      borderColor: "primary.main",
+                    },
+                  }}
+                />
 
-              <Chip
-                label="Last 6 Months"
-                variant="outlined"
-                clickable
-                onClick={() => handleQuickDateRange("last6months")}
-                sx={{
-                  "&:hover": {
-                    backgroundColor: "primary.main",
-                    color: "white",
-                    borderColor: "primary.main",
-                  },
-                }}
-              />
+                <Chip
+                  label="Last 3 Months"
+                  variant="outlined"
+                  clickable
+                  onClick={() => handleQuickDateRange("last3months")}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "primary.main",
+                      color: "white",
+                      borderColor: "primary.main",
+                    },
+                  }}
+                />
 
-              <Chip
-                label="Last 12 Months"
-                variant="outlined"
-                clickable
-                onClick={() => handleQuickDateRange("last12months")}
-                sx={{
-                  "&:hover": {
-                    backgroundColor: "primary.main",
-                    color: "white",
-                    borderColor: "primary.main",
-                  },
-                }}
-              />
+                <Chip
+                  label="Last 6 Months"
+                  variant="outlined"
+                  clickable
+                  onClick={() => handleQuickDateRange("last6months")}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "primary.main",
+                      color: "white",
+                      borderColor: "primary.main",
+                    },
+                  }}
+                />
 
-              <Chip
-                label="This Year"
-                variant="outlined"
-                clickable
-                onClick={() => handleQuickDateRange("thisyear")}
-                sx={{
-                  "&:hover": {
-                    backgroundColor: "primary.main",
-                    color: "white",
-                    borderColor: "primary.main",
-                  },
-                }}
-              />
-            </Box>
-          </Paper>
+                <Chip
+                  label="Last 12 Months"
+                  variant="outlined"
+                  clickable
+                  onClick={() => handleQuickDateRange("last12months")}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "primary.main",
+                      color: "white",
+                      borderColor: "primary.main",
+                    },
+                  }}
+                />
 
-          {/* Custom Date Picker */}
-          <CustomDatePicker
-            startDate={startDate}
-            endDate={endDate}
-            setStartDate={setStartDate}
-            setEndDate={setEndDate}
-            onGenerate={handleGenerate}
-            isLoading={isLoading}
-          />
+                <Chip
+                  label="This Year"
+                  variant="outlined"
+                  clickable
+                  onClick={() => handleQuickDateRange("thisyear")}
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "primary.main",
+                      color: "white",
+                      borderColor: "primary.main",
+                    },
+                  }}
+                />
+              </Box>
+            </Paper>
 
-          {/* Additional Info */}
-          <Box sx={{ mt: 2, textAlign: "center" }}>
-            <Typography variant="body2" color="text.secondary">
-              Selected Range: {startDate?.format("MMM DD, YYYY")} to{" "}
-              {endDate?.format("MMM DD, YYYY")}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              ({endDate?.diff(startDate, "days")} days)
-            </Typography>
-          </Box>
-
-          {/* Reset button when report is visible */}
-          {isReportVisible && (
-            <Button
-              variant="outlined"
-              onClick={handleResetReport}
-              sx={{ mt: 2 }}
-            >
-              Generate New Report
-            </Button>
-          )}
-        </Box>
-
-        <Box
-          sx={{
-            flex: 1,
-            overflowY: "auto",
-            p: 2,
-            backgroundColor: theme.palette.background.paper,
-            borderRadius: 1,
-            boxShadow: theme.shadows[1],
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          {isReportVisible ? (
-            <ReportDisplay
-              startDate={startDate?.format("YYYY-MM-DD") ?? ""}
-              endDate={endDate?.format("YYYY-MM-DD") ?? ""}
-              key={`${startDate?.format("YYYY-MM-DD")}-${endDate?.format(
-                "YYYY-MM-DD"
-              )}-${testUserId}`} // Force re-render on date/user change
+            {/* Custom Date Picker */}
+            <CustomDatePicker
+              startDate={startDate}
+              endDate={endDate}
+              setStartDate={setStartDate}
+              setEndDate={setEndDate}
+              onGenerate={handleGenerate}
+              isLoading={isLoading}
             />
-          ) : (
-            <Box
-              sx={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                color: theme.palette.text.secondary,
-                textAlign: "center",
-                gap: 2,
-              }}
-            >
-              <Typography variant="h6" gutterBottom>
-                📊 No report generated yet
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                Select your desired date range and click "Generate Report" to
-                view your financial data
-              </Typography>
-              <Typography variant="body2" color="text.disabled" sx={{ mb: 2 }}>
-                Current selection: {startDate?.format("MMM DD, YYYY")} to{" "}
+
+            {/* Additional Info */}
+            <Box sx={{ mt: 2, textAlign: "center" }}>
+              <Typography variant="body2" color="text.secondary">
+                Selected Range: {startDate?.format("MMM DD, YYYY")} to{" "}
                 {endDate?.format("MMM DD, YYYY")}
               </Typography>
-
-              
+              <Typography variant="body2" color="text.secondary">
+                ({endDate?.diff(startDate, "days")} days)
+              </Typography>
             </Box>
-          )}
-        </Box>
 
-        <Snackbar
-          open={!!error}
-          autoHideDuration={8000}
-          onClose={handleCloseError}
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        >
-          <Alert
-            onClose={handleCloseError}
-            severity="error"
-            sx={{ width: "100%" }}
+            {/* Reset button when report is visible */}
+            {isReportVisible && (
+              <Button
+                variant="outlined"
+                onClick={handleResetReport}
+                sx={{ mt: 2 }}
+              >
+                Generate New Report
+              </Button>
+            )}
+          </Box>
+
+          <Box
+            sx={{
+              flex: 1,
+              overflowY: "auto",
+              p: 2,
+              backgroundColor: theme.palette.background.paper,
+              borderRadius: 1,
+              boxShadow: theme.shadows[1],
+              display: "flex",
+              justifyContent: "center",
+            }}
           >
-            <Typography variant="subtitle2">Error</Typography>
-            {error}
-          </Alert>
-        </Snackbar>
+            {isReportVisible ? (
+              <ReportDisplay
+                startDate={startDate?.format("YYYY-MM-DD") ?? ""}
+                endDate={endDate?.format("YYYY-MM-DD") ?? ""}
+                key={`${startDate?.format("YYYY-MM-DD")}-${endDate?.format(
+                  "YYYY-MM-DD"
+                )}-${userId}`} // ✅ uses authenticated user ID
+              />
+            ) : (
+              <Box
+                sx={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: theme.palette.text.secondary,
+                  textAlign: "center",
+                  gap: 2,
+                }}
+              >
+                <Typography variant="h6" gutterBottom>
+                  📊 No report generated yet
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  Select your desired date range and click "Generate Report" to
+                  view your financial data
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.disabled"
+                  sx={{ mb: 2 }}
+                >
+                  Current selection: {startDate?.format("MMM DD, YYYY")} to{" "}
+                  {endDate?.format("MMM DD, YYYY")}
+                </Typography>
+              </Box>
+            )}
+          </Box>
+
+          <Snackbar
+            open={!!error}
+            autoHideDuration={8000}
+            onClose={handleCloseError}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          >
+            <Alert
+              onClose={handleCloseError}
+              severity="error"
+              sx={{ width: "100%" }}
+            >
+              <Typography variant="subtitle2">Error</Typography>
+              {error}
+            </Alert>
+          </Snackbar>
+        </Box>
       </Box>
     </Box>
   );
