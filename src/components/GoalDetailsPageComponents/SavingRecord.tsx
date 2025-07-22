@@ -53,7 +53,7 @@ const SavingRecord: React.FC<SavingRecordProps> = ({ record }) => {
       </TableCell>
       <TableCell>
         <Typography variant="body2" color="textSecondary">
-          {record.description || 'Necessities'}
+          {record.description || ''}
         </Typography>
       </TableCell>
       <TableCell align="right">

@@ -1,6 +1,31 @@
 import React, { useState } from 'react';
-import { IconButton, Tooltip } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
+import {
+  Box,
+  Button,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+  useMediaQuery,
+  Tooltip,
+  useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
+} from '@mui/material';
+import {
+  DeleteOutline,
+  AccountBalanceWallet,
+  CalendarToday,
+  Schedule,
+  Description,
+  Savings // Add this import for the savings icon
+} from '@mui/icons-material';
 
 interface SavingRecord {
   id: number;
@@ -22,8 +47,14 @@ const SavingRecordsHistoryTable: React.FC<SavingRecordsHistoryTableProps> = ({
   records, 
   onDeleteRecord 
 }) => {
-  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const theme = useTheme();
+  const isTabletOrDesktop = useMediaQuery(theme.breakpoints.down("lg"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  
+  const [showAll, setShowAll] = useState<boolean>(false);
   const [deletingRecord, setDeletingRecord] = useState<number | null>(null);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState<boolean>(false);
+  const [recordToDelete, setRecordToDelete] = useState<SavingRecord | null>(null);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -43,277 +74,298 @@ const SavingRecordsHistoryTable: React.FC<SavingRecordsHistoryTableProps> = ({
     });
   };
 
-  const formatAmount = (amount: number) => {
-    return `+${amount.toFixed(2)} LKR`;
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-LK', {
+      style: 'currency',
+      currency: 'LKR',
+      minimumFractionDigits: 2,
+    }).format(amount);
   };
 
-  const handleDeleteClick = async (recordId: number) => {
-    if (!onDeleteRecord) return;
+  const handleDeleteClick = (record: SavingRecord) => {
+    setRecordToDelete(record);
+    setConfirmDeleteOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!onDeleteRecord || !recordToDelete) return;
     
-    if (window.confirm('Are you sure you want to delete this saving record?')) {
-      setDeletingRecord(recordId);
-      try {
-        await onDeleteRecord(recordId);
-      } catch (error) {
-        console.error('Error deleting record:', error);
-      } finally {
-        setDeletingRecord(null);
-      }
+    setDeletingRecord(recordToDelete.id);
+    try {
+      await onDeleteRecord(recordToDelete.id);
+    } catch (error) {
+      console.error('Error deleting record:', error);
+    } finally {
+      setDeletingRecord(null);
+      setConfirmDeleteOpen(false);
+      setRecordToDelete(null);
     }
   };
 
+  const handleCancelDelete = () => {
+    setConfirmDeleteOpen(false);
+    setRecordToDelete(null);
+  };
+
+  // Get the records to display (limit to 8 if showAll is false)
+  const getRecordsToDisplay = () => {
+    return showAll ? records : records.slice(0, 8);
+  };
+
+  const handleViewToggle = () => {
+    setShowAll(!showAll);
+  };
+
+  const recordsToDisplay = getRecordsToDisplay();
+
   return (
-    <div style={{ marginTop: '32px', position: 'relative' }}>
-      {/* Header */}
-      <div style={{ 
-        marginLeft: '40px',
-        marginBottom: '24px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '16px'
+    <Box sx={{ mx: 3 }}>
+      {/* Desktop and Tablet view */}
+      <Box sx={{
+        display: { xs: 'none', md: 'block' }
       }}>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          borderRadius: '12px',
-          backgroundColor: "#0b00dd",
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <span style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }}>
-            📊
-          </span>
-        </div>
-        <h2 style={{ 
-          margin: 0,
-          color: "#0b00dd",
-          fontWeight: '700',
-          fontSize: '22px'
-        }}>
-          Savings History
-        </h2>
-      </div>
-      
-      <div style={{ 
-        borderRadius: "12px",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-        border: "1px solid #e0e0e0",
-        backgroundColor: "#ffffff",
-        overflow: 'hidden',
-        marginBottom: '40px'
-      }}>
-        <table style={{
-          width: '100%',
-          borderCollapse: 'collapse'
-        }}>
-          <thead>
-            <tr style={{ 
-              backgroundColor: '#f8f9fa',
-              borderBottom: '2px solid #e0e0e0'
-            }}>
-              <th style={{
-                padding: '16px',
-                textAlign: 'left',
-                fontWeight: '700',
-                color: '#0b00dd',
-                textTransform: 'uppercase',
-                fontSize: '12px',
-                letterSpacing: '0.5px'
-              }}>
-                📅 Date
-              </th>
-              <th style={{
-                padding: '16px',
-                textAlign: 'left',
-                fontWeight: '700',
-                color: '#0b00dd',
-                textTransform: 'uppercase',
-                fontSize: '12px',
-                letterSpacing: '0.5px'
-              }}>
-                ⏰ Time
-              </th>
-              <th style={{
-                padding: '16px',
-                textAlign: 'left',
-                fontWeight: '700',
-                color: '#0b00dd',
-                textTransform: 'uppercase',
-                fontSize: '12px',
-                letterSpacing: '0.5px'
-              }}>
-                📝 Description
-              </th>
-              <th style={{
-                padding: '16px',
-                textAlign: 'right',
-                fontWeight: '700',
-                color: '#0b00dd',
-                textTransform: 'uppercase',
-                fontSize: '12px',
-                letterSpacing: '0.5px'
-              }}>
-                💰 Amount
-              </th>
-              <th style={{
-                padding: '16px',
-                textAlign: 'center',
-                fontWeight: '700',
-                color: '#0b00dd',
-                textTransform: 'uppercase',
-                fontSize: '12px',
-                letterSpacing: '0.5px',
-                width: '80px'
-              }}>
+        <Table sx={{ minWidth: 650 }} aria-label="savings history table">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CalendarToday sx={{ fontSize: 18, color: '#666' }} />
+                Date
+              </TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Schedule sx={{ fontSize: 18, color: '#666' }} />
+                  Time
+                </Box>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Description sx={{ fontSize: 18, color: '#666' }} />
+                  Description
+                </Box>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <AccountBalanceWallet sx={{ fontSize: 18, color: '#666' }} />
+                  Amount
+                </Box>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>
                 Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {records.length > 0 ? (
-              records.map((record, index) => (
-                <tr 
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {recordsToDisplay.length > 0 ? (
+              recordsToDisplay.map((record, index) => (
+                <TableRow 
                   key={record.id}
-                  style={{
-                    backgroundColor: index % 2 === 0 ? '#ffffff' : '#fafafa',
-                    borderBottom: '1px solid #e0e0e0',
-                    transition: 'all 0.2s ease',
-                    opacity: deletingRecord === record.id ? 0.5 : 1
+                  sx={{ 
+                    '&:last-child td, &:last-child th': { border: 0 },
+                    '&:hover': { backgroundColor: '#f5f5f5' },
+                    opacity: deletingRecord === record.id ? 0.5 : 1,
+                    transition: 'all 0.2s ease'
                   }}
-                  onMouseEnter={() => setHoveredRow(record.id)}
-                  onMouseLeave={() => setHoveredRow(null)}
                 >
-                  <td style={{
-                    padding: '16px',
-                    borderBottom: '1px solid #e0e0e0',
-                    backgroundColor: hoveredRow === record.id ? '#f0f7ff' : 'transparent'
-                  }}>
-                    <div style={{ fontSize: '14px', color: '#333' }}>
+                  <TableCell>
+                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"}>
                       {formatDate(record.date)}
-                    </div>
-                  </td>
-                  <td style={{
-                    padding: '16px',
-                    borderBottom: '1px solid #e0e0e0',
-                    backgroundColor: hoveredRow === record.id ? '#f0f7ff' : 'transparent'
-                  }}>
-                    <div style={{ fontSize: '14px', color: '#333' }}>
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"}>
                       {formatTime(record.date)}
-                    </div>
-                  </td>
-                  <td style={{
-                    padding: '16px',
-                    borderBottom: '1px solid #e0e0e0',
-                    backgroundColor: hoveredRow === record.id ? '#f0f7ff' : 'transparent'
-                  }}>
-                    <div style={{ fontSize: '14px', color: '#666' }}>
-                      {record.description || 'Necessities'}
-                    </div>
-                  </td>
-                  <td style={{
-                    padding: '16px',
-                    borderBottom: '1px solid #e0e0e0',
-                    textAlign: 'right',
-                    backgroundColor: hoveredRow === record.id ? '#f0f7ff' : 'transparent'
-                  }}>
-                    <div style={{ 
-                      fontSize: '14px', 
-                      fontWeight: '500', 
-                      color: '#4CAF50' 
-                    }}>
-                      {formatAmount(record.amount)}
-                    </div>
-                  </td>
-                  <td style={{
-                    padding: '16px',
-                    borderBottom: '1px solid #e0e0e0',
-                    textAlign: 'center',
-                    backgroundColor: hoveredRow === record.id ? '#f0f7ff' : 'transparent'
-                  }}>
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ wordBreak: "break-word", whiteSpace: "normal", maxWidth: "250px" }}>
+                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"} color="textSecondary">
+                      {record.description || ''}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography 
+                      variant={isTabletOrDesktop ? "body2" : "body1"} 
+                      sx={{ 
+                        color: '#4CAF50', 
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      +{formatCurrency(record.amount)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ textAlign: 'center' }}>
                     {onDeleteRecord && (
                       <Tooltip title="Delete record" arrow>
                         <IconButton
-                          onClick={() => handleDeleteClick(record.id)}
+                          onClick={() => handleDeleteClick(record)}
                           disabled={deletingRecord === record.id}
                           size="small"
                           sx={{
-                            color: '#e74c3c',
-                            opacity: hoveredRow === record.id ? 1 : 0.6,
-                            transition: 'all 0.2s ease',
+                            color: '#f44336',
                             '&:hover': {
                               backgroundColor: '#ffebee',
-                              color: '#c62828',
                               transform: 'scale(1.1)'
                             },
                             '&:disabled': {
-                              color: '#bdc3c7',
-                              cursor: 'not-allowed'
-                            }
+                              color: '#bdc3c7'
+                            },
+                            transition: 'all 0.2s ease'
                           }}
                         >
-                          <DeleteIcon fontSize="small" />
+                          <DeleteOutline fontSize="small" />
                         </IconButton>
                       </Tooltip>
                     )}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td 
-                  colSpan={5} 
-                  style={{ 
-                    padding: '48px',
-                    textAlign: 'center',
-                    backgroundColor: '#ffffff',
-                    borderBottom: 'none'
-                  }}
-                >
-                  <div style={{
+              <TableRow>
+                <TableCell colSpan={5} sx={{ textAlign: 'center', py: 6 }}>
+                  <Box sx={{
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: '16px'
+                    gap: 2
                   }}>
-                    <div style={{
-                      width: '64px',
-                      height: '64px',
-                      borderRadius: '16px',
+                    <Box sx={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: 2,
                       backgroundColor: '#f0f7ff',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       border: '2px solid #e3f2fd'
                     }}>
-                      <span style={{ fontSize: '32px' }}>📈</span>
-                    </div>
-                    <h3 style={{ 
-                      margin: 0,
-                      color: '#0b00dd',
-                      fontWeight: '600',
-                      fontSize: '18px'
+                      <AccountBalanceWallet sx={{ fontSize: 40, color: '#1976d2' }} />
+                    </Box>
+                    <Typography variant="h6" sx={{ 
+                      color: '#1976d2',
+                      fontWeight: 600
                     }}>
                       No Savings Records Yet
-                    </h3>
-                    <p style={{ 
-                      margin: 0,
-                      color: '#666',
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" sx={{ 
                       textAlign: 'center',
-                      maxWidth: '300px',
-                      fontSize: '14px',
-                      lineHeight: 1.5
+                      maxWidth: 300
                     }}>
-                      Start your savings journey by clicking "Add Saving Record" to track your progress towards your goals.
-                    </p>
-                  </div>
-                </td>
-              </tr>
+                      Start your savings journey by adding your first saving record to track your progress towards your goals.
+                    </Typography>
+                  </Box>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </TableBody>
+        </Table>
+        {/* View More/Less Button for Desktop/Tablet */}
+        {records.length > 8 && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <Button 
+              variant="outlined" 
+              onClick={handleViewToggle}
+              disableRipple
+              sx={{
+                borderRadius: "20px",
+                textTransform: "none",
+                px: 3,
+                py: 1
+              }}
+            >
+              {showAll ? "View Less" : `View More (${records.length - 8} more)`}
+            </Button>
+          </Box>
+        )}
+      </Box>
+
+      {/* Mobile view */}
+      <Box sx={{
+        display: { xs: 'block', md: 'none' },
+        mt: 3
+      }}>
+
+        {/* View More/Less Button for Mobile */}
+        {records.length > 8 && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <Button 
+              variant="outlined" 
+              onClick={handleViewToggle}
+              sx={{
+                borderRadius: "20px",
+                textTransform: "none",
+                px: 3,
+                py: 1
+              }}
+            >
+              {showAll ? "View Less" : `View More (${records.length - 8} more)`}
+            </Button>
+          </Box>
+        )}
+      </Box>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmDeleteOpen}
+        onClose={handleCancelDelete}
+        aria-labelledby="confirm-delete-dialog-title"
+        aria-describedby="confirm-delete-dialog-description"
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            padding: '8px'
+          }
+        }}
+      >
+        <DialogTitle id="confirm-delete-dialog-title" sx={{ 
+          fontWeight: 600, 
+          fontSize: '1.25rem',
+          color: '#1a1a1a'
+        }}>
+          Confirm Delete
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="confirm-delete-dialog-description" sx={{ 
+            color: '#666666',
+            fontSize: '0.95rem'
+          }}>
+            Are you sure you want to delete this saving record of{' '}
+            <strong>
+              {recordToDelete && formatCurrency(recordToDelete.amount)}
+            </strong>
+            {recordToDelete?.description && recordToDelete.description.trim() && (
+              <span> for "{recordToDelete.description}"</span>
+            )}? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button 
+            onClick={handleCancelDelete}
+            sx={{ 
+              textTransform: 'none',
+              color: '#666666',
+              fontWeight: 500
+            }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleConfirmDelete} 
+            variant="contained"
+            disabled={deletingRecord === recordToDelete?.id}
+            sx={{ 
+              textTransform: 'none',
+              backgroundColor: '#d32f2f',
+              '&:hover': {
+                backgroundColor: '#b71c1c'
+              },
+              fontWeight: 600,
+              minWidth: '80px'
+            }}
+          >
+            {deletingRecord === recordToDelete?.id ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 

@@ -13,6 +13,7 @@ import Sidebar from '../../components/sidebar/sidebar';
 import theme from '../../assets/styles/theme';
 import { savingRecordService, SavingRecordFormData } from '../../services/savingRecordService';
 import { goalService } from '../../services/goalService';
+import SavingsIcon from '@mui/icons-material/Savings';
 
 // Local interface for component compatibility with Date object
 interface SavingRecord {
@@ -259,8 +260,9 @@ const GoalDetailsPage: React.FC = () => {
             {/* Action Section */}
             <Box sx={{
               display: 'flex',
-              justifyContent: 'center',
-              mb: 4
+              justifyContent: 'flex-start',
+              mb: 4,
+              ml: '100mm'
             }}>
               <AddSavingRecordButton onClick={handleAddSavingRecord} />
             </Box>
@@ -271,16 +273,36 @@ const GoalDetailsPage: React.FC = () => {
               borderRadius: '16px',
               boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
               border: '1px solid #e2e8f0',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
+                transform: 'translateY(-2px)',
+                borderColor: '#cbd5e1'
+              }
             }}>
               <Box sx={{ p: 3, borderBottom: '1px solid #e2e8f0' }}>
-                <Typography variant="h6" sx={{ 
-                  fontWeight: 600,
-                  color: '#1e293b',
-                  fontSize: '18px'
-                }}>
-                  💰 Savings History
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box sx={{
+                    backgroundColor: '#ece8c1ff',
+                    borderRadius: '20%',
+                    width: 40,
+                    height: 40,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <SavingsIcon sx={{ fontSize: 20, color: '#f58b22ff' }} />
+                  </Box>
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 600,
+                    color: '#1e293b',
+                    fontSize: '18px'
+                  }}>
+                    Savings History
+                  </Typography>
+                </Box>
                 <Typography variant="body2" sx={{ 
                   color: '#64748b',
                   mt: 0.5

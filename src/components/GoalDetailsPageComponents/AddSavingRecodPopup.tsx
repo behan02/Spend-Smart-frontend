@@ -107,7 +107,7 @@ const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
     const newRecord = {
       amount: numericAmount,
       date: isoDateString,
-      description: description || 'Necessities',
+      description: description || '',
       goalId: goalId
     };
 

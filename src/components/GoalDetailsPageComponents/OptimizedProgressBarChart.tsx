@@ -220,7 +220,14 @@ const OptimizedProgressBarChart: React.FC<ProgressBarChartProps> = ({
       borderRadius: "15px", 
       height: "100%",
       minHeight: "380px",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      '&:hover': {
+        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
+        transform: 'translateY(-2px)',
+        backgroundColor: '#fafafa'
+      }
     }}>
       {/* Header */}
       <Box sx={{
