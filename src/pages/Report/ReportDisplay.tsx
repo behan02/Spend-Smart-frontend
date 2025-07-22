@@ -18,7 +18,7 @@ import ReportGoal from "../../components/ReportComponents/Reportgoal/reportgoal"
 import BasicTable from "../../components/ReportComponents/Reporttable/transactiontable";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import jsPDF from "jspdf";
+import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 
 // API Configuration
