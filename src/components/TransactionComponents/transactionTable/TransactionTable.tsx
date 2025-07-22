@@ -57,11 +57,20 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
   // State to control how many transactions to show
   const [showAll, setShowAll] = useState<boolean>(false);
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'LKR'
+    }).format(amount);
+  };
+
+  let userId: number = 1; // Assuming a static user ID for now
+
   // Fetch transactions from the API
   useEffect(() => {
     async function fetchTransactions(){
       try{
-        const response = await fetch(`https://localhost:7211/api/Transaction/GetTransaction?type=${typeFilter}&category=${categoryFilter}&date=${date}&startDate=${startDate}&endDate=${endDate}&sorting=${sortOption}`);
+        const response = await fetch(`https://localhost:7211/api/Transaction/GetTransaction/${userId}?type=${typeFilter}&category=${categoryFilter}&date=${date}&startDate=${startDate}&endDate=${endDate}&sorting=${sortOption}`);
         if(!response.ok){
           throw new Error("Failed to fetch transactions");
         }
@@ -104,7 +113,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
   async function deleteTransaction(id: number) {
     try{
       console.log("Deleting transaction with ID:", id);
-      const response = await fetch(`https://localhost:7211/api/Transaction/DeleteTransaction/${id}`, {
+      const response = await fetch(`https://localhost:7211/api/Transaction/DeleteTransaction/${userId}/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -158,9 +167,29 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
                   {/* Category Icon */}
-                  <TableCell sx={{textAlign: "center"}}>{CategoryIcons.map((item: iconType, iconIndex: number) => (
+                  {/* <TableCell sx={{textAlign: "center"}}>{CategoryIcons.map((item: iconType, iconIndex: number) => (
                     list.category === item.category ? <item.icon key={iconIndex} sx={{color: item.color}}/> : null
-                  ))}</TableCell>
+                  ))}</TableCell> */}
+                  <TableCell sx={{textAlign: "center"}}>
+                    {CategoryIcons.map((item: iconType, iconIndex: number) => (
+                      list.category === item.category ? (
+                        <Box
+                          key={iconIndex}
+                          sx={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 40,
+                            height: 40,
+                            borderRadius: "50%",
+                            backgroundColor: item.color,
+                          }}
+                        >
+                          <span style={{ fontSize: "1.5rem" }}>{item.icon}</span>
+                        </Box>
+                      ) : null
+                    ))}
+                  </TableCell>
                   {/* Transaction Type */}
                   <TableCell>
                     <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.type}</Typography>
@@ -189,7 +218,8 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                         fontWeight: "bold",
                       }}
                       >
-                        {list.amount}
+                        {/* {list.amount} */}
+                        {formatCurrency(list.amount)}
                       </Typography>
                       <IconButton onClick={() => deleteTransaction(list.id)}>
                         <DeleteOutline fontSize="medium"/>
@@ -237,9 +267,29 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
             <TableBody>
               {transactionList.map((list: Transaction, index: number) => (
                 <TableRow key={index}>
-                  <TableCell sx={{textAlign: "center"}}>{CategoryIcons.map((item: iconType, iconIndex: number) => (
-                    list.category === item.category ? <item.icon key={iconIndex} sx={{color: item.color}}/> : null
+                  {/* <TableCell sx={{textAlign: "center"}}>{CategoryIcons.map((item: iconType, iconIndex: number) => (
+                    list.category === item.category ? <span key={iconIndex} style={{ fontSize: "1.5rem" }}>{item.icon}</span> : null
                   ))}
+                  </TableCell> */}
+                  <TableCell sx={{textAlign: "center"}}>
+                    {CategoryIcons.map((item: iconType, iconIndex: number) => (
+                      list.category === item.category ? (
+                        <Box
+                          key={iconIndex}
+                          sx={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 40,
+                            height: 40,
+                            borderRadius: "50%",
+                            backgroundColor: item.color,
+                          }}
+                        >
+                          <span style={{ fontSize: "1.5rem" }}>{item.icon}</span>
+                        </Box>
+                      ) : null
+                    ))}
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" component="p">{list.category}</Typography>

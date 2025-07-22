@@ -2,6 +2,7 @@ import { Close } from "@mui/icons-material";
 import { Box, Button, FormControl, IconButton, InputLabel, MenuItem, Modal, Paper, Select, TextareaAutosize, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../../../assets/styles/theme";
 import { useEffect, useState } from "react";
+import CategoryIcons from "../../../assets/categoryIcons/CategoryIcons";
 
 interface TransactionFormProps {
     addTransaction: boolean;
@@ -48,11 +49,12 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
             amount: parseFloat(amount),
             date: date,
             description: description,
-            userId: 1,
         };
 
+        let userId = 1;
+
         try{
-            const response = await fetch("https://localhost:7211/api/Transaction/CreateTransaction", {
+            const response = await fetch(`https://localhost:7211/api/Transaction/CreateTransaction/${userId}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -178,11 +180,31 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
                                     value={categoryID}
                                     onChange={(e) => setCategoryID(e.target.value)}
                                 >
-                                    {categories.map((category) => (
-                                        <MenuItem key={category.id} value={category.id}>
-                                            {category.name}
-                                        </MenuItem>
-                                    ))}
+                                    {categories.map((category) => {
+                                        // <MenuItem key={category.id} value={category.id}>
+                                        //     {category.name}
+                                        // </MenuItem>
+                                        const iconObj = CategoryIcons.find(icon => icon.category === category.name);
+                                        return (
+                                            <MenuItem key={category.id} value={category.id}>
+                                                <span style={{
+                                                    display: "inline-flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    width: 40,
+                                                    height: 40,
+                                                    borderRadius: "50%",
+                                                    fontSize: "1.3rem",
+                                                    marginRight: "8px",
+                                                    verticalAlign: "middle",
+                                                    backgroundColor: iconObj ? iconObj.color : "gray",
+                                                }}>
+                                                    {iconObj ? iconObj.icon : "📦"}
+                                                </span>
+                                                {category.name}
+                                            </MenuItem>
+                                        );
+                                    })}
                                 </Select>
                             </FormControl>
 
