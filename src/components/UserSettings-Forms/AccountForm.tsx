@@ -33,8 +33,8 @@ const AccountForm: React.FC<AccountFormProps> = ({
   onEmailVerificationStatusClear,
 }) => {
   const [formData, setFormData] = useState({
-    name: initialName,
-    email: initialEmail,
+    name: "",
+    email: "",
   });
 
   const [originalData, setOriginalData] = useState({
@@ -78,15 +78,18 @@ const AccountForm: React.FC<AccountFormProps> = ({
     }
   }, [emailVerificationStatus?.type, onEmailVerificationStatusClear]);
 
-  // Update original data when props change
+  // Update original data when props change - but keep form fields empty
   useEffect(() => {
-    setFormData({
-      name: initialName,
-      email: initialEmail,
-    });
+    // Set original data for comparison purposes, but keep form fields empty
     setOriginalData({
-      name: initialName,
-      email: initialEmail,
+      name: initialName || "",
+      email: initialEmail || "",
+    });
+
+    // Always keep form fields empty - don't populate from props
+    setFormData({
+      name: "",
+      email: "",
     });
   }, [initialName, initialEmail]);
 
@@ -131,8 +134,12 @@ const AccountForm: React.FC<AccountFormProps> = ({
   // Check what changes need to be made
   const getChangesToMake = () => {
     const changes = {
-      nameChanged: formData.name.trim() !== originalData.name,
-      emailChanged: formData.email.trim() !== originalData.email,
+      nameChanged:
+        formData.name.trim() !== "" &&
+        formData.name.trim() !== originalData.name,
+      emailChanged:
+        formData.email.trim() !== "" &&
+        formData.email.trim() !== originalData.email,
     };
     return changes;
   };
@@ -256,12 +263,16 @@ const AccountForm: React.FC<AccountFormProps> = ({
         }
       }
 
-      // Set success messages - always show individual messages
+      // Set success messages and clear form data after successful updates
       if (results.nameSuccess) {
         setSuccess((prev) => ({ ...prev, name: results.nameMessage }));
+        // Clear only the name field after successful update
+        setFormData((prev) => ({ ...prev, name: "" }));
       }
       if (results.emailSuccess) {
         setSuccess((prev) => ({ ...prev, email: results.emailMessage }));
+        // Clear only the email field after successful update
+        setFormData((prev) => ({ ...prev, email: "" }));
       }
 
       // Call success callback if any changes were successful
@@ -292,9 +303,9 @@ const AccountForm: React.FC<AccountFormProps> = ({
 
       {/* Name Field */}
       <Box>
-        <Typography sx={{ fontSize: 15, mb: 1 }}>Full Name</Typography>
+        <Typography sx={{ fontSize: 15, mb: 1 }}>User Name</Typography>
         <TextField
-          placeholder="Enter your full name"
+          placeholder="Enter your user name"
           value={formData.name}
           onChange={(e) => handleInputChange("name", e.target.value)}
           error={!!errors.name}

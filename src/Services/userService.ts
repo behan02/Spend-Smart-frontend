@@ -100,6 +100,25 @@ export const userService = {
     }
   },
 
+  // Get user data
+  getUserData: async (userId: number): Promise<{ userId: number; name: string; email: string }> => {
+    try {
+      console.log('👤 Getting user data for userId:', userId);
+      const response = await apiClient.get(`/user/${userId}`);
+      const userData = response.data;
+      
+      // Transform the response to match our frontend interface
+      return {
+        userId: userData.id,
+        name: userData.userName || userData.fullName || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'User',
+        email: userData.email
+      };
+    } catch (error) {
+      console.error('❌ Error getting user data:', error);
+      throw error;
+    }
+  },
+
   // Update user name
   updateUserName: async (dto: UpdateUserNameDto): Promise<ApiResponse> => {
     try {

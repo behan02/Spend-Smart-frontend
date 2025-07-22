@@ -28,6 +28,7 @@ import {
   passwordService,
   ChangePasswordRequest,
 } from "../../Services/passwordService";
+import { userService } from "../../Services/userService";
 
 interface UserData {
   userId: number;
@@ -41,7 +42,7 @@ const UserSettings: React.FC = () => {
     theme.breakpoints.down("md" as import("@mui/material/styles").Breakpoint)
   );
 
-  // ✅ FIX: Proper ref type for Avatar (should be HTMLDivElement or remove if not used)
+  //Proper ref type for Avatar (should be HTMLDivElement or remove if not used)
   const fileInputRef = React.useRef<HTMLDivElement>(null);
   const [profileImageUrl, setProfileImageUrl] = useState<string | undefined>(
     undefined
@@ -82,8 +83,26 @@ const UserSettings: React.FC = () => {
 
   useEffect(() => {
     loadProfilePicture();
+    loadUserData();
     handleEmailVerificationCallback();
   }, [location]);
+
+  // Load user data from API
+  const loadUserData = async () => {
+    try {
+      console.log("Loading user data for userId:", currentUserId);
+      const userData = await userService.getUserData(currentUserId);
+      setUserData({
+        userId: userData.userId,
+        name: userData.name,
+        email: userData.email,
+      });
+      console.log("User data loaded:", userData);
+    } catch (error) {
+      console.warn("Could not load user data:", error);
+      // Keep default values if loading fails
+    }
+  };
 
   // Handle email verification callback from URL parameters
   const handleEmailVerificationCallback = () => {
@@ -138,6 +157,8 @@ const UserSettings: React.FC = () => {
 
   const handleUpdateSuccess = () => {
     console.log("User data updated successfully!");
+    // Reload user data to reflect the changes in the UI
+    loadUserData();
   };
 
   // Password change handlers
