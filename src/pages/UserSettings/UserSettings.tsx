@@ -229,6 +229,7 @@ const UserSettings: React.FC = () => {
             p: 0,
           }}
         >
+          {/* Header Image - Extended closer to sidebar */}
           <Box
             sx={{
               position: "relative",
@@ -237,6 +238,7 @@ const UserSettings: React.FC = () => {
               backgroundSize: "cover",
               backgroundPosition: "center",
               borderRadius: 0,
+              marginLeft: !isSmallScreen ? "280px" : "0px", // Closer to sidebar
             }}
           >
             <Avatar
@@ -259,7 +261,13 @@ const UserSettings: React.FC = () => {
             </Avatar>
           </Box>
 
-          <Box sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
+          {/* Main Content - Keep existing margin */}
+          <Box
+            sx={{
+              marginLeft: !isSmallScreen ? "320px" : "0px", // Keep content spacing
+              px: { xs: 2, sm: 3, md: 4 },
+            }}
+          >
             <Box sx={{ mt: 6 }}>
               <ProfilePictureUpload
                 onImageUpdate={handleProfilePictureUpdate}
@@ -383,8 +391,12 @@ const UserSettings: React.FC = () => {
               />
             </Box>
           </Box>
+          {/* End of Main Content */}
 
-          <Footer />
+          {/* Footer - Extended closer to sidebar */}
+          <Box sx={{ marginLeft: !isSmallScreen ? "280px" : "0px" }}>
+            <Footer />
+          </Box>
         </Box>
       </Box>
     </ThemeProvider>

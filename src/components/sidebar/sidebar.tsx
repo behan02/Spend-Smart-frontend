@@ -4,10 +4,8 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  IconButton,
   Box,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import SummarizeIcon from "@mui/icons-material/Summarize";
 import {
@@ -18,7 +16,7 @@ import {
   ExitToApp,
 } from "@mui/icons-material";
 import Logo from "../../assets/images/logo/Logo.png";
-import React, { useState } from "react";
+import React from "react";
 
 //  Define a type for menu items
 interface MenuItem {
@@ -38,35 +36,20 @@ const menuItems: MenuItem[] = [
 ];
 
 const Sidebar: React.FC = () => {
-  const [open, setOpen] = useState(false);
-
-  const toggleDrawer = (openState: boolean) => () => {
-    setOpen(openState);
-  };
-
   return (
     <>
-      {/* Toggle Button */}
-      <IconButton
-        onClick={toggleDrawer(true)}
-        sx={{ position: "fixed", top: 16, left: 16, zIndex: 1300 }}
-      >
-        <MenuIcon />
-      </IconButton>
-
-      {/* Swipeable Drawer */}
+      {/* Permanent Drawer - Always visible */}
       <Drawer
-        variant="temporary"
+        variant="permanent"
         anchor="left"
-        open={open}
-        onClose={toggleDrawer(false)}
-        ModalProps={{ keepMounted: true }} // better performance on mobile
         sx={{
           [`& .MuiDrawer-paper`]: {
             width: 280,
             boxSizing: "border-box",
             background: "#fff",
             color: "#023e8a",
+            position: "fixed",
+            height: "100vh",
           },
         }}
       >
@@ -92,7 +75,6 @@ const Sidebar: React.FC = () => {
                   color: "#fff",
                 },
               }}
-              onClick={toggleDrawer(false)}
             >
               <ListItemIcon className="icon" sx={{ color: "#023e8a" }}>
                 {item.icon}
