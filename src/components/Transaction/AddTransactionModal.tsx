@@ -21,7 +21,7 @@ import {
 import { categoryApi, Category } from '../../api/categoryApi';
 import { transactionApi, CreateTransactionRequest } from '../../api/transactionApi';
 import { useUser } from '../../context/UserContext';
-import CategoryIcons from '../../assets/categoryIcons/CategoryIcons';
+import CategoryIcons, { iconType } from '../../assets/categoryIcons/CategoryIcons';
 
 interface AddTransactionModalProps {
   open: boolean;
@@ -43,6 +43,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [budgetImpacts, setBudgetImpacts] = useState<any[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
   
   const [formData, setFormData] = useState({
     transactionType: 'Expense' as 'Income' | 'Expense',
@@ -55,7 +56,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     tags: [] as string[],
     receiptUrl: '',
     isRecurring: false,
-    recurringFrequency: '',
+    recurringFrequency: '' as 'Daily' | 'Weekly' | 'Monthly' | 'Annually' | '',
     recurringEndDate: ''
   });
 
@@ -69,14 +70,25 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
   const loadCategories = async () => {
     try {
-      setLoading(true);
+      setLoadingCategories(true);
       const allCategories = await categoryApi.getAllCategories();
+      console.log('Categories loaded:', allCategories);
       setCategories(allCategories);
     } catch (error) {
       console.error('Error loading categories:', error);
-      setError('Failed to load categories');
+      setError('Failed to load categories. Using default categories.');
+      
+      // Create fallback categories from CategoryIcons
+      const fallbackCategories: Category[] = CategoryIcons.map(icon => ({
+        id: icon.id,
+        categoryName: icon.category,
+        type: icon.category === "Salary / Income" ? "Income" : "Expense"
+      }));
+      
+      console.log('Using fallback categories:', fallbackCategories);
+      setCategories(fallbackCategories);
     } finally {
-      setLoading(false);
+      setLoadingCategories(false);
     }
   };
 
@@ -182,12 +194,29 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     onClose();
   };
 
-  // Get categories filtered by transaction type
-  const filteredCategories = categories.filter(cat => cat.type === formData.transactionType);
+  // Get categories filtered by transaction type (case-insensitive comparison)
+  const filteredCategories = categories.filter(cat => 
+    cat.type.toLowerCase() === formData.transactionType.toLowerCase()
+  );
+
+  console.log('Current transaction type:', formData.transactionType);
+  console.log('Filtered categories:', filteredCategories);
+  console.log('All categories:', categories);
 
   // Get category details for UI
   const getCategoryDetails = (categoryId: number) => {
     const category = categories.find(cat => cat.id === categoryId);
+    
+    // If we have icon and color directly from the API, use those
+    if (category?.icon && category?.color) {
+      return {
+        name: category.categoryName,
+        icon: category.icon,
+        color: category.color
+      };
+    }
+    
+    // Fallback to CategoryIcons
     const iconDetails = CategoryIcons.find(icon => icon.id === categoryId);
     return {
       name: category?.categoryName || 'Unknown',
@@ -197,7 +226,11 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+    <Dialog 
+      open={open} 
+      onClose={handleClose} 
+      fullWidth={true}
+    >
       <DialogTitle>
         {isEditMode ? 'Edit Transaction' : 'Add New Transaction'}
       </DialogTitle>
@@ -239,7 +272,12 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             <ToggleButtonGroup
               value={formData.transactionType}
               exclusive
-              onChange={(e, value) => value && setFormData(prev => ({ ...prev, transactionType: value, categoryId: '' }))}
+              onChange={(e, value) => {
+                if (value) {
+                  console.log('Setting transaction type to:', value);
+                  setFormData(prev => ({ ...prev, transactionType: value, categoryId: '' }));
+                }
+              }}
               sx={{ mb: 1 }}
             >
               <ToggleButton value="Income" sx={{ px: 3 }}>
@@ -259,14 +297,20 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               label="Category"
               onChange={(e) => setFormData(prev => ({ ...prev, categoryId: e.target.value }))}
             >
-              {filteredCategories.map(category => {
-                const details = getCategoryDetails(category.id);
-                return (
-                  <MenuItem key={category.id} value={category.id}>
-                    {details.icon} {details.name}
-                  </MenuItem>
-                );
-              })}
+              {loadingCategories ? (
+                <MenuItem disabled>Loading categories...</MenuItem>
+              ) : filteredCategories.length > 0 ? (
+                filteredCategories.map(category => {
+                  const details = getCategoryDetails(category.id);
+                  return (
+                    <MenuItem key={category.id} value={category.id.toString()}>
+                      {details.icon} {details.name}
+                    </MenuItem>
+                  );
+                })
+              ) : (
+                <MenuItem disabled>No categories found for {formData.transactionType}</MenuItem>
+              )}
             </Select>
           </FormControl>
 

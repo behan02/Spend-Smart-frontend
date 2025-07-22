@@ -30,19 +30,19 @@ const BudgetPage: React.FC = () => {
 
   const loadBudgets = async () => {
     if (!user) return;
-    
+
     try {
       setLoading(true);
       setError(null);
       console.log('Loading budgets for user:', user.id);
-      
+
       const userBudgets = await budgetApi.getUserBudgets(user.id);
       console.log('Loaded budgets:', userBudgets);
-      
+
       // Ensure userBudgets is an array
       const budgetsArray = Array.isArray(userBudgets) ? userBudgets : [];
       setBudgets(budgetsArray);
-      
+
       // Set first budget as selected if none selected and budgets exist
       if (budgetsArray.length > 0 && !selectedBudget) {
         setSelectedBudget(budgetsArray[0]);
@@ -170,7 +170,8 @@ const BudgetPage: React.FC = () => {
                       totalAmount: selectedBudget.totalBudgetAmount || 0,
                       spentAmount: selectedBudget.totalSpentAmount || 0,
                       remainingAmount: (selectedBudget.totalBudgetAmount || 0) - (selectedBudget.totalSpentAmount || 0),
-                      progress: selectedBudget.progressPercentage || 0
+                      progress: selectedBudget.progressPercentage || 0,
+                      categories: [] // We'll need to load this separately or modify the API
                     } : null}
                     onEdit={handleEditBudget}
                     onDelete={handleDeleteBudget}

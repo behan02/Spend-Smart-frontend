@@ -1,110 +1,82 @@
 import axios from 'axios';
+import { API_BASE_URL } from './config';
+import { 
+  BudgetSummaryDto, 
+  BudgetResponseDto, 
+  TransactionDto, 
+  ExpenseBreakdownDto, 
+  PeriodDataDto,
+  CreateBudgetDto,
+  UpdateBudgetDto
+} from '../types/budgetTypes';
 
-const API_BASE_URL = 'http://localhost:5110/api';
+const BUDGET_API_URL = `${API_BASE_URL}/Budget`;
 
-// Create axios instance with default config
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Budget API interfaces
-export interface BudgetCategoryAllocation {
-  categoryId: number;
-  allocatedAmount: number;
-}
-
-export interface CreateBudgetRequest {
-  budgetName: string;
-  budgetType: string; // 'Monthly' or 'Annually'
-  startDate: string; // ISO date string
-  description?: string;
-  categoryAllocations: BudgetCategoryAllocation[];
-}
-
-export interface BudgetSummary {
-  budgetId: number;
-  budgetName: string;
-  budgetType: string;
-  startDate: string;
-  endDate: string;
-  totalBudgetAmount: number;
-  totalSpentAmount: number;
-  remainingAmount: number;
-  progressPercentage: number;
-  status: string;
-}
-
-export interface BudgetDetails {
-  budgetId: number;
-  budgetName: string;
-  budgetType: string;
-  startDate: string;
-  endDate: string;
-  totalBudgetAmount: number;
-  totalSpentAmount: number;
-  remainingAmount: number;
-  progressPercentage: number;
-  status: string;
-  description?: string;
-  categories: BudgetCategoryDetails[];
-}
-
-export interface BudgetCategoryDetails {
-  budgetCategoryId: number;
-  categoryId: number;
-  categoryName: string;
-  allocatedAmount: number;
-  spentAmount: number;
-  remainingAmount: number;
-  progressPercentage: number;
-}
-
-export interface ApiResponse<T> {
-  success: boolean;
-  message?: string;
-  data: T;
-  errors?: string[];
-}
-
-// Budget API functions
 export const budgetApi = {
-  // Get user budgets
-  getUserBudgets: async (userId: number): Promise<BudgetSummary[]> => {
-    const response = await api.get<ApiResponse<BudgetSummary[]>>(`/Budget/user/${userId}`);
-    return response.data.data;
+  // Get all budgets for a user
+  getUserBudgets: async (userId: number): Promise<BudgetSummaryDto[]> => {
+    const response = await axios.get<BudgetSummaryDto[]>(`${BUDGET_API_URL}/user/${userId}`);
+    return response.data;
   },
 
-  // Get budget details
-  getBudgetDetails: async (budgetId: number): Promise<BudgetDetails> => {
-    const response = await api.get<ApiResponse<BudgetDetails>>(`/Budget/${budgetId}`);
-    return response.data.data;
+  // Get budget details by ID
+  getBudgetDetails: async (budgetId: number): Promise<BudgetResponseDto> => {
+    const response = await axios.get<BudgetResponseDto>(`${BUDGET_API_URL}/details/${budgetId}`);
+    return response.data;
   },
 
-  // Create budget
-  createBudget: async (userId: number, budget: CreateBudgetRequest): Promise<BudgetDetails> => {
-    const response = await api.post<ApiResponse<BudgetDetails>>(`/Budget?userId=${userId}`, budget);
-    return response.data.data;
+  // Get transactions for a budget
+  getBudgetTransactions: async (budgetId: number): Promise<TransactionDto[]> => {
+    const response = await axios.get<TransactionDto[]>(`${BUDGET_API_URL}/${budgetId}/transactions`);
+    return response.data;
   },
 
-  // Update budget
-  updateBudget: async (budgetId: number, budget: CreateBudgetRequest): Promise<BudgetDetails> => {
-    const response = await api.put<ApiResponse<BudgetDetails>>(`/Budget/${budgetId}`, budget);
-    return response.data.data;
+  // Get expense breakdown for a budget
+  getExpenseBreakdown: async (budgetId: number): Promise<ExpenseBreakdownDto[]> => {
+    const response = await axios.get<ExpenseBreakdownDto[]>(`${BUDGET_API_URL}/${budgetId}/expense-breakdown`);
+    return response.data;
   },
 
-  // Delete budget
+  // Get period data for budget chart
+  getBudgetPeriodData: async (budgetId: number): Promise<PeriodDataDto[]> => {
+    const response = await axios.get<PeriodDataDto[]>(`${BUDGET_API_URL}/${budgetId}/period-data`);
+    return response.data;
+  },
+
+  // Create a new budget
+  createBudget: async (userId: number, budgetData: CreateBudgetDto): Promise<BudgetResponseDto> => {
+    const response = await axios.post<BudgetResponseDto>(`${BUDGET_API_URL}/create/${userId}`, budgetData);
+    return response.data;
+  },
+
+  // Update an existing budget
+  updateBudget: async (budgetId: number, budgetData: UpdateBudgetDto): Promise<BudgetResponseDto> => {
+    const response = await axios.put<BudgetResponseDto>(`${BUDGET_API_URL}/update/${budgetId}`, budgetData);
+    return response.data;
+  },
+
+  // Delete a budget
   deleteBudget: async (budgetId: number): Promise<void> => {
-    await api.delete(`/Budget/${budgetId}`);
+    await axios.delete(`${BUDGET_API_URL}/delete/${budgetId}`);
   },
 
-  // Get budget analytics
-  getBudgetAnalytics: async (budgetId: number): Promise<any> => {
-    const response = await api.get<ApiResponse<any>>(`/BudgetAnalytics/${budgetId}`);
-    return response.data.data;
+  // Update budget status
+  updateBudgetStatus: async (budgetId: number, status: string): Promise<void> => {
+    await axios.put(`${BUDGET_API_URL}/${budgetId}/status/${status}`);
   },
+
+  // Record transaction impact on budget
+  recordTransactionImpact: async (
+    transactionId: number,
+    budgetId: number,
+    categoryId: number,
+    amount: number
+  ): Promise<void> => {
+    await axios.post(`${BUDGET_API_URL}/transaction-impact`, {
+      transactionId,
+      budgetId,
+      categoryId,
+      amount
+    });
+  }
 };
-
-export default budgetApi;

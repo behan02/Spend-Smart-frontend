@@ -149,6 +149,7 @@ const BudgetDetailsPage: React.FC<BudgetDetailsPageProps> = ({
   const [periodData, setPeriodData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     if (currentBudgetId) {
@@ -157,18 +158,23 @@ const BudgetDetailsPage: React.FC<BudgetDetailsPageProps> = ({
       // Default to budget ID 1 if no ID is provided
       fetchBudgetDetails('1');
     }
-  }, [currentBudgetId]);
+  }, [currentBudgetId, refreshTrigger]);
 
   const fetchBudgetDetails = async (budgetId: string) => {
     try {
       setLoading(true);
       setError(null);
       
+      const budgetIdNumber = parseInt(budgetId, 10);
+      if (isNaN(budgetIdNumber)) {
+        throw new Error('Invalid budget ID');
+      }
+      
       await Promise.all([
-        fetchBudget(budgetId),
-        fetchTransactions(budgetId),
-        fetchExpenseBreakdown(budgetId),
-        fetchPeriodData(budgetId)
+        fetchBudget(budgetIdNumber),
+        fetchTransactions(budgetIdNumber),
+        fetchExpenseBreakdown(budgetIdNumber),
+        fetchPeriodData(budgetIdNumber)
       ]);
       
     } catch (err) {
@@ -178,54 +184,75 @@ const BudgetDetailsPage: React.FC<BudgetDetailsPageProps> = ({
     }
   };
 
-  const fetchBudget = async (budgetId: string) => {
-    const budget = await budgetService.getBudgetById(budgetId);
-    setBudget(budget);
+  const fetchBudget = async (budgetId: number) => {
+    try {
+      const budget = await budgetService.getBudgetById(budgetId);
+      setBudget(budget);
+      
+      // If there's an onBudgetUpdate callback, call it with the fetched budget
+      if (onBudgetUpdate && budget) {
+        onBudgetUpdate(budget);
+      }
+    } catch (error) {
+      console.error('Error fetching budget:', error);
+      throw error;
+    }
   };
 
-  const fetchTransactions = async (budgetId: string) => {
-    const transactions = await budgetService.getTransactionsByBudgetId(budgetId);
-    setTransactions(transactions);
+  const fetchTransactions = async (budgetId: number) => {
+    try {
+      const transactions = await budgetService.getTransactionsByBudgetId(budgetId);
+      setTransactions(transactions);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      throw error;
+    }
   };
 
-  const fetchExpenseBreakdown = async (budgetId: string) => {
-    const breakdown = await budgetService.getExpenseBreakdown(budgetId);
-    
-    // Enhance breakdown data with CategoryIcons
-    const enhancedBreakdown = breakdown.map(item => {
-      const { icon, color } = getCategoryIconAndColor(item.label);
-      return {
-        ...item,
-        icon: icon,
-        color: item.color || color
-      };
-    });
-    
-    setExpenseBreakdown(enhancedBreakdown);
+  const fetchExpenseBreakdown = async (budgetId: number) => {
+    try {
+      const breakdown = await budgetService.getExpenseBreakdown(budgetId);
+      console.log("Fetched expense breakdown:", breakdown);
+      
+      // Enhance breakdown data with CategoryIcons
+      const enhancedBreakdown = breakdown.map(item => {
+        const { icon, color } = getCategoryIconAndColor(item.label);
+        return {
+          ...item,
+          icon: item.icon || icon,
+          color: item.color || color
+        };
+      });
+      
+      console.log("Enhanced expense breakdown:", enhancedBreakdown);
+      setExpenseBreakdown(enhancedBreakdown);
+    } catch (error) {
+      console.error('Error fetching expense breakdown:', error);
+      throw error;
+    }
   };
 
-  const fetchPeriodData = async (budgetId: string) => {
-    const data = await budgetService.getPeriodData(budgetId);
-    setPeriodData(data);
+  const fetchPeriodData = async (budgetId: number) => {
+    try {
+      const data = await budgetService.getPeriodData(budgetId);
+      setPeriodData(data);
+    } catch (error) {
+      console.error('Error fetching period data:', error);
+      throw error;
+    }
   };
-
-
 
   const handleTransactionUpdate = async () => {
-    if (currentBudgetId) {
-      await Promise.all([
-        fetchTransactions(currentBudgetId),
-        fetchBudget(currentBudgetId),
-        fetchExpenseBreakdown(currentBudgetId),
-        fetchPeriodData(currentBudgetId)
-      ]);
-    }
+    console.log("Refreshing budget data after transaction update");
+    // Trigger a refresh of all data by incrementing the refresh trigger
+    setRefreshTrigger(prev => prev + 1);
   };
 
   const handleTransactionDelete = async (transactionId: number) => {
     try {
       await budgetService.deleteTransaction(transactionId);
-      await handleTransactionUpdate();
+      // Trigger refresh after deletion
+      handleTransactionUpdate();
     } catch (err) {
       console.error('Failed to delete transaction:', err);
     }
@@ -341,6 +368,15 @@ const BudgetDetailsPage: React.FC<BudgetDetailsPageProps> = ({
               <ExpenseBreakdownChart 
                 data={expenseBreakdown}
                 totalSpent={budget?.spentAmount || 0}
+                onRefresh={() => {
+                  if (currentBudgetId) {
+                    const budgetIdNumber = parseInt(currentBudgetId, 10);
+                    if (!isNaN(budgetIdNumber)) {
+                      console.log("Manually refreshing expense breakdown");
+                      fetchExpenseBreakdown(budgetIdNumber);
+                    }
+                  }
+                }}
               />
             </Paper>
 

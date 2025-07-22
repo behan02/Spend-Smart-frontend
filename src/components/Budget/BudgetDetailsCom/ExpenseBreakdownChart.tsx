@@ -1,17 +1,20 @@
 import React from 'react';
-import { Box, Typography, List, ListItem, ListItemText } from '@mui/material';
+import { Box, Typography, List, ListItem, ListItemText, Button, Tooltip } from '@mui/material';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { ExpenseBreakdown } from '../types/BudgetDetails';
 import { getCategoryIconAndColor } from '../../../utils/categoryUtils';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 interface ExpenseBreakdownChartProps {
   data: ExpenseBreakdown[];
   totalSpent: number;
+  onRefresh?: () => void;
 }
 
 const ExpenseBreakdownChart: React.FC<ExpenseBreakdownChartProps> = ({ 
   data, 
-  totalSpent 
+  totalSpent,
+  onRefresh 
 }) => {
   // Default colors for categories
   const defaultColors = [
@@ -24,7 +27,7 @@ const ExpenseBreakdownChart: React.FC<ExpenseBreakdownChartProps> = ({
     const { icon, color } = getCategoryIconAndColor(item.label);
     return {
       ...item,
-      icon: icon,
+      icon: item.icon || icon,
       color: item.color || color || defaultColors[index % defaultColors.length]
     };
   });
@@ -44,73 +47,114 @@ const ExpenseBreakdownChart: React.FC<ExpenseBreakdownChartProps> = ({
 
   return (
     <Box>
-      <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
-        Expenses Breakdown
-      </Typography>
-      
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        {/* Pie Chart */}
-        <Box sx={{ width: '100%', height: 300, mb: 2 }}>
-          <ResponsiveContainer>
-            <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={120}
-                paddingAngle={2}
-                dataKey="value"
-              >
-                {chartData.map((entry) => (
-                  <Cell key={`cell-${entry.id}`} fill={entry.color} />
-                ))}
-              </Pie>
-              {renderCustomizedLabel()}
-            </PieChart>
-          </ResponsiveContainer>
-        </Box>
-
-        {/* Legend */}
-        <Box sx={{ width: '100%' }}>
-          <List sx={{ py: 0 }}>
-            {chartData.map((item) => (
-              <ListItem key={item.id} sx={{ py: 0.5, px: 0 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                  <Box
-                    sx={{
-                      width: 12,
-                      height: 12,
-                      borderRadius: '50%',
-                      backgroundColor: item.color,
-                      mr: 1,
-                      flexShrink: 0
-                    }}
-                  />
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
-                          {item.icon && `${item.icon} `}{item.label}
-                        </Typography>
-                        <Box sx={{ textAlign: 'right' }}>
-                          <Typography variant="body2" fontWeight="bold">
-                            ${item.value.toFixed(2)}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {item.percentage.toFixed(1)}%
-                          </Typography>
-                        </Box>
-                      </Box>
-                    }
-                    sx={{ m: 0 }}
-                  />
-                </Box>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6" fontWeight="bold">
+          Expenses Breakdown
+        </Typography>
+        
+        {onRefresh && (
+          <Tooltip title="Refresh expense data">
+            <Button 
+              size="small" 
+              onClick={onRefresh}
+              startIcon={<RefreshIcon />}
+              sx={{ minWidth: 'auto', p: 0.5 }}
+            >
+              Refresh
+            </Button>
+          </Tooltip>
+        )}
       </Box>
+      
+      {data.length === 0 ? (
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: 300,
+          flexDirection: 'column',
+          backgroundColor: '#f5f5f5',
+          borderRadius: 2
+        }}>
+          <Typography color="text.secondary" sx={{ mb: 2 }}>
+            No expense data available
+          </Typography>
+          {onRefresh && (
+            <Button 
+              variant="outlined" 
+              size="small" 
+              onClick={onRefresh}
+              startIcon={<RefreshIcon />}
+            >
+              Refresh Data
+            </Button>
+          )}
+        </Box>
+      ) : (
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {/* Pie Chart */}
+          <Box sx={{ width: '100%', height: 300, mb: 2 }}>
+            <ResponsiveContainer>
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={120}
+                  paddingAngle={2}
+                  dataKey="value"
+                >
+                  {chartData.map((entry) => (
+                    <Cell key={`cell-${entry.id}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                {renderCustomizedLabel()}
+              </PieChart>
+            </ResponsiveContainer>
+          </Box>
+
+          {/* Legend */}
+          <Box sx={{ width: '100%' }}>
+            <List sx={{ py: 0 }}>
+              {chartData.map((item) => (
+                <ListItem key={item.id} sx={{ py: 0.5, px: 0 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                    <Box
+                      sx={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: '50%',
+                        backgroundColor: item.color,
+                        mr: 1,
+                        flexShrink: 0
+                      }}
+                    />
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+                            {item.icon && `${item.icon} `}{item.label}
+                          </Typography>
+                          <Box sx={{ textAlign: 'right' }}>
+                            <Typography variant="body2" fontWeight="bold">
+                              ${item.value.toFixed(2)}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {item.percentage.toFixed(1)}%
+                            </Typography>
+                          </Box>
+                        </Box>
+                      }
+                      sx={{ m: 0 }}
+                    />
+                  </Box>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        </Box>
+      )}
     </Box>
   );
 };

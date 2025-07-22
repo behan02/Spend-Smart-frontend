@@ -1,18 +1,28 @@
 import { Close } from "@mui/icons-material";
 import { Box, Button, Checkbox, FormControl, FormControlLabel, IconButton, InputLabel, MenuItem, Modal, Paper, Select, TextField, ThemeProvider, Typography } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import theme from "../../../assets/styles/theme";
-
+import { categoryApi, Category } from "../../../api/categoryApi";
+import { transactionApi } from "../../../api/transactionApi";
+import { useUser } from "../../../context/UserContext";
 
 interface RecurringTransactionProps {
     recurringTransaction: boolean;
     setRecurringTransaction: (value: boolean) => void;
+    onTransactionCreated?: () => void;
 }
 
-const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurringTransaction, setRecurringTransaction}) => {
-
+const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({
+    recurringTransaction, 
+    setRecurringTransaction,
+    onTransactionCreated
+}) => {
+    const { user } = useUser();
+    const [loading, setLoading] = useState(false);
+    const [categoryID, setCategoryID] = useState('');
     const [date, setDate] = useState("");
     const [amount, setAmount] = useState("");
+    const [description, setDescription] = useState("");
     
     const [frequency, setFrequency] = useState("Monthly");
     const [endDate, setEndDate] = useState("");
@@ -20,11 +30,90 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
     const [autoDeduct, setAutoDeduct] = useState(false);
 
     const [type, setType] = useState("");
+    const [categories, setCategories] = useState<Category[]>([]);
 
-    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    useEffect(() => {
+        if (recurringTransaction) {
+            fetchCategories();
+        }
+    }, [recurringTransaction]);
+
+    const fetchCategories = async () => {
+        try {
+            const result = await categoryApi.getAllCategories();
+            setCategories(result);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+            setCategories([]);
+        }
+    };
+
+    const resetForm = () => {
+        setType("");
+        setAmount("");
+        setCategoryID("");
+        setDate("");
+        setDescription("");
+        setFrequency("Monthly");
+        setEndDate("");
+        setOccurrences("");
+        setAutoDeduct(false);
+    };
+
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        setRecurringTransaction(false);
-        alert("Transaction added successfully!");
+
+        if (!user) {
+            alert("Please log in to add transactions");
+            return;
+        }
+
+        if (!type || !amount || !date || !categoryID) {
+            alert("Please fill in all required fields");
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const transactionData = {
+                categoryId: parseInt(categoryID),
+                transactionType: type.charAt(0).toUpperCase() + type.slice(1) as 'Income' | 'Expense',
+                amount: parseFloat(amount),
+                description: description,
+                transactionDate: date,
+                isRecurring: true,
+                recurringFrequency: frequency as 'Daily' | 'Weekly' | 'Monthly' | 'Annually',
+                recurringEndDate: endDate || undefined
+            };
+
+            const result = await transactionApi.createTransaction(user.id, transactionData);
+            console.log("Recurring transaction added successfully", result);
+            
+            // Check if budget was impacted
+            if (result.budgetImpacts && result.budgetImpacts.length > 0) {
+                console.log("Budget impacts:", result.budgetImpacts);
+                const impactSummary = result.budgetImpacts.map(impact => 
+                    `${impact.budgetName}: $${impact.impactAmount}`
+                ).join(', ');
+                alert(`Recurring transaction added successfully! Budget impacts: ${impactSummary}`);
+            } else {
+                alert("Recurring transaction added successfully!");
+            }
+            
+            setRecurringTransaction(false);
+            resetForm();
+            
+            // Call the callback to refresh parent component
+            if (onTransactionCreated) {
+                onTransactionCreated();
+            }
+        } catch (error) {
+            console.error("Error adding recurring transaction:", error);
+            alert("Failed to add recurring transaction. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -65,7 +154,7 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
                         }}>
                             Add Recurring Transaction
                         </Typography>
-                        <IconButton onClick={() => {setRecurringTransaction(false); setType("")}}aria-label="close">
+                        <IconButton onClick={() => {setRecurringTransaction(false); resetForm();}} aria-label="close">
                             <Close />
                         </IconButton>
                     </Box>
@@ -119,13 +208,32 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
                             onChange={(e) => setAmount(e.target.value)} 
                         />
                         <FormControl size="small" fullWidth required>
+                            <InputLabel id="category-label">Category</InputLabel>
+                            <Select 
+                                labelId="category-label" 
+                                value={categoryID} 
+                                onChange={(e) => setCategoryID(e.target.value)} 
+                                label="Category"
+                            >
+                                {categories
+                                    .filter(cat => 
+                                        type ? cat.type.toLowerCase() === type.toLowerCase() : true
+                                    )
+                                    .map((category) => (
+                                        <MenuItem key={category.id} value={category.id}>
+                                            {category.categoryName}
+                                        </MenuItem>
+                                    ))
+                                }
+                            </Select>
+                        </FormControl>
+                        <FormControl size="small" fullWidth required>
                             <InputLabel id="frequency-label">Frequency</InputLabel>
                             <Select labelId="frequency-label" value={frequency} onChange={(e) => setFrequency(e.target.value)} label="Frequency">
                                 <MenuItem value="Daily">Daily</MenuItem>
                                 <MenuItem value="Weekly">Weekly</MenuItem>
-                                <MenuItem value="Bi-Weekly">Bi-Weekly</MenuItem>
                                 <MenuItem value="Monthly">Monthly</MenuItem>
-                                <MenuItem value="Yearly">Yearly</MenuItem>
+                                <MenuItem value="Annually">Annually</MenuItem>
                             </Select>
                         </FormControl>
                         <TextField 
@@ -152,13 +260,13 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
                             InputLabelProps={{ shrink: true }} 
                         />
                         <TextField 
-                            label="Occurrences (optional)" 
+                            label="Description (optional)" 
                             variant="outlined" 
-                            type="number" 
+                            type="text" 
                             size="small" 
                             fullWidth 
-                            value={occurrences} 
-                            onChange={(e) => setOccurrences(e.target.value)} 
+                            value={description} 
+                            onChange={(e) => setDescription(e.target.value)} 
                         />
                         <FormControlLabel 
                             control={<Checkbox checked={autoDeduct} onChange={(e) => setAutoDeduct(e.target.checked)} />} 
@@ -168,19 +276,20 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
                             variant="contained"
                             type="submit" 
                             disableRipple 
+                            disabled={loading}
                             sx={{ 
                                 borderRadius: "15px",
                                 bgcolor: "primary.main", 
                             }}
                         >
-                            Submit
+                            {loading ? "Adding..." : "Submit"}
                         </Button>
                     </Box>
                 </Paper>
             </Modal>
         </Box>
         </ThemeProvider>
-    )
-}
+    );
+};
 
 export default RecurringTransactionForm;

@@ -9,11 +9,18 @@ import {
   IconButton,
   ToggleButton,
   ToggleButtonGroup,
+  Chip,
+  Step,
+  Stepper,
+  StepLabel,
   Divider,
   CircularProgress,
   Alert
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import AddIcon from '@mui/icons-material/Add';
+import CategoryIcons, { iconType } from '../../assets/categoryIcons/CategoryIcons';
+import { categoryApi, Category } from '../../api/categoryApi';
 import { budgetApi, CreateBudgetRequest } from '../../api/budgetApi';
 import { useUser } from '../../context/UserContext';
 
@@ -21,6 +28,8 @@ interface BudgetFormData {
   name: string;
   type: 'Monthly' | 'Annually';
   startDate: string;
+  selectedCategories: number[];
+  categoryAmounts: { [key: number]: number };
   totalAmount: number;
   description: string;
 }
@@ -33,12 +42,11 @@ interface AddBudgetModalProps {
   isEditMode?: boolean;
 }
 
-interface AddBudgetModalProps {
-  open: boolean;
-  onClose: () => void;
-  onSave: () => void; // Changed to just trigger refresh
-  initialData?: any;
-  isEditMode?: boolean;
+// Create a local Category type that matches the structure we need
+interface LocalCategory {
+  id: number;
+  categoryName: string;
+  type: string;
 }
 
 const AddBudgetModal: React.FC<AddBudgetModalProps> = ({ 
@@ -49,22 +57,49 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
   isEditMode = false 
 }) => {
   const { user } = useUser();
+  const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<LocalCategory[]>([]);
   const [formData, setFormData] = useState<BudgetFormData>({
     name: '',
     type: 'Monthly',
     startDate: new Date().toISOString().split('T')[0], // Default to today
+    selectedCategories: [],
+    categoryAmounts: {},
     totalAmount: 0,
     description: ''
   });
 
-  // Load initial data when modal opens
+  const steps = ['Budget Details', 'Set Amounts'];
+
+  // Load categories from CategoryIcons when modal opens
   useEffect(() => {
     if (open) {
+      loadCategoriesFromIcons();
       resetForm();
     }
   }, [open]);
+
+  const loadCategoriesFromIcons = () => {
+    try {
+      // Filter out income categories (we only want expense categories for budgets)
+      const expenseCategories = CategoryIcons
+        .filter(icon => !icon.category.toLowerCase().includes('income') && 
+                       !icon.category.toLowerCase().includes('salary'))
+        .map((icon, index) => ({
+          id: icon.id,
+          categoryName: icon.category,
+          type: 'Expense'
+        }));
+      
+      setCategories(expenseCategories);
+      setError(null);
+    } catch (error) {
+      console.error('Error loading categories from icons:', error);
+      setError('Failed to load categories');
+    }
+  };
 
   const resetForm = () => {
     if (isEditMode && initialData) {
@@ -72,6 +107,11 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
         name: initialData.budgetName || '',
         type: initialData.budgetType || 'Monthly',
         startDate: initialData.startDate?.split('T')[0] || '',
+        selectedCategories: initialData.categories?.map((cat: any) => cat.categoryId) || [],
+        categoryAmounts: initialData.categories?.reduce((acc: any, cat: any) => {
+          acc[cat.categoryId] = cat.allocatedAmount;
+          return acc;
+        }, {}) || {},
         totalAmount: initialData.totalBudgetAmount || 0,
         description: initialData.description || ''
       });
@@ -80,28 +120,62 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
         name: '',
         type: 'Monthly',
         startDate: new Date().toISOString().split('T')[0], // Default to today
+        selectedCategories: [],
+        categoryAmounts: {},
         totalAmount: 0,
         description: ''
       });
     }
+    setActiveStep(0);
     setError(null);
   };
 
   const handleNext = () => {
-    // Validate form
-    if (!formData.name.trim()) {
-      setError('Please enter a budget name');
-      return;
+    if (activeStep === 0) {
+      // Validate first step
+      if (!formData.name.trim()) {
+        setError('Please enter a budget name');
+        return;
+      }
+      if (!formData.startDate) {
+        setError('Please select a start date');
+        return;
+      }
+      if (formData.selectedCategories.length === 0) {
+        setError('Please select at least one category');
+        return;
+      }
+      setError(null);
     }
-    if (!formData.startDate) {
-      setError('Please select a starting date');
-      return;
-    }
-    if (formData.totalAmount <= 0) {
-      setError('Please enter a valid budget amount greater than 0');
-      return;
-    }
-    handleSave();
+    setActiveStep((prev) => prev + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prev) => prev - 1);
+  };
+
+  const handleCategoryToggle = (categoryId: number) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedCategories: prev.selectedCategories.includes(categoryId)
+        ? prev.selectedCategories.filter(id => id !== categoryId)
+        : [...prev.selectedCategories, categoryId]
+    }));
+  };
+
+  const handleCategoryAmountChange = (categoryId: number, amount: string) => {
+    const numAmount = parseFloat(amount) || 0;
+    setFormData(prev => ({
+      ...prev,
+      categoryAmounts: {
+        ...prev.categoryAmounts,
+        [categoryId]: numAmount
+      }
+    }));
+  };
+
+  const calculateTotalAmount = () => {
+    return Object.values(formData.categoryAmounts).reduce((sum, amount) => sum + amount, 0);
   };
 
   const handleSave = async () => {
@@ -110,19 +184,37 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
       return;
     }
 
+    // Check if all categories have amounts
+    const missingAmounts = formData.selectedCategories.some(
+      categoryId => !formData.categoryAmounts[categoryId] && formData.categoryAmounts[categoryId] !== 0
+    );
+
+    if (missingAmounts) {
+      setError('Please enter amounts for all selected categories');
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
-      
+
+      const totalAmount = calculateTotalAmount();
+
+      // Map our local category IDs to the budget request
       const budgetRequest: CreateBudgetRequest = {
         budgetName: formData.name,
         budgetType: formData.type,
         startDate: formData.startDate,
         description: formData.description,
-        categoryAllocations: [{
-          categoryId: 1, // Use a default category or create a general category
-          allocatedAmount: formData.totalAmount
-        }]
+        categoryAllocations: formData.selectedCategories.map(categoryId => {
+          // Find the corresponding category
+          const category = categories.find(cat => cat.id === categoryId);
+          
+          return {
+            categoryId,
+            allocatedAmount: formData.categoryAmounts[categoryId] || 0
+          };
+        })
       };
 
       console.log('Sending budget request:', budgetRequest);
@@ -137,112 +229,292 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
       console.log('Budget saved successfully!');
       onSave(); // Trigger refresh
       onClose();
-      
+
       // Reset form data
       setFormData({
         name: '',
         type: 'Monthly',
         startDate: new Date().toISOString().split('T')[0],
+        selectedCategories: [],
+        categoryAmounts: {},
         totalAmount: 0,
         description: ''
       });
-      setError(null);
+      setActiveStep(0);
+    } catch (error: any) {
+      console.error('Error saving budget:', error);
+      console.error('Error response:', error.response);
+      setError(error.response?.data?.message || error.message || 'Failed to save budget');
     } finally {
       setLoading(false);
     }
   };
 
   const handleClose = () => {
+    setActiveStep(0);
     setError(null);
     onClose();
   };
 
-  const renderFormContent = () => {
-    return (
-      <Box>
-        {/* Budget Type Toggle */}
-        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
-          <ToggleButtonGroup
-            value={formData.type}
-            exclusive
-            onChange={(_, newType) => newType && setFormData(prev => ({ ...prev, type: newType }))}
-            sx={{ borderRadius: 2 }}
-          >
-            <ToggleButton value="Monthly" sx={{ px: 3, textTransform: 'none' }}>
-              Monthly
-            </ToggleButton>
-            <ToggleButton value="Annually" sx={{ px: 3, textTransform: 'none' }}>
-              Annually
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </Box>
+  // Get category icon and details
+  const getCategoryDetails = (categoryId: number) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    // Get icon directly from CategoryIcons since we're using the same IDs
+    const iconDetails = CategoryIcons.find(icon => icon.id === categoryId);
+    
+    return {
+      name: category?.categoryName || 'Unknown',
+      icon: iconDetails?.icon || '❓',
+      color: iconDetails?.color || '#ccc'
+    };
+  };
 
-        {/* Budget Name */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="body1" sx={{ mb: 1, fontWeight: 'bold' }}>
-            Name
-          </Typography>
-          <TextField
-            fullWidth
-            variant="outlined"
-            value={formData.name}
-            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-            placeholder="Enter budget name"
-            size="small"
-          />
-        </Box>
+  // Only show expense categories for budget selection
+  const availableCategories = categories;
 
-        {/* Starting Date */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="body1" sx={{ mb: 1, fontWeight: 'bold' }}>
-            Starting Date
-          </Typography>
-          <TextField
-            fullWidth
-            variant="outlined"
-            type="date"
-            value={formData.startDate}
-            onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-            size="small"
-            InputLabelProps={{ shrink: true }}
-          />
-        </Box>
+  const renderStepContent = () => {
+    switch (activeStep) {
+      case 0:
+        return (
+          <Box>
+            {/* Budget Type Toggle */}
+            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
+              <ToggleButtonGroup
+                value={formData.type}
+                exclusive
+                onChange={(e, newType) => newType && setFormData(prev => ({ ...prev, type: newType as 'Monthly' | 'Annually' }))}
+                sx={{ borderRadius: 2 }}
+              >
+                <ToggleButton value="Monthly" sx={{ px: 3, textTransform: 'none' }}>
+                  Monthly
+                </ToggleButton>
+                <ToggleButton value="Annually" sx={{ px: 3, textTransform: 'none' }}>
+                  Annually
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
 
-        {/* Total Budget Amount */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="body1" sx={{ mb: 1, fontWeight: 'bold' }}>
-            Total Budget
-          </Typography>
-          <TextField
-            fullWidth
-            variant="outlined"
-            type="number"
-            value={formData.totalAmount || ''}
-            onChange={(e) => setFormData(prev => ({ ...prev, totalAmount: parseFloat(e.target.value) || 0 }))}
-            placeholder="Enter total budget amount"
-            size="small"
-            inputProps={{ min: 0, step: 0.01 }}
-          />
-        </Box>
+            {/* Budget Name */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="body1" sx={{ mb: 1, fontWeight: 'bold' }}>
+                Name
+              </Typography>
+              <TextField
+                fullWidth
+                variant="outlined"
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Enter budget name"
+                size="small"
+              />
+            </Box>
 
-        {/* Description */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="body1" sx={{ mb: 1, fontWeight: 'bold' }}>
-            Description (Optional)
-          </Typography>
-          <TextField
-            fullWidth
-            variant="outlined"
-            multiline
-            rows={3}
-            value={formData.description}
-            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-            placeholder="Enter budget description"
-            size="small"
-          />
-        </Box>
-      </Box>
-    );
+            {/* Starting Date */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="body1" sx={{ mb: 1, fontWeight: 'bold' }}>
+                Starting Date
+              </Typography>
+              <TextField
+                fullWidth
+                variant="outlined"
+                type="date"
+                value={formData.startDate}
+                onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                size="small"
+                InputLabelProps={{ shrink: true }}
+              />
+            </Box>
+
+            {/* Categories */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="body1" sx={{ mb: 2, fontWeight: 'bold' }}>
+                Categories
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                {formData.selectedCategories.length > 0 ? (
+                  formData.selectedCategories.map(categoryId => {
+                    const categoryDetails = getCategoryDetails(categoryId);
+                    return (
+                      <Chip
+                        key={categoryId}
+                        icon={<span style={{ fontSize: '1.2rem', marginLeft: '8px' }}>{categoryDetails.icon}</span>}
+                        label={categoryDetails.name}
+                        onDelete={() => handleCategoryToggle(categoryId)}
+                        sx={{ 
+                          backgroundColor: categoryDetails.color + '20',  // Add transparency
+                          color: 'rgba(0,0,0,0.87)',
+                          '& .MuiChip-deleteIcon': { color: 'rgba(0,0,0,0.54)' }
+                        }}
+                      />
+                    );
+                  })
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    No categories selected. Please select from the list below.
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+
+            {/* Category Selection Grid */}
+            <Box sx={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', 
+              gap: 1,
+              mb: 3,
+              maxHeight: '300px',
+              overflowY: 'auto',
+              p: 1
+            }}>
+              {availableCategories.map(category => {
+                const categoryDetails = getCategoryDetails(category.id);
+                return (
+                  <Button
+                    key={category.id}
+                    onClick={() => handleCategoryToggle(category.id)}
+                    sx={{
+                      p: 1.5,
+                      border: '1px solid #e0e0e0',
+                      borderRadius: 2,
+                      backgroundColor: formData.selectedCategories.includes(category.id) 
+                        ? '#e3f2fd' 
+                        : 'transparent',
+                      color: formData.selectedCategories.includes(category.id) 
+                        ? '#1976d2' 
+                        : 'inherit',
+                      textTransform: 'none',
+                      fontSize: '0.875rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-start',
+                      gap: 1
+                    }}
+                  >
+                    <span style={{ fontSize: '1.2rem' }}>{categoryDetails.icon}</span> 
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {categoryDetails.name}
+                    </span>
+                  </Button>
+                );
+              })}
+            </Box>
+          </Box>
+        );
+
+      case 1:
+        return (
+          <Box>
+            {/* Budget Type Toggle */}
+            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
+              <ToggleButtonGroup
+                value={formData.type}
+                exclusive
+                onChange={(e, newType) => newType && setFormData(prev => ({ ...prev, type: newType as 'Monthly' | 'Annually' }))}
+                sx={{ borderRadius: 2 }}
+              >
+                <ToggleButton value="Monthly" sx={{ px: 3, textTransform: 'none' }}>
+                  Monthly
+                </ToggleButton>
+                <ToggleButton value="Annually" sx={{ px: 3, textTransform: 'none' }}>
+                  Annually
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+
+            {/* Category Amounts */}
+            <Box sx={{ mb: 3 }}>
+              {formData.selectedCategories.map(categoryId => {
+                const categoryDetails = getCategoryDetails(categoryId);
+                return (
+                  <Box key={categoryId} sx={{ mb: 2 }}>
+                    <Typography variant="body1" sx={{ 
+                      mb: 1, 
+                      fontWeight: 'bold',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}>
+                      <span style={{ 
+                        fontSize: '1.2rem', 
+                        backgroundColor: categoryDetails.color + '30',
+                        padding: '4px',
+                        borderRadius: '4px',
+                        display: 'inline-flex'
+                      }}>
+                        {categoryDetails.icon}
+                      </span> 
+                      {categoryDetails.name}
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      type="number"
+                      value={formData.categoryAmounts[categoryId] || ''}
+                      onChange={(e) => handleCategoryAmountChange(categoryId, e.target.value)}
+                      placeholder="Enter amount"
+                      size="small"
+                      InputProps={{
+                        startAdornment: <span style={{ marginRight: 8 }}>$</span>,
+                      }}
+                    />
+                  </Box>
+                );
+              })}
+            </Box>
+
+            {/* Total Budget */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="body1" sx={{ mb: 1, fontWeight: 'bold' }}>
+                Total Budget
+              </Typography>
+              <TextField
+                fullWidth
+                variant="outlined"
+                type="number"
+                value={calculateTotalAmount()}
+                disabled
+                size="small"
+                sx={{ backgroundColor: '#f5f5f5' }}
+              />
+            </Box>
+
+            {/* Description */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="body1" sx={{ mb: 1, fontWeight: 'bold' }}>
+                Description (Optional)
+              </Typography>
+              <TextField
+                fullWidth
+                variant="outlined"
+                multiline
+                rows={3}
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Enter budget description"
+                size="small"
+              />
+            </Box>
+          </Box>
+        );
+
+      default:
+        return null;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   };
 
   return (
@@ -276,6 +548,17 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
           </IconButton>
         </Box>
 
+        {/* Step Progress */}
+        <Box sx={{ mb: 3 }}>
+          <Stepper activeStep={activeStep} alternativeLabel>
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </Box>
+
         <Divider sx={{ mb: 3 }} />
 
         {/* Error Alert */}
@@ -291,36 +574,50 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
             <CircularProgress />
           </Box>
         ) : (
-          /* Form Content */
-          renderFormContent()
+          /* Step Content */
+          renderStepContent()
         )}
 
         {/* Action Buttons */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
           <Button
-            onClick={handleClose}
+            onClick={activeStep === 0 ? handleClose : handleBack}
             variant="outlined"
             sx={{ textTransform: 'none', borderRadius: 2 }}
           >
-            Cancel
+            {activeStep === 0 ? 'Cancel' : 'Back'}
           </Button>
-          
-          <Button
-            onClick={handleNext}
-            variant="contained"
-            disabled={loading}
-            sx={{ 
-              textTransform: 'none', 
-              borderRadius: 2,
-              backgroundColor: '#2952CC'
-            }}
-          >
-            {loading ? <CircularProgress size={20} color="inherit" /> : 'Save'}
-          </Button>
+
+          {activeStep === steps.length - 1 ? (
+            <Button
+              onClick={handleSave}
+              variant="contained"
+              disabled={loading}
+              sx={{ 
+                textTransform: 'none', 
+                borderRadius: 2,
+                backgroundColor: '#2952CC'
+              }}
+            >
+              {loading ? <CircularProgress size={20} color="inherit" /> : 'Save'}
+            </Button>
+          ) : (
+            <Button
+              onClick={handleNext}
+              variant="contained"
+              disabled={loading || formData.name.trim() === '' || formData.selectedCategories.length === 0}
+              sx={{ 
+                textTransform: 'none', 
+                borderRadius: 2,
+                backgroundColor: '#2952CC'
+              }}
+            >
+              Next
+            </Button>
+          )}
         </Box>
       </Paper>
     </Modal>
   );
-};
-
+}
 export default AddBudgetModal;

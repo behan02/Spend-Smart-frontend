@@ -11,6 +11,7 @@ export interface Budget {
   categories: BudgetCategory[];
   description?: string;
   status: 'active' | 'completed' | 'exceeded';
+  remainingDays?: number;
 }
 
 export interface BudgetCategory {

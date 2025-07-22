@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:5110/api';
+import { API_BASE_URL } from './config';
 
 // Create axios instance
 const api = axios.create({
@@ -73,39 +72,87 @@ export interface ApiResponse<T> {
 export const transactionApi = {
   // Get user transactions
   getUserTransactions: async (userId: number): Promise<TransactionView[]> => {
-    const response = await api.get<ApiResponse<TransactionView[]>>(`/Transaction/user/${userId}`);
-    return response.data.data;
+    try {
+      const response = await api.get<ApiResponse<TransactionView[]>>(`/Transaction/user/${userId}`);
+      if (response.data && response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching user transactions:', error);
+      return [];
+    }
   },
 
   // Get transaction details
   getTransactionDetails: async (transactionId: number): Promise<TransactionDetails> => {
-    const response = await api.get<ApiResponse<TransactionDetails>>(`/Transaction/${transactionId}`);
-    return response.data.data;
+    try {
+      const response = await api.get<ApiResponse<TransactionDetails>>(`/Transaction/${transactionId}`);
+      if (response.data && response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      throw new Error(`Transaction with ID ${transactionId} not found`);
+    } catch (error) {
+      console.error('Error fetching transaction details:', error);
+      throw error;
+    }
   },
 
   // Create transaction
   createTransaction: async (userId: number, transaction: CreateTransactionRequest): Promise<TransactionDetails> => {
-    const response = await api.post<ApiResponse<TransactionDetails>>(`/Transaction?userId=${userId}`, transaction);
-    return response.data.data;
+    try {
+      const response = await api.post<ApiResponse<TransactionDetails>>(`/Transaction?userId=${userId}`, transaction);
+      if (response.data && response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      throw new Error('Failed to create transaction');
+    } catch (error) {
+      console.error('Error creating transaction:', error);
+      throw error;
+    }
   },
 
   // Update transaction
   updateTransaction: async (transactionId: number, transaction: CreateTransactionRequest): Promise<TransactionDetails> => {
-    const response = await api.put<ApiResponse<TransactionDetails>>(`/Transaction/${transactionId}`, transaction);
-    return response.data.data;
+    try {
+      const response = await api.put<ApiResponse<TransactionDetails>>(`/Transaction/${transactionId}`, transaction);
+      if (response.data && response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      
+      // If the response doesn't include the updated transaction data, fetch it
+      return await transactionApi.getTransactionDetails(transactionId);
+    } catch (error) {
+      console.error('Error updating transaction:', error);
+      throw error;
+    }
   },
 
   // Delete transaction
   deleteTransaction: async (transactionId: number): Promise<void> => {
-    await api.delete(`/Transaction/${transactionId}`);
+    try {
+      await api.delete(`/Transaction/${transactionId}`);
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      throw error;
+    }
   },
 
   // Get transactions by date range
   getTransactionsByDateRange: async (userId: number, startDate: string, endDate: string): Promise<TransactionView[]> => {
-    const response = await api.get<ApiResponse<TransactionView[]>>(`/Transaction/user/${userId}/range`, {
-      params: { startDate, endDate }
-    });
-    return response.data.data;
+    try {
+      const response = await api.get<ApiResponse<TransactionView[]>>(`/Transaction/user/${userId}/range`, {
+        params: { startDate, endDate }
+      });
+      
+      if (response.data && response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching transactions by date range:', error);
+      return [];
+    }
   },
 };
 

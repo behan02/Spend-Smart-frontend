@@ -15,6 +15,8 @@ export interface Category {
   id: number;
   categoryName: string;
   type: string; // 'Income' or 'Expense'
+  icon?: string;
+  color?: string;
 }
 
 export interface ApiResponse<T> {
@@ -28,14 +30,34 @@ export interface ApiResponse<T> {
 export const categoryApi = {
   // Get all categories
   getAllCategories: async (): Promise<Category[]> => {
-    const response = await api.get<ApiResponse<Category[]>>('/Category');
-    return response.data.data;
+    try {
+      // Use the correct endpoint from DatabaseController
+      const response = await api.get('/Database/check-categories');
+      
+      // The response format is different than expected
+      // It returns { totalCount, expenseCategories, incomeCategories, categories }
+      if (response.data && response.data.categories) {
+        return response.data.categories;
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      throw error;
+    }
   },
 
   // Get categories by type
   getCategoriesByType: async (type: 'Income' | 'Expense'): Promise<Category[]> => {
-    const response = await api.get<ApiResponse<Category[]>>(`/Category/type/${type}`);
-    return response.data.data;
+    try {
+      const allCategories = await categoryApi.getAllCategories();
+      return allCategories.filter(category => 
+        category.type.toLowerCase() === type.toLowerCase()
+      );
+    } catch (error) {
+      console.error('Error fetching categories by type:', error);
+      throw error;
+    }
   },
 };
 
