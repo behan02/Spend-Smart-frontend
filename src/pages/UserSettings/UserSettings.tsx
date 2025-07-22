@@ -7,6 +7,7 @@ import {
   useMediaQuery,
   useTheme,
   ThemeProvider,
+  CircularProgress,
 } from "@mui/material";
 import axios from "axios";
 
@@ -17,9 +18,15 @@ import Sidebar from "../../components/sidebar/sidebar";
 import Footer from "../../components/footer/Footer";
 import ProfilePictureUpload from "../../components/UserSettings-Forms/ProfilepictureUpload";
 import AccountForm from "../../components/UserSettings-Forms/AccountForm";
-import Passwordchange from "../../components/UserSettings-Forms/Passwordchange";
+import Passwordchange, {
+  PasswordChangeData,
+} from "../../components/UserSettings-Forms/Passwordchange";
 import PageButton from "../../components/Button/PageButton";
 import { getApiBaseUrl } from "../../Utils/apiUtils";
+import {
+  passwordService,
+  ChangePasswordRequest,
+} from "../../Services/passwordService";
 
 interface UserData {
   userId: number;
@@ -47,6 +54,17 @@ const UserSettings: React.FC = () => {
     name: "",
     email: "",
   });
+
+  // Password change state
+  const [passwordData, setPasswordData] = useState<PasswordChangeData>({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
+  const [passwordError, setPasswordError] = useState<string>("");
+  const [passwordSuccess, setPasswordSuccess] = useState<string>("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   useEffect(() => {
     loadProfilePicture();
@@ -76,6 +94,62 @@ const UserSettings: React.FC = () => {
 
   const handleUpdateSuccess = () => {
     console.log("User data updated successfully!");
+  };
+
+  // Password change handlers
+  const handlePasswordDataChange = (data: PasswordChangeData) => {
+    setPasswordData(data);
+    // Clear previous messages when user types
+    if (passwordError) setPasswordError("");
+    if (passwordSuccess) setPasswordSuccess("");
+  };
+
+  const handlePasswordValidationChange = (isValid: boolean) => {
+    setIsPasswordValid(isValid);
+  };
+
+  const handlePasswordChange = async () => {
+    if (!isPasswordValid) {
+      setPasswordError("Please fix the validation errors before submitting.");
+      return;
+    }
+
+    setIsChangingPassword(true);
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    try {
+      const request: ChangePasswordRequest = {
+        userId: currentUserId,
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+        confirmPassword: passwordData.confirmPassword,
+      };
+
+      console.log("🔐 Attempting password change for user:", currentUserId);
+      const response = await passwordService.changePassword(request);
+
+      if (response.success) {
+        setPasswordSuccess(
+          response.message || "Password changed successfully!"
+        );
+        // Clear the form
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+        console.log("🔐 Password change successful");
+      } else {
+        setPasswordError(response.message || "Failed to change password.");
+        console.log("🔐 Password change failed:", response.message);
+      }
+    } catch (error) {
+      console.error("🔐 Password change error:", error);
+      setPasswordError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   return (
@@ -173,7 +247,12 @@ const UserSettings: React.FC = () => {
                     minWidth: { lg: "400px" },
                   }}
                 >
-                  <Passwordchange />
+                  <Passwordchange
+                    onPasswordDataChange={handlePasswordDataChange}
+                    onValidationChange={handlePasswordValidationChange}
+                    error={passwordError}
+                    success={passwordSuccess}
+                  />
                 </Box>
 
                 <Box
@@ -206,9 +285,15 @@ const UserSettings: React.FC = () => {
               </Box>
 
               <PageButton
-                text="Save Changes"
-                onClick={() => alert("Password updated!")}
+                text={isChangingPassword ? "Changing..." : "Save Changes"}
+                onClick={handlePasswordChange}
                 type="button"
+                disabled={!isPasswordValid || isChangingPassword}
+                startIcon={
+                  isChangingPassword ? (
+                    <CircularProgress size={16} color="inherit" />
+                  ) : undefined
+                }
               />
             </Box>
           </Box>
