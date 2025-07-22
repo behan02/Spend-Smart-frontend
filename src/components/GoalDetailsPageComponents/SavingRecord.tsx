@@ -37,7 +37,7 @@ const SavingRecord: React.FC<SavingRecordProps> = ({ record }) => {
   };
 
   const formatAmount = (amount: number) => {
-    return `+$${amount.toFixed(2)}`;
+    return `+${amount.toFixed(2)} LKR`;
   };
 
   return (

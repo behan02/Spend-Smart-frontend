@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Stack, ThemeProvider, CssBaseline, Paper } from '@mui/material';
+import { Box, Typography, Stack, ThemeProvider, Paper } from '@mui/material';
 import HeaderCard from '../../components/GoalsPageComponents/Header-card';
 import AddGoalModal from '../../components/GoalsPageComponents/AddGoalModal';
 import GoalItem from '../../components/GoalsPageComponents/GoalItem';
 import GoalDetails from '../../components/GoalsPageComponents/GoalDetails';
-import Footer from "../../components/footer/Footer";
 import Header from "../../components/header/header";
 import HeaderImage from '../../assets/images/goal_page_image.png';
 import Sidebar from '../../components/sidebar/sidebar';
 import theme from '../../assets/styles/theme';
-import { goalService, Goal as GoalType, GoalFormData } from '../../services/goalService';
+import { goalService, GoalFormData } from '../../services/goalService';
 import { savingRecordService } from '../../services/savingRecordService';
 import { useNavigate } from 'react-router-dom';
 
@@ -33,6 +32,7 @@ const Goals: React.FC = () => {
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [goalToEdit, setGoalToEdit] = useState<Goal | null>(null);
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [goalsWithRecords, setGoalsWithRecords] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -47,9 +47,59 @@ const Goals: React.FC = () => {
     return diffDays > 0 ? diffDays : 0;
   };
 
+  // Helper function to check which goals have saving records
+  const checkGoalsWithRecords = async (goalsList: Goal[]) => {
+    try {
+      const recordChecks = await Promise.all(
+        goalsList.map(async (goal) => {
+          try {
+            const records = await savingRecordService.getByGoalId(goal.id);
+            return { goalId: goal.id, hasRecords: records.length > 0 };
+          } catch (error) {
+            console.error(`Error checking records for goal ${goal.id}:`, error);
+            return { goalId: goal.id, hasRecords: false };
+          }
+        })
+      );
+      
+      const goalsWithRecordsSet = new Set(
+        recordChecks
+          .filter(check => check.hasRecords)
+          .map(check => check.goalId)
+      );
+      
+      setGoalsWithRecords(goalsWithRecordsSet);
+    } catch (error) {
+      console.error('Error checking goals with records:', error);
+    }
+  };
+
   // Load goals from API
   useEffect(() => {
     loadGoals();
+  }, []);
+
+  // Reload goals when the page becomes visible (for navigation back scenarios)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('🔄 Page became visible, reloading goals for fresh progress data...');
+        loadGoals();
+      }
+    };
+
+    const handleFocus = () => {
+      console.log('🔄 Window focused, reloading goals for fresh progress data...');
+      loadGoals();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const loadGoals = async () => {
@@ -58,21 +108,58 @@ const Goals: React.FC = () => {
       setError(null);
       const data = await goalService.getAll();
       
-      // Transform API data to match component interface
-      const transformedGoals: Goal[] = data.map(goal => ({
-        id: goal.id,
-        name: goal.name,
-        currentAmount: goal.currentAmount,
-        savedAmount: goal.currentAmount, // Use currentAmount as savedAmount for compatibility
-        targetAmount: goal.targetAmount,
-        progress: Math.round((goal.currentAmount / goal.targetAmount) * 100),
-        endDate: goal.endDate,
-        description: goal.description,
-        remainingDays: calculateRemainingDays(goal.endDate)
-      }));
+      // For each goal, fetch saving records to calculate real progress
+      const transformedGoals: Goal[] = await Promise.all(
+        data.map(async (goal) => {
+          try {
+            // Fetch saving records for this goal
+            const savingRecords = await savingRecordService.getByGoalId(goal.id);
+            
+            // Calculate total from saving records
+            const totalFromRecords = savingRecords.reduce((sum, record) => sum + record.amount, 0);
+            
+            // The backend already includes saving records in currentAmount,
+            // so we don't need to add them again to avoid double counting
+            const realCurrentAmount = goal.currentAmount;
+            
+            // Calculate progress percentage
+            const progress = Math.round((realCurrentAmount / goal.targetAmount) * 100);
+            
+            console.log(`💰 Goal "${goal.name}": Current=${goal.currentAmount}, Records=${totalFromRecords}, Total=${realCurrentAmount}, Progress=${progress}%`);
+            
+            return {
+              id: goal.id,
+              name: goal.name,
+              currentAmount: realCurrentAmount,
+              savedAmount: realCurrentAmount, // Use current amount for compatibility
+              targetAmount: goal.targetAmount,
+              progress: Math.min(progress, 100), // Cap at 100%
+              endDate: goal.endDate,
+              description: goal.description,
+              remainingDays: calculateRemainingDays(goal.endDate)
+            };
+          } catch (recordError) {
+            console.error(`Error fetching records for goal ${goal.id}:`, recordError);
+            // Fallback to basic calculation if saving records fetch fails
+            return {
+              id: goal.id,
+              name: goal.name,
+              currentAmount: goal.currentAmount,
+              savedAmount: goal.currentAmount,
+              targetAmount: goal.targetAmount,
+              progress: Math.round((goal.currentAmount / goal.targetAmount) * 100),
+              endDate: goal.endDate,
+              description: goal.description,
+              remainingDays: calculateRemainingDays(goal.endDate)
+            };
+          }
+        })
+      );
       
       setGoals(transformedGoals);
       
+      // Also update the goals with records tracking
+      await checkGoalsWithRecords(transformedGoals);
       
       if (transformedGoals.length > 0 && !selectedGoal) {
         setSelectedGoal(transformedGoals[0]);
@@ -95,6 +182,7 @@ const Goals: React.FC = () => {
         }
       ];
       setGoals(fallbackGoals);
+      await checkGoalsWithRecords(fallbackGoals);
       setSelectedGoal(fallbackGoals[0]);
     } finally {
       setLoading(false);
@@ -170,25 +258,10 @@ const Goals: React.FC = () => {
       
       console.log('✅ Goal created successfully:', newGoal);
       
-      // Transform API response to match component interface
-      const transformedGoal: Goal = {
-        id: newGoal.id,
-        name: newGoal.name,
-        currentAmount: newGoal.currentAmount,
-        savedAmount: newGoal.currentAmount,
-        targetAmount: newGoal.targetAmount,
-        progress: Math.round((newGoal.currentAmount / newGoal.targetAmount) * 100),
-        endDate: newGoal.endDate,
-        description: newGoal.description,
-        remainingDays: calculateRemainingDays(newGoal.endDate)
-      };
+      // Reload all goals to get updated progress calculations
+      await loadGoals();
       
-      console.log('Transformed goal for frontend:', transformedGoal);
-      
-      setGoals([...goals, transformedGoal]);
-      setSelectedGoal(transformedGoal);
-     
-      console.log('✅ Goal added to frontend state');
+      console.log('✅ Goals reloaded with updated progress');
       
       // Close the modal
       handleCloseModal();
@@ -234,23 +307,10 @@ const Goals: React.FC = () => {
       
       console.log('✅ Goal updated successfully in API:', updatedGoal);
       
-      // Update local state
-      const updatedGoals = goals.map(goal => 
-        goal.id === goalToEdit.id 
-          ? { 
-              ...goal, 
-              ...updatedGoalData, 
-              id: goal.id,
-              currentAmount: Number(updatedGoalData.currentAmount) || 0,
-              savedAmount: Number(updatedGoalData.currentAmount) || 0,
-              progress: Math.round((Number(updatedGoalData.currentAmount) / Number(updatedGoalData.targetAmount)) * 100),
-              remainingDays: calculateRemainingDays(updatedGoalData.endDate)
-            } 
-          : goal
-      );
+      // Reload all goals to get updated progress calculations
+      await loadGoals();
       
-      setGoals(updatedGoals);
-      setSelectedGoal(updatedGoals.find(g => g.id === goalToEdit.id) || null);
+      console.log('✅ Goals reloaded with updated progress');
       
       handleCloseEditModal();
       
@@ -297,12 +357,29 @@ const Goals: React.FC = () => {
   };
 
   const handleViewGoalDetails = (id: number) => {
+    console.log('🔍 View Details clicked for goal ID:', id);
     const goalToView = goals.find(goal => goal.id === id);
+    console.log('🎯 Goal to view:', goalToView);
+    
     if (goalToView) {
-      // Navigate to goal details page with goal data 
-      navigate(`/goals/${id}`, { 
-          state: { goal: goalToView } 
-      });
+      console.log('✅ Goal found, navigating to details page...');
+      console.log('🚀 Navigating to:', `/goals/${id}`);
+      
+      try {
+        // Navigate to goal details page with only serializable goal data
+        navigate(`/goals/${id}`, { 
+          state: { 
+            goal: goalToView
+          } 
+        });
+        console.log('✅ Navigation completed successfully');
+      } catch (error) {
+        console.error('❌ Navigation failed:', error);
+        // Fallback navigation method
+        window.location.href = `/goals/${id}`;
+      }
+    } else {
+      console.error('❌ Goal not found for ID:', id);
     }
   };
 
@@ -432,8 +509,9 @@ const Goals: React.FC = () => {
                     goal={selectedGoal} 
                     onEdit={handleEditGoal} 
                     onDelete={handleDeleteGoal} 
-                    onViewDetails={handleViewGoalDetails} 
-/>
+                    onViewDetails={handleViewGoalDetails}
+                    hasRecords={goalsWithRecords.has(selectedGoal.id)}
+                  />
                 ) : (
                   <Paper
                     elevation={0}

@@ -103,7 +103,7 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave, init
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Typography variant="h6" component="h2" fontWeight="bold">
-            Add New Goal
+            {isEditMode ? 'Edit Goal' : 'Add New Goal'}
           </Typography>
           <IconButton onClick={handleClose} size="small">
             <CloseIcon />
@@ -130,7 +130,7 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave, init
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
             <Box sx={{ width: '48%' }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>Target amount</Typography>
+            <Typography variant="body2" sx={{ mb: 1 }}>Target amount (LKR)</Typography>
             <TextField
               fullWidth
               variant="outlined"
@@ -150,7 +150,7 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave, init
             />
             </Box>
           <Box sx={{ width: '48%' }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>Current amount</Typography>
+            <Typography variant="body2" sx={{ mb: 1 }}>Current amount (LKR)</Typography>
             <TextField
               fullWidth
               variant="outlined"

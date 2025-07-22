@@ -117,7 +117,7 @@ const GoalItem: React.FC<GoalItemProps> = ({ goal, isSelected, onClick }) => {
             opacity: 0.8,
             color: 'inherit'
           }}>
-            ${goal.savedAmount.toFixed(2)} / ${goal.targetAmount.toFixed(2)}
+            {goal.savedAmount.toFixed(2)} LKR / {goal.targetAmount.toFixed(2)} LKR
           </Typography>
         </Box>
       </Box>

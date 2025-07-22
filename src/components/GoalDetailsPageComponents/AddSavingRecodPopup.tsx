@@ -11,19 +11,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { SavingRecord } from './SavingRecord';
-
-interface Goal {
-  id: number;
-  name: string;
-  savedAmount: number;
-  targetAmount: number;
-  progress: number;
-  deadline?: Date;
-  description?: string;
-  remainingDays?: number;
-  createdAt?: string;
-  startDate?: string;
-}
+import { Goal } from '../../services/goalService';
 
 interface AddSavingRecodPopupProps {
   open: boolean;
@@ -61,8 +49,9 @@ const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
   // Calculate current total saved amount
   const getCurrentSavedAmount = () => {
     if (!goal) return 0;
-    const totalFromRecords = savingRecords.reduce((total, record) => total + record.amount, 0);
-    return goal.savedAmount + totalFromRecords;
+    // The backend already includes saving records in currentAmount,
+    // so we use the goal's currentAmount directly to avoid double counting
+    return goal.currentAmount;
   };
 
   // Validate if the new amount would exceed target
@@ -164,7 +153,7 @@ const AddSavingRecodPopup: React.FC<AddSavingRecodPopupProps> = ({
 
         <Box sx={{ mb: 3 }}>
           <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-            Amount
+            Amount (LKR)
           </Typography>
           <TextField
             fullWidth

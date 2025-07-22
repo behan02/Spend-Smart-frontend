@@ -27,6 +27,7 @@ interface GoalDetailsProps {
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
   onViewDetails: (id: number) => void;
+  hasRecords?: boolean; // New prop to check if goal has saving records
 }
 
 const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onViewDetails }) => {
@@ -98,7 +99,7 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
               color: '#1F2937',
               fontSize: '32px'
             }}>
-              ${goal.savedAmount.toFixed(2)}
+              {goal.savedAmount.toFixed(2)} LKR
             </Typography>
           </Box>
           
@@ -111,7 +112,7 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
               color: '#1F2937',
               fontSize: '32px'
             }}>
-              ${goal.targetAmount.toFixed(2)}
+              {goal.targetAmount.toFixed(2)} LKR
             </Typography>
           </Box>
         </Box>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Goal } from '../../services/goalService';
 
 // Material UI style icons as SVG components
 const TrendingUpIcon = () => (
@@ -32,17 +33,6 @@ const ScheduleIcon = ({ size = 16, color = "currentColor" }) => (
 
 
 
-interface Goal {
-  id: number;
-  name: string;
-  savedAmount: number;
-  targetAmount: number;
-  progress: number;
-  deadline?: Date;
-  description?: string;
-  remainingDays?: number;
-}
-
 interface SavingRecord {
   id: number;
   amount: number;
@@ -67,8 +57,9 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
   // Calculate total saved amount from records
   const totalSavedFromRecords = savingRecords.reduce((total, record) => total + record.amount, 0);
   
-  // Calculate current saved amount (initial saved + records)
-  const currentSavedAmount = goal.savedAmount + totalSavedFromRecords;
+  // The backend already includes saving records in currentAmount,
+  // so we use the goal's currentAmount directly to avoid double counting
+  const currentSavedAmount = goal.currentAmount;
   
   // Calculate progress percentage
   const progressPercentage = goal.targetAmount > 0 

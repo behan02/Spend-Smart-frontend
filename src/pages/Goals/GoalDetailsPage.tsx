@@ -12,7 +12,7 @@ import Header from '../../components/header/header';
 import Sidebar from '../../components/sidebar/sidebar';
 import theme from '../../assets/styles/theme';
 import { savingRecordService, SavingRecordFormData } from '../../services/savingRecordService';
-import { goalService } from '../../services/goalService';
+import { goalService, Goal } from '../../services/goalService';
 import SavingsIcon from '@mui/icons-material/Savings';
 
 // Local interface for component compatibility
@@ -28,23 +28,23 @@ interface SavingRecord {
   updatedAt?: string;
 }
 
-interface Goal {
+interface SavingRecord {
   id: number;
-  name: string;
-  savedAmount: number;
-  targetAmount: number;
-  progress: number;
-  deadline?: Date;
+  amount: number;
+  date: string; // Date part
+  time: string; // Time part
   description?: string;
-  remainingDays?: number;
+  goalId: number;
+  userId?: number;
   createdAt?: string;
-  startDate?: string;
+  updatedAt?: string;
 }
 
 const GoalDetailsPage: React.FC = () => {
   const location = useLocation();
   const [addRecordModalOpen, setAddRecordModalOpen] = useState(false);
   const [savingRecords, setSavingRecords] = useState<SavingRecord[]>([]);
+  const [currentGoal, setCurrentGoal] = useState<Goal | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -52,16 +52,24 @@ const GoalDetailsPage: React.FC = () => {
     severity: 'success' as 'success' | 'error'
   });
   
-  // Get goal data from navigation state
-  const goalData: Goal | undefined = location.state?.goal;
-  const goalName = goalData?.name || 'Goal Details';
+  // Get initial goal data from navigation state
+  const initialGoalData: Goal | undefined = location.state?.goal;
+  const goalName = currentGoal?.name || initialGoalData?.name || 'Goal Details';
 
-  // Fetch saving records when component mounts
+  // Initialize currentGoal with data from navigation state
   useEffect(() => {
-    if (goalData?.id) {
-      fetchSavingRecords(goalData.id);
+    if (initialGoalData) {
+      setCurrentGoal(initialGoalData);
     }
-  }, [goalData?.id]);
+  }, [initialGoalData]);
+
+  // Fetch saving records when component mounts or goal changes
+  useEffect(() => {
+    const goalId = currentGoal?.id || initialGoalData?.id;
+    if (goalId) {
+      fetchSavingRecords(goalId);
+    }
+  }, [currentGoal?.id, initialGoalData?.id]);
 
   const fetchSavingRecords = async (goalId: number) => {
     setIsLoading(true);
@@ -83,6 +91,17 @@ const GoalDetailsPage: React.FC = () => {
     }
   };
 
+  const refreshGoalData = async (goalId: number) => {
+    try {
+      const updatedGoal = await goalService.getById(goalId);
+      setCurrentGoal(updatedGoal);
+      console.log('Goal data refreshed:', updatedGoal);
+    } catch (err) {
+      console.error('Error refreshing goal data:', err);
+      // Don't show error to user as this is not critical
+    }
+  };
+
   const handleAddSavingRecord = () => {
     setAddRecordModalOpen(true);
   };
@@ -92,7 +111,8 @@ const GoalDetailsPage: React.FC = () => {
   };
 
   const handleSaveRecord = async (recordData: { amount: number; date: string | Date; description?: string }) => {
-    if (!goalData?.id) {
+    const goalId = currentGoal?.id || initialGoalData?.id;
+    if (!goalId) {
       setSnackbar({
         open: true,
         message: 'Cannot add record: Goal ID is missing',
@@ -108,15 +128,18 @@ const GoalDetailsPage: React.FC = () => {
         amount: recordData.amount,
         date: recordData.date instanceof Date ? recordData.date.toISOString() : recordData.date,
         description: recordData.description || '',
-        goalId: goalData.id,
+        goalId: goalId,
         userId: 1 // Default user ID, update when you have authentication
       };
 
       // Call the service to create the record
       await savingRecordService.create(formData);
       
-      // Refresh all records after creating to ensure consistency
-      await fetchSavingRecords(goalData.id);
+      // Refresh saving records after creating to ensure consistency
+      await fetchSavingRecords(goalId);
+      
+      // Refresh goal data to get updated currentAmount
+      await refreshGoalData(goalId);
 
       
 
@@ -139,7 +162,8 @@ const GoalDetailsPage: React.FC = () => {
   };
 
   const handleDeleteRecord = async (recordId: number) => {
-    if (!goalData?.id) {
+    const goalId = currentGoal?.id || initialGoalData?.id;
+    if (!goalId) {
       setSnackbar({
         open: true,
         message: 'Cannot delete record: Goal ID is missing',
@@ -153,8 +177,11 @@ const GoalDetailsPage: React.FC = () => {
       // Call the service to delete the record
       await savingRecordService.delete(recordId);
       
-      // Refresh all records after deleting
-      await fetchSavingRecords(goalData.id);
+      // Refresh saving records after deleting
+      await fetchSavingRecords(goalId);
+      
+      // Refresh goal data to get updated currentAmount
+      await refreshGoalData(goalId);
 
      
       setSnackbar({
@@ -227,9 +254,9 @@ const GoalDetailsPage: React.FC = () => {
                 display: 'flex',
                 justifyContent: 'center'
               }}>
-                {goalData && (
+                {currentGoal && (
                   <CardWithCircularProgressBar
-                    goal={goalData}
+                    goal={currentGoal}
                     savingRecords={savingRecords}
                   />
                 )}
@@ -245,12 +272,12 @@ const GoalDetailsPage: React.FC = () => {
                 overflow: 'hidden',
                 minHeight: '400px'
               }}>
-                {goalData && (
+                {currentGoal && (
                   <OptimizedProgressBarChart
                     savingRecords={savingRecords}
-                    goalTargetAmount={goalData.targetAmount}
-                    goalDeadline={goalData.deadline}
-                    goalCreationDate={goalData.createdAt ? new Date(goalData.createdAt) : (goalData.startDate ? new Date(goalData.startDate) : undefined)}
+                    goalTargetAmount={currentGoal.targetAmount}
+                    goalDeadline={currentGoal.deadline}
+                    goalCreationDate={currentGoal.createdAt ? new Date(currentGoal.createdAt) : (currentGoal.startDate ? new Date(currentGoal.startDate) : undefined)}
                   />
                 )}
               </Box>
@@ -344,8 +371,8 @@ const GoalDetailsPage: React.FC = () => {
         open={addRecordModalOpen}
         onClose={handleCloseModal}
         onSave={handleSaveRecord}
-        goalId={goalData?.id || 0}
-        goal={goalData}
+        goalId={(currentGoal?.id || initialGoalData?.id) || 0}
+        goal={currentGoal || initialGoalData}
         savingRecords={savingRecords}
       />
 
