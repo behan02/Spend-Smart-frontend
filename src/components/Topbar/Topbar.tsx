@@ -74,7 +74,10 @@ const Topbar = () => {
               sx={{ 
                 width: 32, 
                 height: 32,
-                fontSize: '0.875rem'
+                fontSize: '0.875rem',
+                backgroundColor: profilePictureUrl ? 'transparent' : '#9e9e9e',
+                color: '#ffffff',
+                fontWeight: 'bold'
               }}
             >
               {!profilePictureUrl && (adminProfile?.name?.charAt(0).toUpperCase() || "A")}

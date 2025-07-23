@@ -47,8 +47,26 @@ const Sidebar = () => {
       <List sx={{ paddingTop: '25px' }}>
         {/* Dashboard Button */}
         <ListItem disablePadding sx={{ marginBottom: '21px' }}>
-          <ListItemButton onClick={() => navigate('/')}>
-            <ListItemIcon sx={{ color: '#fff' }}>
+          <ListItemButton 
+            onClick={() => navigate('/')}
+            sx={{
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                transform: 'translateX(8px)',
+                transition: 'all 0.3s ease',
+                '& .MuiListItemIcon-root': {
+                  transform: 'scale(1.1)',
+                  transition: 'transform 0.3s ease',
+                },
+                '& .MuiListItemText-primary': {
+                  fontWeight: 'bold',
+                  transition: 'font-weight 0.3s ease',
+                }
+              },
+              transition: 'all 0.3s ease',
+            }}
+          >
+            <ListItemIcon sx={{ color: '#fff', transition: 'transform 0.3s ease' }}>
               <DashboardIcon />
             </ListItemIcon>
             <ListItemText primary="Dashboard" />
@@ -57,8 +75,26 @@ const Sidebar = () => {
 
         {/* Manage Users Button */}
         <ListItem disablePadding sx={{ marginBottom: '16px' }}>
-          <ListItemButton onClick={() => navigate('/user')}>
-            <ListItemIcon sx={{ color: '#fff' }}>
+          <ListItemButton 
+            onClick={() => navigate('/user')}
+            sx={{
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                transform: 'translateX(8px)',
+                transition: 'all 0.3s ease',
+                '& .MuiListItemIcon-root': {
+                  transform: 'scale(1.1)',
+                  transition: 'transform 0.3s ease',
+                },
+                '& .MuiListItemText-primary': {
+                  fontWeight: 'bold',
+                  transition: 'font-weight 0.3s ease',
+                }
+              },
+              transition: 'all 0.3s ease',
+            }}
+          >
+            <ListItemIcon sx={{ color: '#fff', transition: 'transform 0.3s ease' }}>
               <PeopleIcon />
             </ListItemIcon>
             <ListItemText primary="Manage Users" />
@@ -67,8 +103,26 @@ const Sidebar = () => {
 
         {/* System Settings Button */}
         <ListItem disablePadding sx={{ marginBottom: '16px' }}>
-          <ListItemButton onClick={() => navigate('/settings')}>
-            <ListItemIcon sx={{ color: '#fff' }}>
+          <ListItemButton 
+            onClick={() => navigate('/settings')}
+            sx={{
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                transform: 'translateX(8px)',
+                transition: 'all 0.3s ease',
+                '& .MuiListItemIcon-root': {
+                  transform: 'scale(1.1)',
+                  transition: 'transform 0.3s ease',
+                },
+                '& .MuiListItemText-primary': {
+                  fontWeight: 'bold',
+                  transition: 'font-weight 0.3s ease',
+                }
+              },
+              transition: 'all 0.3s ease',
+            }}
+          >
+            <ListItemIcon sx={{ color: '#fff', transition: 'transform 0.3s ease' }}>
               <SettingsIcon />
             </ListItemIcon>
             <ListItemText primary="System Settings" />
@@ -77,8 +131,25 @@ const Sidebar = () => {
 
         {/* Logout Button */}
         <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon sx={{ color: '#fff' }}>
+          <ListItemButton
+            sx={{
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                transform: 'translateX(8px)',
+                transition: 'all 0.3s ease',
+                '& .MuiListItemIcon-root': {
+                  transform: 'scale(1.1)',
+                  transition: 'transform 0.3s ease',
+                },
+                '& .MuiListItemText-primary': {
+                  fontWeight: 'bold',
+                  transition: 'font-weight 0.3s ease',
+                }
+              },
+              transition: 'all 0.3s ease',
+            }}
+          >
+            <ListItemIcon sx={{ color: '#fff', transition: 'transform 0.3s ease' }}>
               <LogoutIcon />
             </ListItemIcon>
             <ListItemText primary="Logout" />

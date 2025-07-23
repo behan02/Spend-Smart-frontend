@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Box, Container, Typography, Switch, FormControlLabel, Select, MenuItem, Button, TextField, Avatar, Stack, Alert } from '@mui/material';
+import { Box, Container, Typography, Select, MenuItem, Button, TextField, Avatar, Stack, Alert } from '@mui/material';
 import Sidebar from '../components/Sidebar/Sidebar';
 import Topbar from '../components/Topbar/Topbar';
 import MonthlyReportCard from '../components/MonthlyReportCard/MonthlyReportCard';
@@ -355,18 +355,6 @@ const SystemSettingsPage = () => {
         <Topbar />
         <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
 
-          {/* System Maintenance */}
-          <Box sx={{ backgroundColor: '#fff', p: 4, borderRadius: 3, mb: 4}}>
-            <Typography variant="h6" gutterBottom>System Maintenance</Typography>
-            <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-              Enable maintenance mode to temporarily restrict user access while performing system updates.
-            </Typography>
-            <FormControlLabel
-              control={<Switch color="primary" />}
-              label="Enable Maintenance Mode"
-            />
-          </Box>
-
                    {/* Monthly Report Generation */}
           <MonthlyReportCard onReportGenerated={(data) => console.log('Report generated:', data)} />
 
@@ -389,9 +377,18 @@ const SystemSettingsPage = () => {
               <Stack direction="row" spacing={2} alignItems="center">
                 <Avatar
                   alt="Admin User"
-                  src={profilePictureUrl || "https://i.pravatar.cc/150?img=3"}
-                  sx={{ width: 80, height: 80 }}
-                />
+                  src={profilePictureUrl || undefined}
+                  sx={{ 
+                    width: 80, 
+                    height: 80,
+                    backgroundColor: profilePictureUrl ? 'transparent' : '#9e9e9e',
+                    color: '#ffffff',
+                    fontSize: '2rem',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {!profilePictureUrl && adminData.name ? adminData.name.charAt(0).toUpperCase() : ''}
+                </Avatar>
                 <Typography variant="h4" sx={{ fontWeight: 700, color: '#333' }}>
                   {adminData.name || 'Loading...'}
                 </Typography>

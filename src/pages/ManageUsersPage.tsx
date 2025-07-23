@@ -175,7 +175,6 @@ const ManageUsersPage = () => {
                       <MenuItem value="">All Statuses</MenuItem>
                       <MenuItem value="Active">Active</MenuItem>
                       <MenuItem value="Inactive">Inactive</MenuItem>
-                      <MenuItem value="Suspended">Suspended</MenuItem>
                     </Select>
                   </FormControl>
                 </Box>
