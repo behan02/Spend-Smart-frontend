@@ -38,7 +38,7 @@ const ReportTable: React.FC = () => {
   );
   const [deleting, setDeleting] = useState(false);
 
-  const userId = 1; // TODO: Get from authentication context
+  const userId = 2; // TODO: Get from authentication context
 
   useEffect(() => {
     fetchReports();
