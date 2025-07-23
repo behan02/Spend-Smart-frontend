@@ -4,7 +4,16 @@ import { useEffect, useState } from "react";
 import React from "react";
 import { useUser } from "../../../context/UserContext";
 
-const DashboardBargraph: React.FC = () => {
+interface DashboardBargraphProps {
+  dashboardData: {
+    income: number;
+    expense: number;
+    balance: number;
+    recentTransactions: any[];
+  },
+}
+
+const DashboardBargraph: React.FC<DashboardBargraphProps> = ({dashboardData}) => {
 
   //State to manage the selected time period for the bar graph
   const [timeperiod, setTimeperiod] = useState<string>("Monthly");
@@ -32,7 +41,7 @@ const DashboardBargraph: React.FC = () => {
       }
     }
     fetchBarGraphData();
-  },[timeperiod]);
+  },[timeperiod, dashboardData]);
 
   return (
     <Card sx={{ p: "20px", borderRadius: "15px", height: "100%"}}>
