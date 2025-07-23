@@ -19,7 +19,7 @@ interface TransactionTableProps {
   typeFilter: string;
   categoryFilter: string;
   addfiltersuccessfully: boolean;
-  setAddfiltersuccessfully: (clicked: boolean) => void;
+  setAddfilterssuccessfully: (clicked: boolean) => void;
   addtransactionsuccessfully: boolean;
   setAddtransactionsuccessfully: (clicked: boolean) => void;
   date: string;
@@ -30,13 +30,16 @@ interface TransactionTableProps {
   sortOption: string;
   addRecurringTransactionSuccessfully: boolean;
   setAddRecurringTransactionSuccessfully: (clicked: boolean) => void;
+  // Add new props
+  executedTransactionsDeleted?: boolean;
+  setExecutedTransactionsDeleted?: (clicked: boolean) => void;
 }
 
 const TransactionTable: React.FC<TransactionTableProps> = ({
   typeFilter, 
   categoryFilter, 
   addfiltersuccessfully, 
-  setAddfiltersuccessfully, 
+  setAddfilterssuccessfully, 
   addtransactionsuccessfully, 
   setAddtransactionsuccessfully, 
   date, 
@@ -46,7 +49,11 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
   setSortApplied, 
   sortOption, 
   addRecurringTransactionSuccessfully, 
-  setAddRecurringTransactionSuccessfully}) => {
+  setAddRecurringTransactionSuccessfully,
+  // Add new props
+  executedTransactionsDeleted,
+  setExecutedTransactionsDeleted
+}) => {
     
   // Media query to check if the screen width is less than or equal to "laptop"
   const isTabletOrDesktop: boolean = useMediaQuery(theme.breakpoints.down("laptop"));
@@ -83,14 +90,24 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
 
     fetchTransactions();
 
-    if(addtransactionsuccessfully || addfiltersuccessfully || sortApplied) {
+    if(addtransactionsuccessfully || addfiltersuccessfully || sortApplied || executedTransactionsDeleted) {
       fetchTransactions();
       setAddtransactionsuccessfully(false);
-      setAddfiltersuccessfully(false);
+      setAddfilterssuccessfully(false);
       setSortApplied(false);
       setAddRecurringTransactionSuccessfully(false);
+      // Reset the executed transactions deleted flag
+      if (setExecutedTransactionsDeleted) {
+        setExecutedTransactionsDeleted(false);
+      }
     }
-  },[addtransactionsuccessfully, addfiltersuccessfully, sortApplied, addRecurringTransactionSuccessfully]);
+  },[
+    addtransactionsuccessfully, 
+    addfiltersuccessfully, 
+    sortApplied, 
+    addRecurringTransactionSuccessfully,
+    executedTransactionsDeleted // Add this dependency
+  ]);
 
   // useEffect(() => {
   //   async function fetchTransactions(){

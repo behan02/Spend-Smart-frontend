@@ -1,7 +1,8 @@
 import { Close } from "@mui/icons-material";
-import { Box, Button, Checkbox, FormControl, FormControlLabel, IconButton, InputLabel, MenuItem, Modal, Paper, Select, TextField, ThemeProvider, Typography } from "@mui/material";
+import { Box, Button, FormControl, IconButton, InputLabel, MenuItem, Modal, Paper, Select, TextField, ThemeProvider, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import theme from "../../../assets/styles/theme";
+import CategoryIcons, { iconType } from "../../../assets/categoryIcons/CategoryIcons";
 
 
 interface RecurringTransactionProps {
@@ -14,15 +15,15 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
     // State variables to manage form inputs
     const [startDate, setStartDate] = useState("");
     const [amount, setAmount] = useState("");    
-    const [frequency, setFrequency] = useState("Monthly");
+    const [frequency, setFrequency] = useState("");
     const [endDate, setEndDate] = useState("");
     const [occurrences, setOccurrences] = useState("");
-    const [autoDeduct, setAutoDeduct] = useState(false);
     const [type, setType] = useState("");
     const [categoryID, setCategoryID] = useState('');
     const [description, setDescription] = useState("");
 
     const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
+    let userId = 1;
 
     useEffect(() => {
         async function fetchCategories() {
@@ -40,6 +41,65 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
         fetchCategories();
     },[type]);
 
+    // Validation function for end date based on frequency
+    const validateEndDate = (startDate: string, endDate: string, frequency: string): boolean => {
+        if (!startDate || !endDate) return true; // Skip validation if either is empty
+
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        // Calculate minimum end date based on frequency
+        const minEndDate = new Date(start);
+
+        switch (frequency) {
+            case "Daily":
+                minEndDate.setDate(start.getDate() + 1); // At least next day
+                break;
+            case "Weekly":
+                minEndDate.setDate(start.getDate() + 7); // At least 1 week later
+                break;
+            case "Monthly":
+                minEndDate.setMonth(start.getMonth() + 1); // At least 1 month later
+                break;
+            case "Yearly":
+                minEndDate.setFullYear(start.getFullYear() + 1); // At least 1 year later
+                break;
+            default:
+                return true;
+        }
+
+        return end >= minEndDate;
+    };
+
+    // Get error message for invalid end date
+    const getEndDateErrorMessage = (startDate: string, endDate: string, frequency: string): string => {
+        if (!startDate || !endDate) return "";
+
+        const start = new Date(startDate);
+        const minEndDate = new Date(start);
+
+        switch (frequency) {
+            case "Daily":
+                minEndDate.setDate(start.getDate() + 1);
+                return `End date must be at least 1 day after start date for daily frequency`;
+            case "Weekly":
+                minEndDate.setDate(start.getDate() + 7);
+                return `End date must be at least 1 week after start date for weekly frequency`;
+            case "Monthly":
+                minEndDate.setMonth(start.getMonth() + 1);
+                return `End date must be at least 1 month after start date for monthly frequency`;
+            case "Yearly":
+                minEndDate.setFullYear(start.getFullYear() + 1);
+                return `End date must be at least 1 year after start date for yearly frequency`;
+            default:
+                return "";
+        }
+    };
+
+    // Check if current end date is valid
+    const isEndDateValid = validateEndDate(startDate, endDate, frequency);
+    const endDateError = !isEndDateValid ? getEndDateErrorMessage(startDate, endDate, frequency) : "";
+
     // Handle form submission
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -47,6 +107,12 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
         // Ensure either endDate or occurrences is filled
         if (!endDate && !occurrences) {
             alert("Please fill either End Date or Occurrences.");
+            return;
+        }
+
+        // Validate end date if provided
+        if (endDate && !validateEndDate(startDate, endDate, frequency)) {
+            alert(getEndDateErrorMessage(startDate, endDate, frequency));
             return;
         }
 
@@ -59,12 +125,10 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
             startDate: startDate,
             endDate: endDate ? endDate : null,
             occurrences: occurrences ? parseInt(occurrences) : null,
-            autoDeduct: autoDeduct,
-            userId: 1,
         };
 
         try{
-            const response = await fetch("https://localhost:7211/api/RecurringTransaction/CreateRecurringTransaction", {
+            const response = await fetch(`https://localhost:7211/api/RecurringTransaction/CreateRecurringTransaction/${userId}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -211,22 +275,42 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
                             </Select>
                         </FormControl>
 
+                        {/* Category Dropdown with Icons */}
                         <FormControl size="small" fullWidth required>
                             <InputLabel id="select-category">Category</InputLabel>
-                                <Select
-                                    labelId="select-category"
-                                    // value={month}
-                                    // onChange={handleMonth}
-                                    label="Category"
-                                    value={categoryID}
-                                    onChange={(e) => setCategoryID(e.target.value)}
-                                >
-                                    {categories.map((category) => (
+                            <Select
+                                labelId="select-category"
+                                label="Category"
+                                value={categoryID}
+                                onChange={(e) => setCategoryID(e.target.value)}
+                            >
+                                {categories.map((category) => {
+                                    // Find the icon for this category name
+                                    const iconObj = CategoryIcons.find(icon => icon.category === category.name);
+                                    return (
                                         <MenuItem key={category.id} value={category.id}>
-                                            {category.name}
+                                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                                                <Box
+                                                    sx={{
+                                                        display: "inline-flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                        width: 32,
+                                                        height: 32,
+                                                        borderRadius: "50%",
+                                                        fontSize: "1.1rem",
+                                                        marginRight: "12px",
+                                                        backgroundColor: iconObj ? iconObj.color : "gray",
+                                                    }}
+                                                >
+                                                    {iconObj ? iconObj.icon : "📦"}
+                                                </Box>
+                                                {category.name}
+                                            </Box>
                                         </MenuItem>
-                                    ))}
-                                </Select>
+                                    );
+                                })}
+                            </Select>
                         </FormControl>
 
                         {/* Start Date Input */}
@@ -255,6 +339,13 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
                             onChange={(e) => setEndDate(e.target.value)} 
                             InputLabelProps={{ shrink: true }} 
                             disabled={!!occurrences}
+                            error={!!endDateError}
+                            helperText={endDateError}
+                            sx={{
+                                '& .MuiFormHelperText-root': {
+                                    color: 'error.main'
+                                }
+                            }}
                         />
 
                         {/* Occurrences Input */}
@@ -267,19 +358,26 @@ const RecurringTransactionForm: React.FC<RecurringTransactionProps> = ({recurrin
                             value={occurrences} 
                             onChange={(e) => setOccurrences(e.target.value)} 
                             disabled={!!endDate}
+                            inputProps={{
+                                min: 1,
+                                step: 1,
+                                pattern: "[0-9]*"
+                            }}
+                            onKeyPress={(e) => {
+                                // Prevent decimal point and negative sign
+                                if (e.key === '.' || e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E') {
+                                    e.preventDefault();
+                                }
+                            }}
+                            helperText="Enter a whole number only"
                         />
 
-                        {/* Auto-Deduction Checkbox */}
-                        <FormControlLabel 
-                            control={<Checkbox checked={autoDeduct} onChange={(e) => setAutoDeduct(e.target.checked)} />} 
-                            label="Enable Auto-Deduction" 
-                        />
-
-                        {/* Submit Button */}
+                        {/* Submit Button - disabled if validation fails */}
                         <Button 
                             variant="contained"
                             type="submit" 
                             disableRipple 
+                            disabled={!!endDateError || (!endDate && !occurrences)} // Disable if validation fails
                             sx={{ 
                                 borderRadius: "15px",
                                 bgcolor: "primary.main", 

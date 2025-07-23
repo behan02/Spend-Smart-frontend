@@ -1,9 +1,17 @@
 import { Box, Card, Typography } from "@mui/material";
 import { PieChart } from "@mui/x-charts";
-import { dataset } from "./dataset";
 import { useEffect, useState } from "react";
 
-const DashboardPiechart = () => {
+interface DashboardPiechartProps {
+  dashboardData: {
+    income: number;
+    expense: number;
+    balance: number;
+    recentTransactions: any[];
+  },
+}
+
+const DashboardPiechart: React.FC<DashboardPiechartProps> = ({dashboardData}) => {
 
     const [data, setData] = useState<any[]>([]);
 
@@ -25,7 +33,7 @@ const DashboardPiechart = () => {
             }
         }
         fetchPieChartData();
-    },[])
+    },[dashboardData])
 
   return (
     // <Box 
@@ -37,11 +45,12 @@ const DashboardPiechart = () => {
     <Card sx={{ p: "20px", borderRadius: "15px", height: "100%"}}>
         <Typography variant="h5" component="p" fontWeight="bold">Expense Structure</Typography>
         <Box sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "column",
-            height: "100%",
+            // display: "flex",
+            // alignItems: "center",
+            // justifyContent: "center",
+            // flexDirection: "column",
+            // height: "100%",
+            textAlign: "center",
         }}>
             <PieChart 
                 series={[
@@ -51,12 +60,17 @@ const DashboardPiechart = () => {
                         outerRadius: 120,
                         paddingAngle: 0.5,
                         cornerRadius: 2,
+                        highlightScope: {fade: 'global', highlight: 'item'},
+                        faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
                     }
                 ]}
                 width={400}
                 height={400}
                 slotProps={{
-                    legend: {direction: "column", position: {horizontal: "right", vertical: "middle"}}
+                    legend: {
+                        direction: "row", position: {horizontal: "left", vertical: "bottom"},
+                    
+                    },
                 }}
             />
         </Box>

@@ -26,6 +26,9 @@ const Transaction: React.FC = () => {
     const [sortOption, setSortOption] = useState<string>("");
     const [sortApplied, setSortApplied] = useState<boolean>(false);
     const [addRecurringTransactionSuccessfully, setAddRecurringTransactionSuccessfully] = useState<boolean>(false);
+    
+    // Add new state for tracking executed transaction deletions
+    const [executedTransactionsDeleted, setExecutedTransactionsDeleted] = useState<boolean>(false);
 
     return (
         <ThemeProvider theme={theme}>
@@ -67,7 +70,7 @@ const Transaction: React.FC = () => {
                             typeFilter={typeFilter}
                             categoryFilter={categoryFilter}
                             addfiltersuccessfully={addfiltersuccessfully}
-                            setAddfiltersuccessfully={setAddfiltersuccessfully}
+                            setAddfilterssuccessfully={setAddfiltersuccessfully}
                             addtransactionsuccessfully={addtransactionsuccessfully}
                             setAddtransactionsuccessfully={setAddtransactionsuccessfully}
                             date={date}
@@ -78,10 +81,15 @@ const Transaction: React.FC = () => {
                             sortOption={sortOption}
                             addRecurringTransactionSuccessfully={addRecurringTransactionSuccessfully}
                             setAddRecurringTransactionSuccessfully={setAddRecurringTransactionSuccessfully}
+                            // Add new props for executed transaction deletions
+                            executedTransactionsDeleted={executedTransactionsDeleted}
+                            setExecutedTransactionsDeleted={setExecutedTransactionsDeleted}
                         />
                         <RecurringTransactionsDisplay 
                             addRecurringTransactionSuccessfully={addRecurringTransactionSuccessfully}
                             setAddRecurringTransactionSuccessfully={setAddRecurringTransactionSuccessfully}
+                            // Add new prop to trigger transaction table refresh
+                            setExecutedTransactionsDeleted={setExecutedTransactionsDeleted}
                         />
                         <AddTransactionForm
                             addTransaction={addTransaction} 
@@ -97,9 +105,9 @@ const Transaction: React.FC = () => {
                         </Box>
                     </Box>
                 
-                    <Box>
+                    {/* <Box>
                         <Footer />
-                    </Box>
+                    </Box> */}
                 </Box>
             </Stack>
         </ThemeProvider>

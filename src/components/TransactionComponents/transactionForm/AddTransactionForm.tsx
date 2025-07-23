@@ -3,6 +3,9 @@ import { Box, Button, FormControl, IconButton, InputLabel, MenuItem, Modal, Pape
 import theme from "../../../assets/styles/theme";
 import { useEffect, useState } from "react";
 import CategoryIcons from "../../../assets/categoryIcons/CategoryIcons";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 
 interface TransactionFormProps {
     addTransaction: boolean;
@@ -209,7 +212,7 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
                             </FormControl>
 
                             {/* Date Input */}
-                            <TextField
+                            {/* <TextField
                                 id="date-input"
                                 label="Date"
                                 variant="outlined" 
@@ -223,7 +226,24 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
                                 // placeholder="Date"
                                 value={date}
                                 onChange={(e) => setDate(e.target.value)}
-                            />
+                            /> */}
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <DatePicker 
+                                    label="Select Date"
+                                    value={date ? dayjs(date) : null}
+                                    onChange={(newValue) => setDate(newValue ? dayjs(newValue).format("YYYY-MM-DD") : "")}
+                                    maxDate={dayjs()}
+                                    slotProps={{
+                                        textField: {
+                                            fullWidth: true,
+                                            size: "small",
+                                            sx: { 
+                                                borderRadius: "12px",
+                                            }
+                                        }
+                                    }}
+                                />
+                            </LocalizationProvider>
 
                             {/* Description Input */}
                             <TextField 

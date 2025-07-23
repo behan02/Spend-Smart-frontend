@@ -1,23 +1,38 @@
+import { DeleteOutline } from "@mui/icons-material";
 import { Box, Button, Card, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography, useMediaQuery } from "@mui/material";
 import theme from "../../../assets/styles/theme";
-import { DeleteOutline } from "@mui/icons-material";
 import CategoryIcons, { iconType } from "../../../assets/categoryIcons/CategoryIcons";
+import { useState } from "react";
 
 interface Transaction {
+    id: number;
     type: string;
     category: string;
+    amount: number;
     date: string;
     description: string;
-    amount: number;
 }
 
 interface DashboardTransactionProps {
-    data: Transaction[];
+  data: Transaction[];
+  onDelete?: (id: number) => Promise<void>; // Add onDelete prop
 }
 
-const DashboardTransaction: React.FC<DashboardTransactionProps> = ({data}) => {
-
+const DashboardTransaction: React.FC<DashboardTransactionProps> = ({ data, onDelete }) => {
     const isTabletOrDesktop: boolean = useMediaQuery(theme.breakpoints.down("laptop"));
+
+    const handleDelete = async (id: number) => {
+        if (onDelete) {
+            await onDelete(id);
+        }
+    };
+
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'LKR'
+        }).format(amount);
+    };
 
     return (
         <ThemeProvider theme={theme}>
@@ -50,26 +65,43 @@ const DashboardTransaction: React.FC<DashboardTransactionProps> = ({data}) => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                {data.map((list: Transaction, index: number) => (
-                                    <TableRow 
-                                        key={index} 
-                                        // sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                    >
-                                        <TableCell sx={{textAlign: "center"}}>{CategoryIcons.map((item: iconType, iconIndex: number) => (
+                                {data.map((transaction: Transaction, index: number) => (
+                                    <TableRow key={transaction.id || index}>
+                                        {/* <TableCell sx={{textAlign: "center"}}>{CategoryIcons.map((item: iconType, iconIndex: number) => (
                                                 list.category === item.category ? <item.icon key={iconIndex} sx={{color: item.color}}/> : null
                                             ))}
+                                        </TableCell> */}
+                                        <TableCell sx={{textAlign: "center"}}>
+                                            {CategoryIcons.map((item: iconType, iconIndex: number) => (
+                                                    transaction.category === item.category ? (
+                                                        <Box
+                                                            key={iconIndex}
+                                                            sx={{
+                                                                display: "inline-flex",
+                                                                alignItems: "center",
+                                                                justifyContent: "center",
+                                                                width: 40,
+                                                                height: 40,
+                                                                borderRadius: "50%",
+                                                                backgroundColor: item.color,
+                                                            }}
+                                                        >
+                                                            <span style={{ fontSize: "1.5rem" }}>{item.icon}</span>
+                                                        </Box>
+                                                    ) : null
+                                                ))}
                                         </TableCell>
                                         <TableCell>
-                                            <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.type}</Typography>
+                                            <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{transaction.type}</Typography>
                                         </TableCell>
                                         <TableCell>
-                                            <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.category}</Typography>
+                                            <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{transaction.category}</Typography>
                                         </TableCell>
                                         <TableCell>
-                                            <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.date}</Typography>
+                                            <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{transaction.date}</Typography>
                                         </TableCell>
                                         <TableCell sx={{wordBreak: "break-word", whiteSpace: "normal", maxWidth: "250px"}}>
-                                            <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.description}</Typography>
+                                            <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{transaction.description}</Typography>
                                         </TableCell>
                                         <TableCell>
                                             <Box sx={{
@@ -79,13 +111,13 @@ const DashboardTransaction: React.FC<DashboardTransactionProps> = ({data}) => {
                                             }}
                                             >
                                                 <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p" sx={{
-                                                    color: list.type === "Income" ? "#19A23D" : "#EE3838",
+                                                    color: transaction.type === "Income" ? "#19A23D" : "#EE3838",
                                                     fontWeight: "bold",
                                                 }}
                                                 >
-                                                    {list.amount}
+                                                    {formatCurrency(transaction.amount)}
                                                 </Typography>
-                                                <IconButton>
+                                                <IconButton onClick={() => handleDelete(transaction.id)}>
                                                     <DeleteOutline fontSize="medium"/>
                                                 </IconButton>
                                             </Box>  
@@ -110,18 +142,38 @@ const DashboardTransaction: React.FC<DashboardTransactionProps> = ({data}) => {
                         <TableContainer sx={{borderRadius: "15px"}}>
                             <Table aria-label="simple table">
                                 <TableBody>
-                                {data.map((list: Transaction, index: number) => (
-                                    <TableRow key={index}>
-                                        <TableCell sx={{textAlign: "center"}}>{CategoryIcons.map((item: iconType, iconIndex: number) => (
+                                {data.map((transaction: Transaction, index: number) => (
+                                    <TableRow key={transaction.id || index}>
+                                        {/* <TableCell sx={{textAlign: "center"}}>{CategoryIcons.map((item: iconType, iconIndex: number) => (
                                                         list.category === item.category ? <item.icon key={iconIndex} sx={{color: item.color}}/> : null
                                                     ))}
+                                        </TableCell> */}
+                                        <TableCell sx={{textAlign: "center"}}>
+                                            {CategoryIcons.map((item: iconType, iconIndex: number) => (
+                                            transaction.category === item.category ? (
+                                                <Box
+                                                key={iconIndex}
+                                                sx={{
+                                                    display: "inline-flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    width: 40,
+                                                    height: 40,
+                                                    borderRadius: "50%",
+                                                    backgroundColor: item.color,
+                                                }}
+                                                >
+                                                <span style={{ fontSize: "1.5rem" }}>{item.icon}</span>
+                                                </Box>
+                                            ) : null
+                                            ))}
                                         </TableCell>
                                         <TableCell>
-                                            <Typography variant="body2" component="p">{list.category}</Typography>
-                                            <Typography variant="body2" component="p">{list.type}</Typography>
+                                            <Typography variant="body2" component="p">{transaction.category}</Typography>
+                                            <Typography variant="body2" component="p">{transaction.type}</Typography>
                                         </TableCell>
                                         <TableCell>
-                                            <Typography variant="body2" component="p">{list.date}</Typography>
+                                            <Typography variant="body2" component="p">{transaction.date}</Typography>
                                         </TableCell>
                                         <TableCell>
                                             <Box sx={{
@@ -130,13 +182,13 @@ const DashboardTransaction: React.FC<DashboardTransactionProps> = ({data}) => {
                                             alignItems: "center",
                                             }}>
                                             <Typography variant="body2" component="p" sx={{
-                                                color: list.type === "Income" ? "#19A23D" : "#EE3838",
+                                                color: transaction.type === "Income" ? "#19A23D" : "#EE3838",
                                                 fontWeight: "bold",
                                             }}
                                             >
-                                                {list.amount}
+                                                ${transaction.amount}
                                             </Typography>
-                                            <IconButton>
+                                            <IconButton onClick={() => handleDelete(transaction.id)}>
                                                 <DeleteOutline fontSize="small"/>
                                             </IconButton>
                                             </Box>  
