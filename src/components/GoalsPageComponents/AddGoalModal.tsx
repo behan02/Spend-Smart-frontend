@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -14,33 +14,83 @@ interface AddGoalModalProps {
   open: boolean;
   onClose: () => void;
   onSave: (goal: any) => void;
+  initialData?: any;
+  isEditMode?: boolean;
 }
 
-const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave }) => {
+const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave, initialData, isEditMode = false }) => {
   const [name, setName] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
   const [currentAmount, setCurrentAmount] = useState('');
   const [deadlineDate, setDeadlineDate] = useState('');
   const [description, setDescription] = useState('');
+  
+  // Set initial values when editing
+  useEffect(() => {
+    if (isEditMode && initialData) {
+      setName(initialData.name || '');
+      setTargetAmount(initialData.targetAmount?.toString() || '');
+      setCurrentAmount(initialData.currentAmount?.toString() || '');
+      setDeadlineDate(initialData.endDate ? initialData.endDate.split('T')[0] : '');
+      setDescription(initialData.description || '');
+      console.log('Editing goal with data:', initialData);
+    } else {
+      // Reset form when opening for new goal
+      setName('');
+      setTargetAmount('');
+      setCurrentAmount('');
+      setDeadlineDate('');
+      setDescription('');
+    }
+  }, [isEditMode, initialData, open]);
 
   const handleSave = () => {
-    if (!name || !targetAmount || !currentAmount) {
+    if (!name) {
+      return;
+    }
+    
+    // In edit mode, validate deadline extension
+    if (isEditMode && initialData?.endDate && deadlineDate) {
+      const originalDate = new Date(initialData.endDate.split('T')[0]);
+      const newDate = new Date(deadlineDate);
+      if (newDate < originalDate) {
+        return; // Don't save if trying to shorten deadline
+      }
+    }
+    
+    // In create mode, require target amount
+    if (!isEditMode && !targetAmount) {
       return;
     }
 
-    // Convert the date string to a Date object if it exists
-    const deadline = deadlineDate ? new Date(deadlineDate) : null;
-
-    const newGoal = {
+    // For edit mode, preserve original amounts; for create mode, use entered values
+    const targetAmountValue = isEditMode 
+      ? (initialData?.targetAmount || parseFloat(targetAmount))
+      : parseFloat(targetAmount);
+      
+    const currentAmountValue = isEditMode 
+      ? (initialData?.currentAmount || 0)
+      : (currentAmount ? parseFloat(currentAmount) : 0);
+    
+    // Prepare the goal data with field names that match the API
+    const goalData = {
       name,
-      targetAmount: parseFloat(targetAmount),
-      savedAmount: parseFloat(currentAmount),
-      progress: Math.round((parseFloat(currentAmount) / parseFloat(targetAmount)) * 100),
-      deadline: deadline,
+      targetAmount: targetAmountValue,
+      currentAmount: currentAmountValue,
+      // Also include savedAmount for backwards compatibility with frontend
+      savedAmount: currentAmountValue,
+      progress: targetAmountValue > 0 
+        ? Math.round((currentAmountValue / targetAmountValue) * 100) 
+        : 0,
+      // Use endDate to match backend model
+      endDate: deadlineDate || new Date().toISOString().split('T')[0],
       description,
+      // Include the ID if in edit mode
+      ...(isEditMode && initialData?.id && { id: initialData.id }),
     };
 
-    onSave(newGoal);
+    console.log('Saving goal data:', goalData);
+    onSave(goalData);
     handleClose();
   };
 
@@ -74,7 +124,7 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave }) =>
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Typography variant="h6" component="h2" fontWeight="bold">
-            Add New Goal
+            {isEditMode ? 'Edit Goal' : 'Add New Goal'}
           </Typography>
           <IconButton onClick={handleClose} size="small">
             <CloseIcon />
@@ -87,32 +137,72 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave }) =>
             fullWidth
             variant="outlined"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              // Allow only letters, numbers, and spaces
+              if (e.target.value === '' || /^[a-zA-Z0-9 ]+$/.test(e.target.value)) {
+          setName(e.target.value);
+              }
+            }}
             size="small"
+            error={name !== '' && !/^[a-zA-Z0-9 ]+$/.test(name)}
+            helperText={name !== '' && !/^[a-zA-Z0-9 ]+$/.test(name) ? "Name should contain only letters and numbers" : ""}
           />
         </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ width: '48%' }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>Target amount</Typography>
+            <Box sx={{ width: '48%' }}>
+            <Typography variant="body2" sx={{ mb: 1 }}>Target amount (LKR)</Typography>
             <TextField
               fullWidth
               variant="outlined"
               value={targetAmount}
-              onChange={(e) => setTargetAmount(e.target.value)}
+              onChange={(e) => {
+              const value = e.target.value;
+              if (value === '' || /^\d*\.?\d*$/.test(value)) {
+          setTargetAmount(value);
+              }
+              }}
               type="number"
               size="small"
+              disabled={isEditMode} // Disable target amount editing in edit mode
+              error={targetAmount !== '' && !/^\d*\.?\d*$/.test(targetAmount)}
+              helperText={targetAmount !== '' && !/^\d*\.?\d*$/.test(targetAmount) 
+              ? "Target amount should be a valid number" 
+              : isEditMode ? "Target amount cannot be changed" : ""}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: isEditMode ? '#f5f5f5' : 'inherit'
+                }
+              }}
             />
-          </Box>
+            </Box>
           <Box sx={{ width: '48%' }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>Current amount</Typography>
+            <Typography variant="body2" sx={{ mb: 1 }}>Current amount (LKR)</Typography>
             <TextField
               fullWidth
               variant="outlined"
               value={currentAmount}
-              onChange={(e) => setCurrentAmount(e.target.value)}
+              onChange={(e) => {
+          const value = e.target.value;
+          if (value === '' || (/^\d*\.?\d*$/.test(value) && (targetAmount === '' || parseFloat(value) <= parseFloat(targetAmount)))) {
+            setCurrentAmount(value);
+          }
+              }}
               type="number"
               size="small"
+              disabled={isEditMode} // Disable current amount editing in edit mode
+              error={currentAmount !== '' && (!/^\d*\.?\d*$/.test(currentAmount) || 
+          (targetAmount !== '' && parseFloat(currentAmount) > parseFloat(targetAmount)))}
+              helperText={currentAmount !== '' && (!/^\d*\.?\d*$/.test(currentAmount) 
+          ? "Current amount should be a valid number" 
+          : (targetAmount !== '' && parseFloat(currentAmount) > parseFloat(targetAmount))
+            ? "Current amount cannot exceed target amount"
+            : isEditMode ? "Current amount is managed by saving records" : "")}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: isEditMode ? '#f5f5f5' : 'inherit'
+                }
+              }}
             />
           </Box>
         </Box>
@@ -129,6 +219,25 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ open, onClose, onSave }) =>
             InputLabelProps={{
               shrink: true,
             }}
+            inputProps={{
+              min: isEditMode && initialData?.endDate 
+                ? initialData.endDate.split('T')[0] // In edit mode, minimum is the original deadline
+                : new Date().toISOString().split('T')[0] // In create mode, minimum is today
+            }}
+            error={deadlineDate !== '' && (
+              isEditMode 
+                ? (initialData?.endDate && new Date(deadlineDate) < new Date(initialData.endDate.split('T')[0]))
+                : new Date(deadlineDate) <= new Date(new Date().setHours(0, 0, 0, 0))
+            )}
+            helperText={deadlineDate !== '' && (
+              isEditMode 
+                ? (initialData?.endDate && new Date(deadlineDate) < new Date(initialData.endDate.split('T')[0]))
+                  ? "You can only extend the deadline, not shorten it"
+                  : "You can extend the deadline to give yourself more time"
+                : new Date(deadlineDate) <= new Date(new Date().setHours(0, 0, 0, 0))
+                  ? "Deadline must be a future date"
+                  : ""
+            )}
           />
         </Box>
 

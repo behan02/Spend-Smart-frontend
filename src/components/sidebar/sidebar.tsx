@@ -33,6 +33,7 @@ interface MenuItem {
 
 // Type menuItems with optional badges
 const menuItems: MenuItem[] = [
+
   {
     text: "Dashboard",
     icon: <DashboardIcon />,
@@ -69,6 +70,7 @@ const menuItems: MenuItem[] = [
     icon: <ExitToApp />, 
     path: "/" 
   },
+
 ];
 
 

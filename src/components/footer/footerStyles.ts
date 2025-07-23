@@ -3,6 +3,8 @@ import theme from "../../assets/styles/theme";
 
 const footerStyles: SxProps = {
     display: 'flex',
+    margin: 0,
+
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',

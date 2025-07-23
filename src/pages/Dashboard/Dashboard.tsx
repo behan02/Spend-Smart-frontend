@@ -11,12 +11,15 @@ import DashboardTransaction from "../../components/DashboardComponents/dashboard
 import Grid from '@mui/material/Grid';
 import Sidebar from "../../components/sidebar/sidebar";
 import { useEffect, useState } from "react";
+import { useUser } from "../../context/UserContext";
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState<any>();
   const [loading, setLoading] = useState<boolean>(true);
+
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0); // Add refresh trigger
   let userId: Number = 1;
+
 
   // Function to fetch dashboard data
   const fetchDashboardData = async () => {

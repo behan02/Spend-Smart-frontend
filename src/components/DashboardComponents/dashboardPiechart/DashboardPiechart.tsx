@@ -1,6 +1,8 @@
 import { Box, Card, Typography } from "@mui/material";
 import { PieChart } from "@mui/x-charts";
+
 import { useEffect, useState } from "react";
+import { useUser } from "../../../context/UserContext";
 
 interface DashboardPiechartProps {
   dashboardData: {
@@ -15,7 +17,7 @@ const DashboardPiechart: React.FC<DashboardPiechartProps> = ({dashboardData}) =>
 
     const [data, setData] = useState<any[]>([]);
 
-    let userId: Number = 1;
+    const { userId } = useUser();
 
     useEffect(() => {
         async function fetchPieChartData() {

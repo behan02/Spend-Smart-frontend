@@ -2,10 +2,14 @@ import { Close } from "@mui/icons-material";
 import { Box, Button, FormControl, IconButton, InputLabel, MenuItem, Modal, Paper, Select, TextareaAutosize, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../../../assets/styles/theme";
 import { useEffect, useState } from "react";
+
 import CategoryIcons from "../../../assets/categoryIcons/CategoryIcons";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
+
+import { useUser } from "../../../context/UserContext";
+
 
 interface TransactionFormProps {
     addTransaction: boolean;
@@ -21,6 +25,8 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
     const [categoryID, setCategoryID] = useState('');
     const [date, setDate] = useState('');
     const [description, setDescription] = useState('');
+    const { userId } = useUser(); // Get userId from UserContext
+    console.log("User ID from context:", userId);
 
     // State to store fetched categories
     const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
@@ -52,10 +58,12 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
             amount: parseFloat(amount),
             date: date,
             description: description,
+
+           
+
         };
 
-        let userId = 1;
-
+        
         try{
             const response = await fetch(`https://localhost:7211/api/Transaction/CreateTransaction/${userId}`, {
                 method: "POST",
