@@ -4,7 +4,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import PeopleIcon from '@mui/icons-material/People';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from 'react-router-dom';
-import Logo from '../../assets/Logo.png';
+import Logo from '../../assets/ChatGPT_Image_Jul_23__2025__09_24_00_PM-removebg-preview.png';
 
 const Sidebar = () => {
   const navigate = useNavigate(); //  for navigation programmatically
