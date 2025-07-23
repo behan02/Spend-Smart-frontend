@@ -38,7 +38,7 @@ const ReportTable: React.FC = () => {
   );
   const [deleting, setDeleting] = useState(false);
 
-  const userId = 2; // TODO: Get from authentication context
+  const userId = 1; // TODO: Get from authentication context
 
   useEffect(() => {
     fetchReports();
@@ -185,7 +185,7 @@ const ReportTable: React.FC = () => {
                         startIcon={<ViewIcon />}
                         onClick={() => handleViewReport(report)}
                         size="small"
-                        sx={{ minWidth: 80 }}
+                        sx={{ minWidth: 80}}
                       >
                         VIEW
                       </Button>

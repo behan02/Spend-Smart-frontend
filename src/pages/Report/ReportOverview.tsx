@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, CssBaseline, ThemeProvider, Typography } from "@mui/material";
 import React from "react";
 import ReportImage from "../../assets/images/Report-amico.png";
 import Header from "../../components/header/header";
@@ -25,7 +25,8 @@ const ReportOverview: React.FC = () => {
           p={4}
           width="80%"
         
-          height={{ xs: "auto", md: "auto" }}
+          //height={{ xs: "auto", md: "auto" }}
+          height="280px"
           mx="auto"
           mt={2}
         >
@@ -45,8 +46,7 @@ const ReportOverview: React.FC = () => {
               <Typography
                 gutterBottom
                 sx={{
-                  fontFamily: "Poppins",
-                  fontSize: { xs: "1.1rem", md: "1.4rem" },
+                  fontSize: { xs: "1.1rem", md: "1.2rem" },
                 }}
               >
                 Tailor your report to perfection.
@@ -55,8 +55,7 @@ const ReportOverview: React.FC = () => {
               <Typography
                 gutterBottom
                 sx={{
-                  fontFamily: "Poppins",
-                  fontSize: { xs: "1.1rem", md: "1.4rem" },
+                  fontSize: { xs: "1.1rem", md: "1.2rem" },
                 }}
               >
                 Choose any date range you need and get the insights that matter
@@ -73,7 +72,7 @@ const ReportOverview: React.FC = () => {
             alt="Report Illustration"
             sx={{
               width: { xs: "80%", sm: "60%", md: "50%" },
-              maxWidth: "350px",
+              maxWidth: "345px",
               height: "auto",
               display: "block",
               mx: "auto",
@@ -83,27 +82,11 @@ const ReportOverview: React.FC = () => {
         
 
         {/* Report Table Section */}
-        <Box
-          sx={{
-            mt: 4,
-            borderRadius: 4,
-            bgcolor: "#F8F9FA",
-            boxShadow: 1,
-            width: { xs: "100%", md: "80%" },
-            mx: "auto",
-            p: 3,
-          }}
-        >
-          <Typography
-            variant="h5"
-            fontWeight="bold"
-            gutterBottom
-            fontSize={{ xs: "1.8rem", md: "2.2rem" }}
-          >
-            Reports
-          </Typography>
-          <ReportTable />
-        </Box>
+
+
+          <Box sx={{ mt: 7 }}>
+            <ReportTable />
+          </Box>
 
         {/* Footer */}
         <Box sx={{ mt: 4 }}>
