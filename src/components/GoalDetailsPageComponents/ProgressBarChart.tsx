@@ -200,7 +200,7 @@ const ProgressBarChart: React.FC<ProgressBarChartProps> = ({
                 fontSize: '1.1rem'
               }}
             >
-              {Math.round(progressPercentage)}%
+              {progressPercentage.toFixed(1)}%
             </Typography>
             <Typography variant="caption" color="textSecondary">
               Complete

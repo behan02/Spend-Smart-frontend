@@ -49,7 +49,7 @@ export const CategoryChip: React.FC<CategoryChipProps> = ({
                 fontWeight: 'bold'
               }}
             >
-              ({progress.toFixed(0)}%)
+              ({progress.toFixed(1)}%)
             </Typography>
           )}
         </Box>

@@ -38,7 +38,7 @@ const DashboardBudget = () => {
                         }}
                     >
                     </LinearProgress>
-                    <Typography variant="h6" component="p" fontSize="12px" textAlign="right">{set.progress}%</Typography>
+                    <Typography variant="h6" component="p" fontSize="12px" textAlign="right">{set.progress.toFixed(1)}%</Typography>
                 </Box>
             ))}
         </Card>

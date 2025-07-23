@@ -398,13 +398,7 @@ const BudgetDetailsPage: React.FC<BudgetDetailsPageProps> = ({
             />
           </Paper>
 
-          {/* Budget Period Chart */}
-          <Paper elevation={2} sx={{ p: 3, borderRadius: 3, backgroundColor: 'white' }}>
-            <BudgetPeriodChart 
-              data={periodData}
-              budgetType={budget?.type || 'monthly'}
-            />
-          </Paper>
+         
         </Box>
       </Box>
     </Box>

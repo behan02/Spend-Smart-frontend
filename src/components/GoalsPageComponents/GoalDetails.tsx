@@ -136,10 +136,10 @@ const GoalDetails: React.FC<GoalDetailsProps> = ({ goal, onEdit, onDelete, onVie
           
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="body2" color="textSecondary" sx={{ fontSize: '14px' }}>
-              {goal.progress}%
+              {goal.progress.toFixed(1)}%
             </Typography>
             <Typography variant="body2" color="textSecondary" sx={{ fontSize: '14px' }}>
-              {100 - goal.progress}%
+              {(100 - goal.progress).toFixed(1)}%
             </Typography>
           </Box>
         </Box>

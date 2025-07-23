@@ -81,7 +81,7 @@ const BudgetItem: React.FC<BudgetItemProps> = ({ budget, isSelected, onClick }) 
               color: isSelected ? getProgressColor() : getProgressColor(),
             }}
           >
-            {percentage}%
+            {percentage.toFixed(1)}%
           </Typography>
         </Box>
       </Box>
