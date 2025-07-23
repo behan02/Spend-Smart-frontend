@@ -10,6 +10,7 @@ import {
   Alert,
   Paper,
 } from "@mui/material";
+import { UserConfig } from "../../config/userConfig";
 import Cards from "../../components/ReportComponents/Cards";
 import PieChart from "../../components/ReportComponents/PieChart";
 import BarGraph from "../../components/ReportComponents/BarGraph";
@@ -204,10 +205,9 @@ function ReportDisplay({ startDate, endDate }: ReportDisplayProps) {
     }
   };
 
-  // Get test user ID
+  // Get test user ID from centralized configuration
   const getTestUserId = (): number => {
-    const storedUserId = localStorage.getItem("testUserId");
-    return storedUserId ? parseInt(storedUserId) : 1;
+    return UserConfig.getCurrentUserId();
   };
 
   useEffect(() => {
@@ -529,7 +529,7 @@ function ReportDisplay({ startDate, endDate }: ReportDisplayProps) {
       const fileName = `SpendSmart-Report-${startDate}-to-${endDate}-${timestamp}.pdf`;
 
       // Upload to Firebase
-      const userId = 1; // TODO: Get from authentication context
+      const userId = UserConfig.getCurrentUserId(); // Get from centralized configuration
       const firebaseUrl = await uploadPDFToFirebase(pdfBlob, fileName, userId);
 
       // Update loading message

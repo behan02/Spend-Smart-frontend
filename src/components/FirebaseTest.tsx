@@ -16,7 +16,7 @@ const FirebaseTest: React.FC = () => {
       const blob = new Blob([testContent], { type: "application/pdf" });
 
       // Test upload with user ID 1
-      const result = await uploadPDFToFirebase(blob, "firebase-test.pdf", 1);
+      const result = await uploadPDFToFirebase(blob, "firebase-test.pdf", 2);
 
       setStatus(`✅ Success! File uploaded to: ${result}`);
     } catch (error: any) {

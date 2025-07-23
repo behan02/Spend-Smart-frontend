@@ -8,6 +8,7 @@ import {
   Paper,
   Chip,
 } from "@mui/material";
+import { UserConfig } from "../../config/userConfig";
 import Header from "../../components/header/header";
 import CustomDatePicker from "../../components/ReportComponents/DatePicker";
 import ReportDisplay from "./ReportDisplay";
@@ -27,8 +28,8 @@ const ReportGenerate: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const theme = useTheme();
 
-  // Temporary hardcoded user ID for development
-  const userId = 1;
+  // Get userId from centralized configuration
+  const userId = UserConfig.getCurrentUserId();
 
   const handleGenerate = async (): Promise<void> => {
     try {

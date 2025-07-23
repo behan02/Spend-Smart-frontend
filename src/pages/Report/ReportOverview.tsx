@@ -84,16 +84,11 @@ const ReportOverview: React.FC = () => {
         {/* Report Table Section */}
 
 
-          <Box sx={{ mt: 7 }}>
+          <Box sx={{ mt: 7, width: "90%", mx: "auto" }}>
             <ReportTable />
           </Box>
 
-        {/* Footer */}
-        <Box sx={{ mt: 4 }}>
-          <Box sx={{ width: "100%" }}>
-            <Footer />
-          </Box>
-        </Box>
+    
       </Box>
     </Box>
   );

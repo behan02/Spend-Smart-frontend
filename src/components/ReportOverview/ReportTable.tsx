@@ -22,6 +22,7 @@ import {
   Delete as DeleteIcon,
   Visibility as ViewIcon,
 } from "@mui/icons-material";
+import { UserConfig } from "../../config/userConfig";
 import {
   getStoredReports,
   deleteStoredReport,
@@ -38,7 +39,7 @@ const ReportTable: React.FC = () => {
   );
   const [deleting, setDeleting] = useState(false);
 
-  const userId = 1; // TODO: Get from authentication context
+  const userId = UserConfig.getCurrentUserId(); // Get from centralized configuration
 
   useEffect(() => {
     fetchReports();
@@ -185,7 +186,7 @@ const ReportTable: React.FC = () => {
                         startIcon={<ViewIcon />}
                         onClick={() => handleViewReport(report)}
                         size="small"
-                        sx={{ minWidth: 80}}
+                        sx={{ minWidth: 80 }}
                       >
                         VIEW
                       </Button>

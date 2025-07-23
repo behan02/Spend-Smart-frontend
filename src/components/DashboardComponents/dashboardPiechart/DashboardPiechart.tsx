@@ -7,7 +7,7 @@ const DashboardPiechart = () => {
 
     const [data, setData] = useState<any[]>([]);
 
-    let userId: Number = 1;
+    let userId: Number = 2;
 
     useEffect(() => {
         async function fetchPieChartData() {

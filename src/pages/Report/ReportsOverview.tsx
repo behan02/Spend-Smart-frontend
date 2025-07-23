@@ -22,6 +22,7 @@ import {
   Delete as DeleteIcon,
   Visibility as ViewIcon,
 } from "@mui/icons-material";
+import { UserConfig } from "../../config/userConfig";
 import {
   getStoredReports,
   deleteStoredReport,
@@ -38,7 +39,7 @@ const ReportsOverview: React.FC = () => {
   );
   const [deleting, setDeleting] = useState(false);
 
-  const userId = 1; // TODO: Get from authentication context
+  const userId = UserConfig.getCurrentUserId(); // Get from centralized configuration
 
   useEffect(() => {
     fetchReports();
@@ -93,12 +94,6 @@ const ReportsOverview: React.FC = () => {
     setReportToDelete(null);
   };
 
-  const formatFileSize = (bytes?: number) => {
-    if (!bytes) return "Unknown";
-    const mb = bytes / 1024 / 1024;
-    return `${mb.toFixed(2)} MB`;
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -137,157 +132,110 @@ const ReportsOverview: React.FC = () => {
         </Alert>
       )}
 
-      <Paper sx={{ mt: 3 }}>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell>
-                  <Typography variant="subtitle1" fontWeight="bold">
-                    Report Name
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="subtitle1" fontWeight="bold">
-                    Date Range
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="subtitle1" fontWeight="bold">
-                    Generated Date
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="subtitle1" fontWeight="bold">
-                    File Info
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="subtitle1" fontWeight="bold">
-                    Access Count
-                  </Typography>
-                </TableCell>
-                <TableCell align="center">
-                  <Typography variant="subtitle1" fontWeight="bold">
-                    Actions
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {reports.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    <Box sx={{ py: 4 }}>
-                      <Typography variant="h6" color="text.secondary">
-                        📊 No reports found
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mt: 1 }}
-                      >
-                        Generate and download a report to see it here
-                      </Typography>
-                    </Box>
+      {/* Center the table with reduced width */}
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+        <Paper sx={{ width: "90%", maxWidth: "1200px" }}>
+          <TableContainer>
+            <Table sx={{ minWidth: 750 }}>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                  <TableCell sx={{ width: "35%" }}>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      Report Name
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ width: "20%" }}>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      Date Range
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ width: "20%" }}>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      Generated Date
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center" sx={{ width: "25%" }}>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      Action
+                    </Typography>
                   </TableCell>
                 </TableRow>
-              ) : (
-                reports.map((report) => (
-                  <TableRow key={report.id} hover>
-                    <TableCell>
-                      <Typography variant="body1" fontWeight="medium">
-                        {report.reportName}
-                      </Typography>
-                      {report.description && (
-                        <Typography variant="body2" color="text.secondary">
-                          {report.description}
+              </TableHead>
+              <TableBody>
+                {reports.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} align="center">
+                      <Box sx={{ py: 4 }}>
+                        <Typography variant="h6" color="text.secondary">
+                          📊 No reports found
                         </Typography>
-                      )}
-                      {report.fileName && (
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ display: "block", mt: 0.5 }}
-                        >
-                          📎 {report.fileName}
-                        </Typography>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">
-                        {report.dateRange}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">
-                        {formatDate(report.dateGenerated)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Box>
                         <Typography
                           variant="body2"
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 0.5,
-                          }}
-                        >
-                          📄 {report.format}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {formatFileSize(report.fileSizeBytes)}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" align="center">
-                        {report.accessCount || 0}
-                      </Typography>
-                      {report.lastAccessed && (
-                        <Typography
-                          variant="caption"
                           color="text.secondary"
-                          sx={{ display: "block" }}
+                          sx={{ mt: 1 }}
                         >
-                          Last: {formatDate(report.lastAccessed)}
+                          Generate and download a report to see it here
                         </Typography>
-                      )}
-                    </TableCell>
-                    <TableCell align="center">
-                      <Box
-                        sx={{
-                          display: "flex",
-                          gap: 1,
-                          justifyContent: "center",
-                        }}
-                      >
-                        <Button
-                          variant="contained"
-                          startIcon={<ViewIcon />}
-                          onClick={() => handleViewReport(report)}
-                          size="small"
-                          sx={{ minWidth: 80 }}
-                        >
-                          VIEW
-                        </Button>
-                        <IconButton
-                          color="error"
-                          onClick={() => handleDeleteClick(report)}
-                          size="small"
-                        >
-                          <DeleteIcon />
-                        </IconButton>
                       </Box>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
+                ) : (
+                  reports.map((report) => (
+                    <TableRow key={report.id} hover>
+                      <TableCell>
+                        <Typography variant="body1" fontWeight="medium">
+                          {report.reportName}
+                        </Typography>
+                        {report.description && (
+                          <Typography variant="body2" color="text.secondary">
+                            {report.description}
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {report.dateRange}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {formatDate(report.dateGenerated)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Box
+                          sx={{
+                            display: "flex",
+                            gap: 1,
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Button
+                            variant="contained"
+                            startIcon={<ViewIcon />}
+                            onClick={() => handleViewReport(report)}
+                            size="small"
+                            sx={{ minWidth: 80 }}
+                          >
+                            VIEW
+                          </Button>
+                          <IconButton
+                            color="error"
+                            onClick={() => handleDeleteClick(report)}
+                            size="small"
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+      </Box>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>

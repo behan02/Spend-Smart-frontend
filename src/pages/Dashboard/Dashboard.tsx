@@ -16,7 +16,7 @@ const Dashboard = () => {
 
   const [dashboardData, setDashboardData] = useState<any>();
   const [loading, setLoading] = useState<boolean>(true);
-  let userId: Number = 1;
+  let userId: Number = 2;
 
   useEffect(() => {
     async function fetchDashboardData(){
