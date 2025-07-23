@@ -93,6 +93,12 @@ const ReportsOverview: React.FC = () => {
     setReportToDelete(null);
   };
 
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return "Unknown";
+    const mb = bytes / 1024 / 1024;
+    return `${mb.toFixed(2)} MB`;
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -153,12 +159,17 @@ const ReportsOverview: React.FC = () => {
                 </TableCell>
                 <TableCell>
                   <Typography variant="subtitle1" fontWeight="bold">
-                    Format
+                    File Info
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="subtitle1" fontWeight="bold">
+                    Access Count
                   </Typography>
                 </TableCell>
                 <TableCell align="center">
                   <Typography variant="subtitle1" fontWeight="bold">
-                    Action
+                    Actions
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -166,10 +177,10 @@ const ReportsOverview: React.FC = () => {
             <TableBody>
               {reports.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} align="center">
+                  <TableCell colSpan={6} align="center">
                     <Box sx={{ py: 4 }}>
                       <Typography variant="h6" color="text.secondary">
-                        No reports found
+                        📊 No reports found
                       </Typography>
                       <Typography
                         variant="body2"
@@ -185,12 +196,21 @@ const ReportsOverview: React.FC = () => {
                 reports.map((report) => (
                   <TableRow key={report.id} hover>
                     <TableCell>
-                      <Typography variant="body1">
+                      <Typography variant="body1" fontWeight="medium">
                         {report.reportName}
                       </Typography>
                       {report.description && (
                         <Typography variant="body2" color="text.secondary">
                           {report.description}
+                        </Typography>
+                      )}
+                      {report.fileName && (
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ display: "block", mt: 0.5 }}
+                        >
+                          📎 {report.fileName}
                         </Typography>
                       )}
                     </TableCell>
@@ -205,7 +225,35 @@ const ReportsOverview: React.FC = () => {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2">{report.format}</Typography>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
+                          }}
+                        >
+                          📄 {report.format}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {formatFileSize(report.fileSizeBytes)}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" align="center">
+                        {report.accessCount || 0}
+                      </Typography>
+                      {report.lastAccessed && (
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ display: "block" }}
+                        >
+                          Last: {formatDate(report.lastAccessed)}
+                        </Typography>
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       <Box

@@ -540,7 +540,7 @@ function ReportDisplay({ startDate, endDate }: ReportDisplayProps) {
         </div>
       `;
 
-      // Store in database
+      // Store in database with enhanced metadata
       await storeReport({
         reportName: `Financial Report (${startDate} to ${endDate})`,
         format: "PDF",
@@ -549,6 +549,8 @@ function ReportDisplay({ startDate, endDate }: ReportDisplayProps) {
         firebaseUrl: firebaseUrl,
         description: `Comprehensive financial report including charts, graphs, and transaction details`,
         userId: userId,
+        fileSizeBytes: pdfBlob.size,
+        fileName: fileName,
       });
 
       // Also download the file locally

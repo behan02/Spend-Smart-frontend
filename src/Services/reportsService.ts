@@ -12,6 +12,12 @@ export interface StoredReport {
   firebaseUrl: string;
   description?: string;
   dateRange: string;
+  fileSizeBytes?: number;
+  fileName?: string;
+  accessCount: number;
+  lastAccessed?: string;
+  status: string;
+  fileSizeMB?: number;
 }
 
 export interface StoreReportData {
@@ -22,6 +28,8 @@ export interface StoreReportData {
   firebaseUrl: string;
   description?: string;
   userId: number;
+  fileSizeBytes?: number;
+  fileName?: string;
 }
 
 // API client setup with error handling
@@ -68,7 +76,12 @@ export const getStoredReports = async (userId: number): Promise<StoredReport[]> 
           endDate: "2025-01-31",
           firebaseUrl: "https://mock-storage.example.com/reports/user_1/sample-report.pdf",
           description: "Mock report for testing",
-          dateRange: "2025-01-01 to 2025-01-31"
+          dateRange: "2025-01-01 to 2025-01-31",
+          fileSizeBytes: 1048576, // 1MB
+          fileName: "sample-report.pdf",
+          accessCount: 0,
+          status: "Active",
+          fileSizeMB: 1.0
         }
       ];
     }
