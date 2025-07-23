@@ -5,7 +5,6 @@ import {
   Snackbar,
   Typography,
   Button,
-  TextField,
   Paper,
   Chip,
 } from "@mui/material";
@@ -15,11 +14,6 @@ import ReportDisplay from "./ReportDisplay";
 import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import Sidebar from "../../components/sidebar/sidebar";
-import axios from "axios";
-import { uploadPDFToFirebase } from "../../Services/firebaseService";
-
-// API Configuration
-const API_BASE_URL = "https://localhost:7211/api";
 
 const SIDEBAR_WIDTH = 240;
 
@@ -31,105 +25,10 @@ const ReportGenerate: React.FC = () => {
   const [isReportVisible, setIsReportVisible] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [testUserId, setTestUserIdState] = useState<number>(
-    parseInt(localStorage.getItem("testUserId") || "1")
-  );
   const theme = useTheme();
 
-  // API Functions
-  const testConnection = async (): Promise<{
-    success: boolean;
-    message: string;
-  }> => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/Reports/test`, {
-        timeout: 10000,
-      });
-      return {
-        success: true,
-        message: response.data.message || "API connection successful",
-      };
-    } catch (error: any) {
-      console.error("API connection test failed:", error);
-      let errorMessage = "API connection failed";
-
-      if (error.code === "ECONNREFUSED") {
-        errorMessage = "Connection refused. Backend server is not running.";
-      } else if (error.response) {
-        errorMessage = `Server error: ${error.response.status}`;
-      } else if (error.request) {
-        errorMessage =
-          "Network error. Check if backend is running on https://localhost:7211";
-      }
-
-      return {
-        success: false,
-        message: errorMessage,
-      };
-    }
-  };
-
-  // Firebase Storage Test Function
-  const testFirebaseUpload = async (): Promise<void> => {
-    setIsLoading(true);
-    try {
-      console.log("🧪 Testing Firebase Storage upload...");
-      console.log("🔥 Project: spend-smart-89085");
-      console.log("📁 Storage Bucket: spend-smart-89085.firebasestorage.app");
-
-      // Create a small test file
-      const testContent = `Firebase Storage Test
-Project: spend-smart-89085
-Timestamp: ${new Date().toISOString()}
-User: ${testUserId}
-Test Type: Storage Rules Verification`;
-
-      const testBlob = new Blob([testContent], { type: "text/plain" });
-
-      console.log(`📤 Uploading test file to reports/user_${testUserId}/`);
-
-      // Try to upload
-      const result = await uploadPDFToFirebase(
-        testBlob,
-        `storage-test-${Date.now()}.txt`,
-        testUserId
-      );
-
-      const message = `✅ Firebase Upload Test SUCCESSFUL!
-
-🔥 Project: spend-smart-89085
-📁 Upload Path: reports/user_${testUserId}/
-🌐 File URL: ${result}
-
-Your Firebase Storage rules are now working correctly!`;
-
-      alert(message);
-      console.log("✅ Firebase test upload successful:", result);
-    } catch (error: any) {
-      console.error("❌ Firebase test upload failed:", error);
-
-      const troubleshooting = `❌ Firebase Upload Test FAILED!
-
-🔥 Project: spend-smart-89085  
-📁 Trying to upload to: reports/user_${testUserId}/
-❌ Error: ${error.message}
-
-🔧 SOLUTION:
-1. Go to: https://console.firebase.google.com/
-2. Select project: spend-smart-89085
-3. Go to Storage > Rules
-4. Add this rule:
-   match /reports/{allPaths=**} { 
-     allow read, write: if true; 
-   }
-5. Click 'Publish'
-6. Wait 1-2 minutes, then test again`;
-
-      alert(troubleshooting);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Temporary hardcoded user ID for development
+  const userId = 1;
 
   const handleGenerate = async (): Promise<void> => {
     try {
@@ -155,24 +54,13 @@ Your Firebase Storage rules are now working correctly!`;
         return;
       }
 
-      // Update test user ID in localStorage
-      localStorage.setItem("testUserId", testUserId.toString());
-
-      // Test API connection before generating report
-      console.log("Testing API connection...");
-      const connectionTest = await testConnection();
-      if (!connectionTest.success) {
-        setError(`Connection failed: ${connectionTest.message}`);
-        return;
-      }
-
-      console.log("API connection successful, generating report...");
+      console.log("Generating report for user:", userId);
 
       // Small delay to show loading state
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       setIsReportVisible(true);
-      console.log("Report generation triggered for user:", testUserId);
+      console.log("Report generation triggered successfully");
     } catch (err: any) {
       console.error("Report generation error:", err);
       setError(err.message || "An error occurred while generating the report");
@@ -186,31 +74,6 @@ Your Firebase Storage rules are now working correctly!`;
   const handleResetReport = () => {
     setIsReportVisible(false);
     setError(null);
-  };
-
-  const handleUserIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(event.target.value) || 1;
-    setTestUserIdState(value);
-  };
-
-  const handleTestConnection = async () => {
-    setIsLoading(true);
-    try {
-      const result = await testConnection();
-      if (result.success) {
-        setError(null);
-        alert(`✅ ${result.message}`);
-      } else {
-        setError(result.message);
-        alert(`❌ ${result.message}`);
-      }
-    } catch (error) {
-      const message = "Failed to test connection";
-      setError(message);
-      alert(`❌ ${message}`);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleQuickDateRange = (range: string) => {
@@ -283,60 +146,6 @@ Your Firebase Storage rules are now working correctly!`;
           pageName="Craft Your Custom Report"
           sx={{ mb: 3, textAlign: "center" }}
         />
-
-        {/* Development Controls */}
-        <Paper
-          elevation={1}
-          sx={{
-            p: 2,
-            mb: 3,
-            bgcolor: "info.light",
-            color: "info.contrastText",
-          }}
-        >
-          <Typography variant="subtitle2" sx={{ mb: 2 }}>
-            🔧 Development Mode - Testing Controls
-          </Typography>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              flexWrap: "wrap",
-            }}
-          >
-            <TextField
-              label="Test User ID"
-              type="number"
-              value={testUserId}
-              onChange={handleUserIdChange}
-              size="small"
-              sx={{ width: "150px" }}
-              inputProps={{ min: 1 }}
-            />
-            <Button
-              variant="contained"
-              size="small"
-              onClick={handleTestConnection}
-              disabled={isLoading}
-              sx={{ bgcolor: "primary.main", color: "white" }}
-            >
-              Test API Connection
-            </Button>
-            <Button
-              variant="contained"
-              size="small"
-              onClick={testFirebaseUpload}
-              disabled={isLoading}
-              sx={{ bgcolor: "warning.main", color: "white" }}
-            >
-              Test Firebase Upload
-            </Button>
-            <Typography variant="body2" sx={{ ml: 1 }}>
-              Backend: {API_BASE_URL}
-            </Typography>
-          </Box>
-        </Paper>
 
         {/* Date Selection */}
         <Box
@@ -504,7 +313,7 @@ Your Firebase Storage rules are now working correctly!`;
               endDate={endDate?.format("YYYY-MM-DD") ?? ""}
               key={`${startDate?.format("YYYY-MM-DD")}-${endDate?.format(
                 "YYYY-MM-DD"
-              )}-${testUserId}`} // Force re-render on date/user change
+              )}-${userId}`} // Force re-render on date/user change
             />
           ) : (
             <Box
