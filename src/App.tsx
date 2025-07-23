@@ -32,8 +32,7 @@ function App() {
         <Route path="/report" element={<ReportOverview />} />
         <Route path="/goals" element={<Goals />} />{/* Add the route for Goals page */}
         <Route path="/goals/:id" element={<GoalDetailsPage />} />{/* Add the route for Goal Details page */}
-        <Route path="/transaction" element={<Transaction />} />
-        <Route path="/forgetpassword" element={<ForgetPassword />} />
+        <Route path="/transaction" element={<Transaction />} /><Route path="/forgetpassword" element={<ForgetPassword />} />
         <Route path="/resetpassword" element={<ResetPasswordPage />} />
         <Route path="/reportGenerate" element={<ReportGenerate />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
@@ -44,6 +43,7 @@ function App() {
         <Route path="/admin/forgetpassword" element={<AdminForgetPassword />} />
         <Route path="/admin/resetpassword" element={<AdminResetPassword />} />
         <Route path="/admin/verification" element={<AdminVerifyEmail />} />
+        
 
       </Routes>
     </Router>
