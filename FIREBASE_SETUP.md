@@ -29,12 +29,12 @@ Since you already have a Firebase project, follow these steps to connect it:
 
 ```javascript
 export const YOUR_FIREBASE_CONFIG = {
-  apiKey: "your-actual-api-key",           // From Firebase Console
-  authDomain: "your-project-id.firebaseapp.com",
-  projectId: "your-actual-project-id",    // Your Firebase project ID
-  storageBucket: "your-project-id.appspot.com",
-  messagingSenderId: "your-actual-sender-id",
-  appId: "your-actual-app-id"             // From Firebase Console
+  apiKey: "AIzaSyB-ItJ9PDLjY0T_2SgzOru56RZI6XzCOd4",           // From Firebase Console
+  authDomain: "spend-smart-89085.firebaseapp.com",
+  projectId: "spend-smart-89085",    // Your Firebase project ID
+  storageBucket: "spend-smart-89085.firebasestorage.app",
+  messagingSenderId: "561873582903",
+  appId: "1:561873582903:web:a9a5b19d455eb90f3738b2"             // From Firebase Console
 };
 ```
 
@@ -84,29 +84,29 @@ Your current Firebase Storage rules need to be updated to include reports access
 ```javascript
 rules_version = '2';
 service firebase.storage {
-  match /b/{bucket}/o {
-    // Allow read/write access to authenticated users (including anonymous)
-    match /profile_pictures/{allPaths=**} {
-      allow read, write: if request.auth != null;
-    }
+
     
     // Allow read access to all files for public access
     match /{allPaths=**} {
       allow read: if true;
     }
   }
-}
-```
+
 
 **Updated Rules (Add reports access):**
 ```javascript
 rules_version = '2';
+
+// Craft rules based on data in your Firestore database
+// allow write: if firestore.get(
+//    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
 service firebase.storage {
   match /b/{bucket}/o {
-    // Allow read/write access to authenticated users for profile pictures
-    match /profile_pictures/{allPaths=**} {
-      allow read, write: if request.auth != null;
+    match /{allPaths=**} {
+      allow read, write: if false;
     }
+  }
+}
     
     // Allow read/write access for reports (public for now, restrict later if needed)
     match /reports/{allPaths=**} {
@@ -118,9 +118,7 @@ service firebase.storage {
     match /{allPaths=**} {
       allow read: if true;
     }
-  }
-}
-```
+ `
 
 **To Apply These Rules:**
 1. Go to Firebase Console > Storage > Rules

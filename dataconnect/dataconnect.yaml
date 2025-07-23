@@ -1,0 +1,12 @@
+specVersion: "v1"
+serviceId: "spend-smart-frontend"
+location: "asia-east2"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "fdcdb"
+      cloudSql:
+        instanceId: "spend-smart-frontend-fdc"
+      # schemaValidation: "COMPATIBLE"
+connectorDirs: ["./connector"]

@@ -16,6 +16,7 @@ import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import Sidebar from "../../components/sidebar/sidebar";
 import axios from "axios";
+import { uploadPDFToFirebase } from "../../Services/firebaseService";
 
 // API Configuration
 const API_BASE_URL = "https://localhost:7211/api";
@@ -65,6 +66,68 @@ const ReportGenerate: React.FC = () => {
         success: false,
         message: errorMessage,
       };
+    }
+  };
+
+  // Firebase Storage Test Function
+  const testFirebaseUpload = async (): Promise<void> => {
+    setIsLoading(true);
+    try {
+      console.log("🧪 Testing Firebase Storage upload...");
+      console.log("🔥 Project: spend-smart-89085");
+      console.log("📁 Storage Bucket: spend-smart-89085.firebasestorage.app");
+
+      // Create a small test file
+      const testContent = `Firebase Storage Test
+Project: spend-smart-89085
+Timestamp: ${new Date().toISOString()}
+User: ${testUserId}
+Test Type: Storage Rules Verification`;
+
+      const testBlob = new Blob([testContent], { type: "text/plain" });
+
+      console.log(`📤 Uploading test file to reports/user_${testUserId}/`);
+
+      // Try to upload
+      const result = await uploadPDFToFirebase(
+        testBlob,
+        `storage-test-${Date.now()}.txt`,
+        testUserId
+      );
+
+      const message = `✅ Firebase Upload Test SUCCESSFUL!
+
+🔥 Project: spend-smart-89085
+📁 Upload Path: reports/user_${testUserId}/
+🌐 File URL: ${result}
+
+Your Firebase Storage rules are now working correctly!`;
+
+      alert(message);
+      console.log("✅ Firebase test upload successful:", result);
+    } catch (error: any) {
+      console.error("❌ Firebase test upload failed:", error);
+
+      const troubleshooting = `❌ Firebase Upload Test FAILED!
+
+🔥 Project: spend-smart-89085  
+📁 Trying to upload to: reports/user_${testUserId}/
+❌ Error: ${error.message}
+
+🔧 SOLUTION:
+1. Go to: https://console.firebase.google.com/
+2. Select project: spend-smart-89085
+3. Go to Storage > Rules
+4. Add this rule:
+   match /reports/{allPaths=**} { 
+     allow read, write: if true; 
+   }
+5. Click 'Publish'
+6. Wait 1-2 minutes, then test again`;
+
+      alert(troubleshooting);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -259,6 +322,15 @@ const ReportGenerate: React.FC = () => {
               sx={{ bgcolor: "primary.main", color: "white" }}
             >
               Test API Connection
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={testFirebaseUpload}
+              disabled={isLoading}
+              sx={{ bgcolor: "warning.main", color: "white" }}
+            >
+              Test Firebase Upload
             </Button>
             <Typography variant="body2" sx={{ ml: 1 }}>
               Backend: {API_BASE_URL}
@@ -458,8 +530,6 @@ const ReportGenerate: React.FC = () => {
                 Current selection: {startDate?.format("MMM DD, YYYY")} to{" "}
                 {endDate?.format("MMM DD, YYYY")}
               </Typography>
-
-              
             </Box>
           )}
         </Box>

@@ -79,9 +79,12 @@ export const uploadPDFToFirebase = async (
 
     // Real Firebase upload to your existing project
     console.log("🔄 Uploading PDF to your Firebase Storage...");
-    console.log(`📁 File: ${fileName}`);
+    console.log(`� Project: ${firebaseConfig.projectId}`);
+    console.log(`📦 Storage Bucket: ${firebaseConfig.storageBucket}`);
+    console.log(`�📁 File: ${fileName}`);
     console.log(`👤 User: ${userId}`);
     console.log(`📊 Size: ${(pdfBlob.size / 1024 / 1024).toFixed(2)} MB`);
+    console.log(`📂 Upload Path: reports/user_${userId}/${fileName}`);
     
     // Create a reference to the file location in your existing Firebase project
     // Using reports folder to organize report files
@@ -110,11 +113,23 @@ export const uploadPDFToFirebase = async (
     
     // Provide helpful error messages
     if (error.code === 'storage/unauthorized') {
-      throw new Error('Firebase Storage: Unauthorized access. Please check your storage rules.');
+      console.error("🔒 Firebase Storage Rules Issue:");
+      console.error(`🔥 Project: ${firebaseConfig.projectId}`);
+      console.error(`📦 Storage Bucket: ${firebaseConfig.storageBucket}`);
+      console.error(`📂 Blocked Path: reports/user_${userId}/${fileName}`);
+      console.error("📋 SOLUTION:");
+      console.error("1. Go to Firebase Console > Storage > Rules");
+      console.error("2. Add this rule for reports folder:");
+      console.error("   match /reports/{allPaths=**} { allow read, write: if true; }");
+      console.error("3. Click 'Publish' to save changes");
+      console.error("4. Wait 1-2 minutes for rules to propagate");
+      throw new Error(`Firebase Storage: Unauthorized access to reports folder in project ${firebaseConfig.projectId}. Please update your storage rules.`);
     } else if (error.code === 'storage/canceled') {
       throw new Error('Firebase Storage: Upload was canceled.');
     } else if (error.code === 'storage/unknown') {
       throw new Error('Firebase Storage: Unknown error occurred.');
+    } else if (error.code === 'storage/retry-limit-exceeded') {
+      throw new Error('Firebase Storage: Upload failed after multiple retries. Check your internet connection.');
     }
     
     throw new Error(`Firebase Storage Error: ${error.message || error}`);
