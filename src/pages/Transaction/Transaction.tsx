@@ -54,9 +54,7 @@ const Transaction: React.FC = () => {
                     onTransactionCreated={handleTransactionChange}
                 />
             </Box>
-            <Box>
-                <Footer />
-            </Box>
+            
         </Box>
         </Box>
         </ThemeProvider>
