@@ -1,3 +1,5 @@
+//budgetTypes.ts
+
 // Budget Types
 
 // Request DTOs
@@ -80,17 +82,32 @@ export interface PeriodDataDto {
 }
 
 export interface TransactionDto {
-  id: number;
+  transactionId: number;
+  transactionType: string;
   categoryId: number;
   categoryName: string;
-  categoryIcon: string;
-  date: string;
-  description?: string;
+  categoryIcon?: string;
+  categoryColor?: string;
   amount: number;
-  type: string;
+  transactionDate: string;
+  description?: string;
+  merchantName?: string;
+  location?: string;
+  tags?: string[];
+  receiptUrl?: string;
+  isRecurring: boolean;
+  recurringFrequency?: string;
+  recurringEndDate?: string;
+  budgetImpacts: BudgetImpactDto[];
+}
+
+export interface BudgetImpactDto {
   budgetId: number;
-  createdAt: string;
-  updatedAt: string;
+  budgetName: string;
+  categoryId: number;
+  categoryName: string;
+  impactAmount: number;
+  impactType: string;
 }
 
 // Transaction Impact DTO

@@ -31,7 +31,7 @@ export const budgetService = {
         spentAmount: apiResponse.totalSpentAmount,
         remainingAmount: apiResponse.remainingAmount,
         description: apiResponse.description,
-        progress: apiResponse.progressPercentage,
+        progress: Math.round(apiResponse.progressPercentage * 10) / 10, // Round to 1 decimal place
         remainingDays: apiResponse.daysRemaining,
         status: apiResponse.status.toLowerCase() as 'active' | 'completed' | 'exceeded',
         categories: apiResponse.categories.map(cat => ({
@@ -40,7 +40,7 @@ export const budgetService = {
           allocatedAmount: cat.allocatedAmount,
           spentAmount: cat.spentAmount,
           remainingAmount: cat.remainingAmount,
-          percentage: cat.progressPercentage
+          percentage: Math.round(cat.progressPercentage * 10) / 10
         }))
       };
 
@@ -55,20 +55,24 @@ export const budgetService = {
   getTransactionsByBudgetId: async (budgetId: number): Promise<Transaction[]> => {
     try {
       const apiTransactions = await budgetApi.getBudgetTransactions(budgetId);
+      console.log('Raw API transactions:', apiTransactions);
 
-      return apiTransactions.map(t => ({
-        id: t.id,
-        categoryId: t.categoryId,
-        categoryName: t.categoryName,
-        categoryIcon: t.categoryIcon,
-        date: t.date,
-        description: t.description || '',
-        amount: t.amount,
-        type: t.type.toLowerCase() as 'income' | 'expense',
-        budgetId: t.budgetId,
-        createdAt: t.createdAt,
-        updatedAt: t.updatedAt
-      }));
+      return apiTransactions.map(t => {
+        console.log('Mapping transaction:', t);
+        return {
+          id: t.transactionId,
+          categoryId: t.categoryId,
+          categoryName: t.categoryName,
+          categoryIcon: t.categoryIcon || '💰',
+          date: t.transactionDate,
+          description: t.description || '',
+          amount: t.amount,
+          type: (t.transactionType || 'expense').toLowerCase() as 'income' | 'expense',
+          budgetId: budgetId,
+          createdAt: t.transactionDate,
+          updatedAt: t.transactionDate
+        };
+      });
     } catch (error) {
       console.error('Error fetching transactions:', error);
       return [];
@@ -132,7 +136,7 @@ export const budgetService = {
         spentAmount: response.totalSpentAmount,
         remainingAmount: response.remainingAmount,
         description: response.description,
-        progress: response.progressPercentage,
+        progress: Math.round(response.progressPercentage * 10) / 10,
         remainingDays: response.daysRemaining,
         status: response.status.toLowerCase() as 'active' | 'completed' | 'exceeded',
         categories: response.categories.map(cat => ({
@@ -141,7 +145,7 @@ export const budgetService = {
           allocatedAmount: cat.allocatedAmount,
           spentAmount: cat.spentAmount,
           remainingAmount: cat.remainingAmount,
-          percentage: cat.progressPercentage
+          percentage: Math.round(cat.progressPercentage * 10) / 10
         }))
       };
     } catch (error) {
@@ -168,7 +172,7 @@ export const budgetService = {
         spentAmount: updatedBudget.totalSpentAmount,
         remainingAmount: updatedBudget.remainingAmount,
         description: updatedBudget.description,
-        progress: updatedBudget.progressPercentage,
+        progress: Math.round(updatedBudget.progressPercentage * 10) / 10,
         remainingDays: updatedBudget.daysRemaining,
         status: updatedBudget.status.toLowerCase() as 'active' | 'completed' | 'exceeded',
         categories: updatedBudget.categories.map(cat => ({
@@ -177,7 +181,7 @@ export const budgetService = {
           allocatedAmount: cat.allocatedAmount,
           spentAmount: cat.spentAmount,
           remainingAmount: cat.remainingAmount,
-          percentage: cat.progressPercentage
+          percentage: Math.round(cat.progressPercentage * 10) / 10
         }))
       };
     } catch (error) {

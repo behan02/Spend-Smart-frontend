@@ -16,21 +16,21 @@ const ExpenseBreakdownChart: React.FC<ExpenseBreakdownChartProps> = ({
   totalSpent,
   onRefresh 
 }) => {
-  // Default colors for categories
+  // Default colors for categories (fallback only)
   const defaultColors = [
     '#4CAF50', '#2196F3', '#FF9800', '#F44336', '#9C27B0', 
     '#607D8B', '#795548', '#009688', '#FFEB3B', '#E91E63'
   ];
 
-  // Prepare data for the pie chart with CategoryIcons
-  const chartData = data.map((item, index) => {
-    const { icon, color } = getCategoryIconAndColor(item.label);
-    return {
-      ...item,
-      icon: item.icon || icon,
-      color: item.color || color || defaultColors[index % defaultColors.length]
-    };
-  });
+  // Use the data directly from the backend, which should include proper icons and colors
+  const chartData = data.map((item, index) => ({
+    ...item,
+    // Use database values first, then fallback to defaults if needed
+    color: item.color || defaultColors[index % defaultColors.length],
+    icon: item.icon || '💰'
+  }));
+
+  console.log('Chart data with icons and colors:', chartData);
 
   const renderCustomizedLabel = () => {
     return (

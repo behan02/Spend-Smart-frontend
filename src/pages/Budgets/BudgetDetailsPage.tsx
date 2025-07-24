@@ -1,3 +1,5 @@
+//BudgetDetailsPage.tsx
+
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, CssBaseline } from '@mui/material';
 import { useParams } from 'react-router-dom';
@@ -170,12 +172,15 @@ const BudgetDetailsPage: React.FC<BudgetDetailsPageProps> = ({
         throw new Error('Invalid budget ID');
       }
       
+      // Fetch budget and expense breakdown first
       await Promise.all([
         fetchBudget(budgetIdNumber),
-        fetchTransactions(budgetIdNumber),
         fetchExpenseBreakdown(budgetIdNumber),
         fetchPeriodData(budgetIdNumber)
       ]);
+      
+      // Then fetch transactions (which can use expense breakdown data for icons)
+      await fetchTransactions(budgetIdNumber);
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch budget details');
@@ -201,7 +206,9 @@ const BudgetDetailsPage: React.FC<BudgetDetailsPageProps> = ({
 
   const fetchTransactions = async (budgetId: number) => {
     try {
+      console.log(`Fetching transactions for budget ID: ${budgetId}`);
       const transactions = await budgetService.getTransactionsByBudgetId(budgetId);
+      console.log(`Fetched ${transactions.length} transactions:`, transactions);
       setTransactions(transactions);
     } catch (error) {
       console.error('Error fetching transactions:', error);
@@ -214,18 +221,8 @@ const BudgetDetailsPage: React.FC<BudgetDetailsPageProps> = ({
       const breakdown = await budgetService.getExpenseBreakdown(budgetId);
       console.log("Fetched expense breakdown:", breakdown);
       
-      // Enhance breakdown data with CategoryIcons
-      const enhancedBreakdown = breakdown.map(item => {
-        const { icon, color } = getCategoryIconAndColor(item.label);
-        return {
-          ...item,
-          icon: item.icon || icon,
-          color: item.color || color
-        };
-      });
-      
-      console.log("Enhanced expense breakdown:", enhancedBreakdown);
-      setExpenseBreakdown(enhancedBreakdown);
+      // Use the breakdown data directly from the database (with icons and colors)
+      setExpenseBreakdown(breakdown);
     } catch (error) {
       console.error('Error fetching expense breakdown:', error);
       throw error;
