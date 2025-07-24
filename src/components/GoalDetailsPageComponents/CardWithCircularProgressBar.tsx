@@ -49,10 +49,13 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
   // Calculate remaining days
   const remainingDays = goal.remainingDays || 0;
 
-  // Circle properties
+  // Circle properties - reduced filled range for more attractive look
   const radius = 55;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (progressPercentage / 100) * circumference;
+  // Reduce the maximum fill to 75% of the circle for better aesthetics
+  const maxFillPercentage = 75;
+  const adjustedProgress = (progressPercentage / 100) * (maxFillPercentage / 100);
+  const strokeDashoffset = circumference - (adjustedProgress * circumference);
 
   return (
     <Card 
@@ -203,6 +206,8 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
                 stroke="rgba(0, 119, 182, 0.1)"
                 strokeWidth="10"
                 fill="transparent"
+                strokeDasharray={`${circumference * (maxFillPercentage / 100)} ${circumference}`}
+                transform="rotate(-135 65 65)"
               />
               {/* Progress circle */}
               <circle
@@ -213,10 +218,10 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
                   `url(#gradient-${goal.id})` : "rgba(0, 119, 182, 0.1)"}
                 strokeWidth="10"
                 fill="transparent"
-                strokeDasharray={circumference}
+                strokeDasharray={`${circumference * (maxFillPercentage / 100)} ${circumference}`}
                 strokeDashoffset={strokeDashoffset}
                 strokeLinecap="round"
-                transform="rotate(-90 65 65)"
+                transform="rotate(-135 65 65)"
                 style={{
                   transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
                   filter: 'drop-shadow(0 2px 8px rgba(0, 119, 182, 0.3))'
@@ -232,7 +237,7 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
               </defs>
             </svg>
             
-            {/* Percentage text in center */}
+            {/* Percentage text in center - Updated with Poppins font */}
             <Box sx={{ 
               position: 'absolute',
               display: 'flex',
@@ -246,14 +251,14 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
                 sx={{
                   fontFamily: 'Poppins, Arial, sans-serif',
                   color: '#22223b',
-                  fontSize: '2rem',
+                  fontSize: '1.4rem', // Reduced font size
                   textAlign: 'center',
-                  lineHeight: 1.1,
+                  lineHeight: 1.2,
                   letterSpacing: '-0.01em',
                   mb: '-2px',
                 }}
               >
-                {currentSavedAmount.toLocaleString()} LKR
+                {currentSavedAmount.toLocaleString()}
                 <Typography
                   component="span"
                   variant="subtitle2"
@@ -261,12 +266,12 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
                     display: 'block',
                     fontFamily: 'Poppins, Arial, sans-serif',
                     fontWeight: 400,
-                    fontSize: '1rem',
+                    fontSize: '0.75rem', // Reduced font size
                     color: '#4a4e69',
-                    mt: 0.5,
+                    mt: 0.3,
                   }}
                 >
-                  Total
+                  LKR Saved
                 </Typography>
               </Typography>
             </Box>

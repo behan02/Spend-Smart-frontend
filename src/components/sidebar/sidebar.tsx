@@ -92,7 +92,22 @@ const Sidebar: React.FC = () => {
 
   // Update active item based on current route
   React.useEffect(() => {
-    const currentItem = menuItems.find(item => item.path === location.pathname);
+    // Special case: Budget details page (/budgets/:id) should keep "Budget" active
+    if (
+      location.pathname.startsWith("/budget") ||
+      location.pathname.startsWith("/budgets")
+    ) {
+      setActiveItem("Budget");
+      return;
+    }
+    // Support subroutes for other menu items (e.g., /goals/123)
+    const currentItem =
+      menuItems.find(item => item.path === location.pathname) ||
+      menuItems.find(
+        item =>
+          item.path !== "/" &&
+          location.pathname.startsWith(item.path)
+      );
     if (currentItem) {
       setActiveItem(currentItem.text);
     }
@@ -133,6 +148,7 @@ const Sidebar: React.FC = () => {
             width: 120,
             height: 150,
             mb: 1,
+            // Removed the blinking/animation effect
             transition: "transform 0.3s ease",
             "&:hover": {
               transform: "scale(1.05)",
