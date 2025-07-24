@@ -3,7 +3,7 @@ import {
   Container, 
   Typography
 } from '@mui/material';
-import Sidebar from '../components/Sidebar/sidebar';
+import Sidebar from '../components/Sidebar/Sidebar';
 import Topbar from '../components/Topbar/Topbar';
 import OverviewCards from '../components/OverviewCards/OverviewCards';
 import LoginFrequencyChart from '../components/LoginFrequencyChart/LoginFrequencyChart';
