@@ -219,7 +219,7 @@ const UserSettings: React.FC = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box display="flex" sx={{ margin: 0, padding: 0 }}>
+      <Box display="flex" sx={{ ml: -35, mr: 0 }}>
         {!isSmallScreen && <Sidebar />}
 
         <Box
@@ -289,20 +289,21 @@ const UserSettings: React.FC = () => {
             </Typography>
 
             <Divider sx={{ my: 2 }} />
-
-            <Typography
-              variant="h6"
-              mb={2}
-              sx={{
-                fontWeight: "bold",
-                fontSize: "1.5rem",
+            <Box sx={{ borderRadius: 2, backgroundColor: "#023e8a", mb: 3, mr: 4, p: 2 }}>
+              <Typography
+                variant="h6"
+                mb={2}
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "1.5rem",
               }}
             >
               Profile Settings
-            </Typography>
+            </Typography></Box>
+            
 
             <Box
-              sx={{ borderRadius: 2, backgroundColor: "#FFFFFF", mb: 3, p: 2 }}
+              sx={{ borderRadius: 2, backgroundColor: "#FFFFFF", mb: 3, mr: 4, p: 2 }}
             >
               <Typography variant="subtitle1" mb={2}>
                 Account
@@ -320,7 +321,7 @@ const UserSettings: React.FC = () => {
             </Box>
 
             <Box
-              sx={{ borderRadius: 2, backgroundColor: "#FFFFFF", mb: 3, p: 2 }}
+              sx={{ borderRadius: 2, backgroundColor: "#FFFFFF", mb: 3, mr: 4, p: 2 }}
             >
               <Typography variant="subtitle1" mb={2}>
                 Password
