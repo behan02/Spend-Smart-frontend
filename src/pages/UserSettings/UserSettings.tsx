@@ -29,6 +29,7 @@ import {
   ChangePasswordRequest,
 } from "../../Services/passwordService";
 import { userService } from "../../Services/userService";
+import FeedbackForm from "../../components/Feedbackform/FeedbackForm";
 
 interface UserData {
   userId: number;
@@ -391,11 +392,14 @@ const UserSettings: React.FC = () => {
                 }
               />
             </Box>
+            {/* Feedback Form */}
+            
+            <FeedbackForm userId={userData.userId} />
           </Box>
           {/* End of Main Content */}
 
           {/* Footer - Extended closer to sidebar */}
-          <Box sx={{ marginLeft: !isSmallScreen ? "280px" : "0px" }}>
+          <Box sx={{mt:10 ,marginLeft: !isSmallScreen ? "280px" : "0px" }}>
             <Footer />
           </Box>
         </Box>
