@@ -38,10 +38,19 @@ function App() {
         <Route path="/admin/forgetpassword" element={<AdminForgetPassword />} />
         <Route path="/admin/resetpassword" element={<AdminResetPassword />} />
         <Route path="/admin/verification" element={<AdminVerifyEmail />} />
+        <Route path="/" element={<Dashboard />} />
+
+              {/* /user path for Manage Users */}
+              <Route path="/user" element={<ManageUsersPage />} />
+              <Route path="/settings" element={<SystemSettingsPage />} />
+              
+              {/* Email verification route */}
+              <Route path="/verify-email/:token" element={<EmailVerification />} />
 
       </Routes>
     </Router>
   );
 }
 
+export default App;
 export default App;
