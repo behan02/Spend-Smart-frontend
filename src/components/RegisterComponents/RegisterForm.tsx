@@ -449,24 +449,7 @@ const RegisterForm: React.FC = () => {
               )}
             />
 
-            <Controller
-              name="currency"
-              control={control}
-              defaultValue=""
-              render={({ field, fieldState }) => (
-                <Grow in timeout={1300}>
-                  <Box sx={{ maxWidth: { xs: "100%", sm: "280px", md: "300px" }, width: "100%" }}>
-                    <Currency
-                      value={field.value}
-                      onChange={field.onChange}
-                      label="Preferred Currency"
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                    />
-                  </Box>
-                </Grow>
-              )}
-            />
+            
 
             <Grow in timeout={1400}>
               <Button

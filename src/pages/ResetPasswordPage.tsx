@@ -133,7 +133,7 @@ function ResetPassword() {
         xs={0}
         md={6}
         sx={{
-          display: { xs: "none", md: "block" }, // Hide on xs, show on md and up
+          display: { xs: "none", md: "block", flexGrow: 1 }, // Hide on xs, show on md and up
         }}
       >
         <UserLeftImage
