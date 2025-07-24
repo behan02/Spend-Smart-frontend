@@ -95,8 +95,9 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ onTransactionDelete
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+      currency: 'LKR',
+      currencyDisplay: 'code'
+    }).format(amount).replace('LKR', 'LKR');
   };
 
   if (loading) {

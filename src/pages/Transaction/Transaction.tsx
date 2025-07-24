@@ -8,6 +8,7 @@ import RecurringTransactionForm from "../../components/TransactionComponents/tra
 import AddTransactionForm from "../../components/TransactionComponents/transactionForm/AddTransactionForm";
 import Header from "../../components/header/header";
 import theme from "../../assets/styles/theme";
+import Sidebar from "../../components/sidebar/sidebar"; 
 
 const Transaction: React.FC = () => {
     const [addTransaction, setAddTransaction] = useState<boolean>(false);
@@ -22,7 +23,9 @@ const Transaction: React.FC = () => {
 
     return (
         <ThemeProvider theme={theme}>
-        <Box>
+            <Box display="flex">
+                <Sidebar />
+        <Box sx={{flexGrow: 1}}>
             <Box sx={{
                 margin: "30px auto",
                 width: "85%",
@@ -54,6 +57,7 @@ const Transaction: React.FC = () => {
             <Box>
                 <Footer />
             </Box>
+        </Box>
         </Box>
         </ThemeProvider>
     );
