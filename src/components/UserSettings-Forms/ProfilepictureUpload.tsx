@@ -37,7 +37,7 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
     } catch (error) {
       console.warn("Could not load profile picture, using default:", error);
       // Gracefully handle the error - don't break the UI
-      setProfileImage(null);
+      setProfileImage(undefined);
     }
   };
 

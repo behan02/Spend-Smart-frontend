@@ -50,7 +50,7 @@ const UserSettings: React.FC = () => {
   );
 
   const API_BASE_URL = getApiBaseUrl();
-  const currentUserId = 2;
+  const currentUserId = 10;
 
   const [userData, setUserData] = useState<UserData>({
     userId: 2,
@@ -290,13 +290,14 @@ const UserSettings: React.FC = () => {
             </Typography>
 
             <Divider sx={{ my: 2 }} />
-            <Box sx={{ borderRadius: 2, backgroundColor: "#023e8a", mb: 3, mr: 4, p: 2 }}>
+            <Box sx={{ borderRadius: 2, background: "linear-gradient(135deg, #023E8A 0%, #667eea 100%)", mb: 3, mr: 4, p: 2 }}>
               <Typography
                 variant="h6"
                 mb={2}
                 sx={{
                   fontWeight: "bold",
                   fontSize: "1.5rem",
+                  color: "#FFFFFF",
               }}
             >
               Profile Settings
@@ -392,15 +393,14 @@ const UserSettings: React.FC = () => {
                 }
               />
             </Box>
-            {/* Feedback Form */}
+
             
-            <FeedbackForm userId={userData.userId} />
           </Box>
           {/* End of Main Content */}
 
           {/* Footer - Extended closer to sidebar */}
           <Box sx={{mt:10 ,marginLeft: !isSmallScreen ? "280px" : "0px" }}>
-            <Footer />
+          
           </Box>
         </Box>
       </Box>
