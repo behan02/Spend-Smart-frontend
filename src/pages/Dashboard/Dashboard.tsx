@@ -16,7 +16,7 @@ const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState<any>();
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0); // Add refresh trigger
-  let userId: Number = 1;
+  let userId: number = 2;
 
   // Function to fetch dashboard data
   const fetchDashboardData = async () => {
@@ -84,33 +84,34 @@ const Dashboard = () => {
               {dashboardData && (
                 <>
                   <Grid size={{ mobile: 12, laptop: 12, desktop: 12 }}>
-                    <DashboardOverview data={dashboardData} />
+                    <DashboardOverview data={dashboardData} userId={userId} />
                   </Grid>
                   <Grid size={{ mobile: 12, desktop: 8, laptop: 7 }}>
-                    <DashboardBargraph dashboardData={dashboardData} />
+                    <DashboardBargraph dashboardData={dashboardData} userId={userId} />
                   </Grid>
                   <Grid size={{ mobile: 12, desktop: 4, laptop: 5 }}>
-                    <DashboardPiechart dashboardData={dashboardData} />
+                    <DashboardPiechart dashboardData={dashboardData} userId={userId} />
                   </Grid>
                   <Grid size={{ mobile: 12, desktop: 6, laptop: 6 }}>
-                    <DashboardBudget />
+                    <DashboardBudget userId={userId} />
                   </Grid>
                   <Grid size={{ mobile: 12, desktop: 6, laptop: 6 }}>
-                    <DashboardGoal />
+                    <DashboardGoal userId={userId} />
                   </Grid>
                   <Grid size={{ mobile: 12, desktop: 12 }}>
                     <DashboardTransaction 
                       data={dashboardData.recentTransactions}
-                      onDelete={handleDeleteTransaction} // Pass delete handler
+                      onDelete={handleDeleteTransaction}
+                      userId={userId}
                     />
                   </Grid>
                 </>
               )}
             </Grid>
           </Box>
-          <Box>
+          {/* <Box>
             <Footer />
-          </Box>
+          </Box> */}
         </Box>
       </Stack>
     </ThemeProvider>

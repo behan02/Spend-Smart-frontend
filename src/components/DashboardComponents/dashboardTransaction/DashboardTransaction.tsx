@@ -16,9 +16,10 @@ interface Transaction {
 interface DashboardTransactionProps {
   data: Transaction[];
   onDelete?: (id: number) => Promise<void>; // Add onDelete prop
+    userId: number; // Add userId prop
 }
 
-const DashboardTransaction: React.FC<DashboardTransactionProps> = ({ data, onDelete }) => {
+const DashboardTransaction: React.FC<DashboardTransactionProps> = ({ data, onDelete, userId }) => {
     const isTabletOrDesktop: boolean = useMediaQuery(theme.breakpoints.down("laptop"));
 
     const handleDelete = async (id: number) => {

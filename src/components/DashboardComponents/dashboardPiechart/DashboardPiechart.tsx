@@ -9,13 +9,12 @@ interface DashboardPiechartProps {
     balance: number;
     recentTransactions: any[];
   },
+    userId: number;
 }
 
-const DashboardPiechart: React.FC<DashboardPiechartProps> = ({dashboardData}) => {
+const DashboardPiechart: React.FC<DashboardPiechartProps> = ({ dashboardData, userId }) => {
 
     const [data, setData] = useState<any[]>([]);
-
-    let userId: Number = 1;
 
     useEffect(() => {
         async function fetchPieChartData() {

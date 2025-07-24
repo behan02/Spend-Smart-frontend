@@ -9,9 +9,10 @@ interface DashboardBargraphProps {
     balance: number;
     recentTransactions: any[];
   },
+  userId: number;
 }
 
-const DashboardBargraph: React.FC<DashboardBargraphProps> = ({dashboardData}) => {
+const DashboardBargraph: React.FC<DashboardBargraphProps> = ({dashboardData, userId}) => {
 
   //State to manage the selected time period for the bar graph
   const [timeperiod, setTimeperiod] = useState<string>("Monthly");
@@ -20,8 +21,6 @@ const DashboardBargraph: React.FC<DashboardBargraphProps> = ({dashboardData}) =>
   const handleChange = (e: SelectChangeEvent) => {
     setTimeperiod(e.target.value);
   }
-
-  let userId: Number = 1;
 
   useEffect(() => {
     async function fetchBarGraphData(){

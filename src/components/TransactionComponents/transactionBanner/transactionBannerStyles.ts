@@ -7,7 +7,7 @@ const bannerContainerStyle: SxProps = {
     justifyContent: "space-between",
     alignItems: "center",
     bgcolor: "#7C9AC1",
-    width: "80%",
+    width: "100%",
     borderRadius: "15px",
     padding: "1px",
     [theme.breakpoints.between("mobile", "laptop")]: {
