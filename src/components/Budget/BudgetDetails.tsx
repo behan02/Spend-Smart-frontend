@@ -140,7 +140,7 @@ const BudgetDetails: React.FC<BudgetDetailsProps> = ({ budget, onEdit, onDelete,
               color: getProgressColor(budget.progress),
               fontSize: '32px'
             }}>
-              ${budget.spentAmount.toFixed(2)}
+              LKR {budget.spentAmount.toFixed(2)}
             </Typography>
           </Box>
 
@@ -153,7 +153,7 @@ const BudgetDetails: React.FC<BudgetDetailsProps> = ({ budget, onEdit, onDelete,
               color: '#1F2937',
               fontSize: '32px'
             }}>
-              ${budget.totalAmount.toFixed(2)}
+              LKR {budget.totalAmount.toFixed(2)}
             </Typography>
           </Box>
         </Box>
@@ -181,7 +181,7 @@ const BudgetDetails: React.FC<BudgetDetailsProps> = ({ budget, onEdit, onDelete,
               {budget.progress}%
             </Typography>
             <Typography variant="body2" color="textSecondary" sx={{ fontSize: '14px' }}>
-              ${budget.remainingAmount.toFixed(2)} remaining
+              LKR {budget.remainingAmount.toFixed(2)} remaining
             </Typography>
           </Box>
         </Box>
@@ -227,7 +227,7 @@ const BudgetDetails: React.FC<BudgetDetailsProps> = ({ budget, onEdit, onDelete,
                       {category.name}
                     </Typography>
                     <Typography variant="body2" sx={{ fontSize: '14px', color: '#6B7280' }}>
-                      ${category.spentAmount.toFixed(2)} / ${category.allocatedAmount.toFixed(2)}
+                      LKR {category.spentAmount.toFixed(2)} / LKR {category.allocatedAmount.toFixed(2)}
                     </Typography>
                   </Box>
                 );

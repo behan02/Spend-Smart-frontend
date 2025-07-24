@@ -78,7 +78,7 @@ export const CategoryChip: React.FC<CategoryChipProps> = ({
               {categoryName}
             </Typography>
             <Typography variant="caption">
-              Spent: ${spentAmount.toFixed(2)} / ${budgetAmount.toFixed(2)}
+              Spent: LKR {spentAmount.toFixed(2)} / LKR {budgetAmount.toFixed(2)}
             </Typography>
             <Typography variant="caption" sx={{ display: 'block' }}>
               Progress: {progress.toFixed(1)}%
