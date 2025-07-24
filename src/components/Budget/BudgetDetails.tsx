@@ -8,7 +8,9 @@ import {
   DialogContent, 
   DialogContentText, 
   DialogActions, 
-  Button
+  Button,
+  LinearProgress,
+  Chip
 } from '@mui/material';
 import { getCategoryIconAndColor } from '../../utils/categoryUtils';
 
@@ -29,6 +31,8 @@ interface Budget {
   }>;
   description?: string;
   remainingDays?: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 interface BudgetDetailsProps {
@@ -40,6 +44,37 @@ interface BudgetDetailsProps {
 
 const BudgetDetails: React.FC<BudgetDetailsProps> = ({ budget, onEdit, onDelete, onViewDetails }) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  // Calculate days remaining based on budget type and dates
+  const calculateDaysRemaining = (budget: Budget): number => {
+    if (budget.remainingDays !== undefined) {
+      return budget.remainingDays;
+    }
+
+    if (budget.endDate) {
+      const today = new Date();
+      const endDate = new Date(budget.endDate);
+      const diffTime = endDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return Math.max(0, diffDays);
+    }
+
+    // Fallback calculation based on budget type
+    const today = new Date();
+    let endDate: Date;
+
+    if (budget.type === 'monthly') {
+      const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      endDate = nextMonth;
+    } else {
+      const endOfYear = new Date(today.getFullYear(), 11, 31);
+      endDate = endOfYear;
+    }
+
+    const diffTime = endDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
+  };
 
   if (!budget) {
     return (
@@ -160,28 +195,51 @@ const BudgetDetails: React.FC<BudgetDetailsProps> = ({ budget, onEdit, onDelete,
 
         {/* Progress Bar */}
         <Box sx={{ mb: 4 }}>
-          <Box sx={{ 
-            width: '100%', 
-            height: 8, 
-            backgroundColor: '#E5E7EB',
-            borderRadius: 4,
-            overflow: 'hidden',
-            mb: 2
-          }}>
-            <Box sx={{ 
-              width: `${Math.min(budget.progress, 100)}%`, 
-              height: '100%',
-              backgroundColor: getProgressColor(budget.progress),
-              transition: 'width 0.3s ease'
-            }} />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="body2" sx={{ fontSize: '14px', fontWeight: 600 }}>
+              Progress: {budget.progress.toFixed(1)}%
+            </Typography>
+            <Chip 
+              label={(() => {
+                if (budget.progress >= 100) return "Over Budget";
+                if (budget.progress >= 90) return "Warning"; 
+                if (budget.progress >= 70) return "Caution";
+                return "On Track";
+              })()}
+              size="small"
+              color={(() => {
+                if (budget.progress >= 100) return "error";
+                if (budget.progress >= 90) return "warning";
+                if (budget.progress >= 70) return "warning";
+                return "success";
+              })()}
+              sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}
+            />
           </Box>
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="body2" color="textSecondary" sx={{ fontSize: '14px' }}>
-              {budget.progress}%
+          <LinearProgress 
+            variant="determinate" 
+            value={Math.min(budget.progress, 100)} 
+            sx={{ 
+              height: 12, 
+              borderRadius: 6,
+              backgroundColor: '#E5E7EB',
+              '& .MuiLinearProgress-bar': {
+                backgroundColor: getProgressColor(budget.progress),
+                borderRadius: 6,
+              }
+            }}
+          />
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+            <Typography variant="body2" color="textSecondary" sx={{ fontSize: '13px' }}>
+              LKR {budget.spentAmount.toFixed(2)} spent
             </Typography>
-            <Typography variant="body2" color="textSecondary" sx={{ fontSize: '14px' }}>
-              LKR {budget.remainingAmount.toFixed(2)} remaining
+            <Typography variant="body2" color="textSecondary" sx={{ fontSize: '13px' }}>
+              {budget.remainingAmount >= 0 
+                ? `LKR ${budget.remainingAmount.toFixed(2)} remaining`
+                : `LKR ${Math.abs(budget.remainingAmount).toFixed(2)} over budget`
+              }
             </Typography>
           </Box>
         </Box>
@@ -236,107 +294,116 @@ const BudgetDetails: React.FC<BudgetDetailsProps> = ({ budget, onEdit, onDelete,
           </Box>
         )}
 
-        {/* Remaining Days */}
-        {budget.remainingDays && (
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Typography variant="body2" sx={{ 
-              color: '#1976D2',
-              fontWeight: 'bold',
-              fontSize: '16px'
-            }}>
-              {budget.remainingDays} days left
-            </Typography>
-          </Box>
-        )}
-
         {/* Action Buttons */}
         <Box sx={{ 
           display: 'flex', 
-          justifyContent: 'space-between',
+          flexDirection: 'column',
           alignItems: 'center',
+          gap: 3,
           mt: 'auto'
         }}>
-          <Box /> {/* Spacer */}
-
-          {/* View Details Button */}
-          <Box
-            onClick={handleViewDetails}
-            sx={{
-              px: 8,
-              py: 1.5,
-              backgroundColor: 'rgb(11, 0, 221)',
-              color: '#fff',
-              borderRadius: '25px',
-              cursor: 'pointer',
-              fontWeight: 700,
-              fontSize: '16px',
-              fontFamily: '"Inter", "Roboto", "Arial", sans-serif',
-              letterSpacing: '0.5px',
-              transition: 'all 0.2s ease',
-              '&:hover': {
-                backgroundColor: '#1E40AF',
-                transform: 'translateY(-1px)',
-                boxShadow: '0 4px 12px rgba(29, 78, 216, 0.3)'
-              }
+          {/* Days Left */}
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              color: '#1976D2',
+              fontWeight: 'bold',
+              fontSize: '18px',
+              textAlign: 'center'
             }}
           >
-            View Details
-          </Box>
+            {calculateDaysRemaining(budget)} days left
+          </Typography>
 
-          {/* Action Icons */}
+          {/* Button and Actions Row */}
           <Box sx={{ 
-            display: 'flex',
-            gap: 1,
-            alignItems: 'center'
+            display: 'flex', 
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%'
           }}>
-            {/* Edit Icon */}
+            <Box /> {/* Spacer */}
+
+            {/* View Details Button */}
             <Box
-              onClick={handleEdit}
+              onClick={handleViewDetails}
               sx={{
-                width: 40,
-                height: 40,
-                borderRadius: '8px',
-                backgroundColor: '#F3F4F6',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                px: 8,
+                py: 1.5,
+                backgroundColor: 'rgb(11, 0, 221)',
+                color: '#fff',
+                borderRadius: '25px',
                 cursor: 'pointer',
+                fontWeight: 700,
+                fontSize: '16px',
+                fontFamily: '"Inter", "Roboto", "Arial", sans-serif',
+                letterSpacing: '0.5px',
                 transition: 'all 0.2s ease',
                 '&:hover': {
-                  backgroundColor: '#E5E7EB',
-                  transform: 'translateY(-1px)'
+                  backgroundColor: '#1E40AF',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(29, 78, 216, 0.3)'
                 }
               }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              View Details
             </Box>
 
-            {/* Delete Icon */}
-            <Box
-              onClick={handleOpenDeleteDialog}
-              sx={{
-                width: 40,
-                height: 40,
-                borderRadius: '8px',
-                backgroundColor: '#F3F4F6',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  backgroundColor: '#FEE2E2',
-                  transform: 'translateY(-1px)'
-                }
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 6h18" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+            {/* Action Icons */}
+            <Box sx={{ 
+              display: 'flex',
+              gap: 1,
+              alignItems: 'center'
+            }}>
+              {/* Edit Icon */}
+              <Box
+                onClick={handleEdit}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '8px',
+                  backgroundColor: '#F3F4F6',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    backgroundColor: '#E5E7EB',
+                    transform: 'translateY(-1px)'
+                  }
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Box>
+
+              {/* Delete Icon */}
+              <Box
+                onClick={handleOpenDeleteDialog}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '8px',
+                  backgroundColor: '#F3F4F6',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    backgroundColor: '#FEE2E2',
+                    transform: 'translateY(-1px)'
+                  }
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 6h18" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Box>
             </Box>
           </Box>
         </Box>

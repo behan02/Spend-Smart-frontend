@@ -36,7 +36,7 @@ const ExpenseBreakdownChart: React.FC<ExpenseBreakdownChartProps> = ({
     return (
       <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="recharts-text">
         <tspan x="50%" dy="-0.5em" fontSize="24" fontWeight="bold">
-          ${totalSpent.toFixed(2)}
+          LKR {totalSpent.toFixed(2)}
         </tspan>
         <tspan x="50%" dy="1.2em" fontSize="14" fill="#666">
           Total
@@ -138,7 +138,7 @@ const ExpenseBreakdownChart: React.FC<ExpenseBreakdownChartProps> = ({
                           </Typography>
                           <Box sx={{ textAlign: 'right' }}>
                             <Typography variant="body2" fontWeight="bold">
-                              ${item.value.toFixed(2)}
+                              LKR {item.value.toFixed(2)}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
                               {item.percentage.toFixed(1)}%

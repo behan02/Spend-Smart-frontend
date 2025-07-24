@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Paper, CircularProgress, Alert, Typography } from '@mui/material';
+import { Box, Paper, CircularProgress, Alert, Typography, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import BudgetItem from '../../components/Budget/BudgetItem';
 import BudgetDetails from '../../components/Budget/BudgetDetails';
@@ -28,11 +28,24 @@ const BudgetPage: React.FC = () => {
     }
   }, [user]);
 
-  const loadBudgets = async () => {
+  // Add auto-refresh for real-time budget progress updates
+  useEffect(() => {
+    if (user) {
+      const interval = setInterval(() => {
+        loadBudgets(false); // Silent refresh without loading state
+      }, 30000); // Refresh every 30 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const loadBudgets = async (showLoadingState = true) => {
     if (!user) return;
 
     try {
-      setLoading(true);
+      if (showLoadingState) {
+        setLoading(true);
+      }
       setError(null);
       console.log('Loading budgets for user:', user.id);
 
@@ -125,6 +138,20 @@ const BudgetPage: React.FC = () => {
             <Box sx={{ display: 'flex', gap: 3, mt: 4 }}>
               {/* Budget List */}
               <Box sx={{ flex: '1 1 400px', maxWidth: '400px' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="h6" fontWeight="bold">
+                    Your Budgets
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={loadBudgets}
+                    disabled={loading}
+                    sx={{ minWidth: 'auto', px: 2 }}
+                  >
+                    Refresh
+                  </Button>
+                </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {budgets.map(budget => (
                     <BudgetItem
@@ -171,6 +198,8 @@ const BudgetPage: React.FC = () => {
                       spentAmount: selectedBudget.totalSpentAmount || 0,
                       remainingAmount: (selectedBudget.totalBudgetAmount || 0) - (selectedBudget.totalSpentAmount || 0),
                       progress: selectedBudget.progressPercentage || 0,
+                      startDate: selectedBudget.startDate,
+                      endDate: selectedBudget.endDate,
                       categories: [] // We'll need to load this separately or modify the API
                     } : null}
                     onEdit={handleEditBudget}
