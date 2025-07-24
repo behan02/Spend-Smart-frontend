@@ -15,7 +15,7 @@ import VerifyEmail  from "./pages/VerifyEmail";
 import AdminForgetPassword from "./pages/AdminRegister/AdminForgetPassword"; 
 import AdminResetPassword from "./pages/AdminRegister/AdminResetPassword";
 import AdminVerifyEmail from "./pages/AdminRegister/AdminVerification"; // Ensure this import matches the file structure
-import AdminDashboard from "./pages/Dashboard/Dashboard"
+import AdminDashboard from "./pages/Dashboard"
 import ManageUsersPage from "./pages/ManageUsersPage";  
 import SystemSettingsPage from "./pages/SystemSettingsPage";
 import EmailVerification from "./pages/VerifyEmail"; // Ensure this import matches the file structure
