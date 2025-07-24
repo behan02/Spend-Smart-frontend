@@ -240,36 +240,34 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <Typography 
-                variant="h3" 
-                fontWeight="800" 
-                sx={{ 
-                  background: progressPercentage >= 100 
-                    ? "linear-gradient(135deg, #059669 0%, #047857 100%)"
-                    : "linear-gradient(135deg, #0077B6 0%, #023E8A 100%)",
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  color: "transparent",
-                  lineHeight: 1,
+              <Typography
+                variant="h4"
+                fontWeight="700"
+                sx={{
+                  fontFamily: 'Poppins, Arial, sans-serif',
+                  color: '#22223b',
                   fontSize: '2rem',
-                  textShadow: '0 2px 8px rgba(0, 119, 182, 0.2)',
-                  animation: progressPercentage >= 100 ? 'celebrate 1s ease-in-out infinite' : 'none'
+                  textAlign: 'center',
+                  lineHeight: 1.1,
+                  letterSpacing: '-0.01em',
+                  mb: '-2px',
                 }}
               >
-                {progressPercentage}%
-              </Typography>
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: '#0077B6',
-                  fontSize: '0.75rem',
-                  fontWeight: '600',
-                  mt: 0.5,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}
-              >
-                Complete
+                {currentSavedAmount.toLocaleString()} LKR
+                <Typography
+                  component="span"
+                  variant="subtitle2"
+                  sx={{
+                    display: 'block',
+                    fontFamily: 'Poppins, Arial, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '1rem',
+                    color: '#4a4e69',
+                    mt: 0.5,
+                  }}
+                >
+                  Total
+                </Typography>
               </Typography>
             </Box>
           </Box>
