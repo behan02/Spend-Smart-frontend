@@ -15,6 +15,10 @@ import VerifyEmail  from "./pages/VerifyEmail";
 import AdminForgetPassword from "./pages/AdminRegister/AdminForgetPassword"; 
 import AdminResetPassword from "./pages/AdminRegister/AdminResetPassword";
 import AdminVerifyEmail from "./pages/AdminRegister/AdminVerification"; // Ensure this import matches the file structure
+import AdminDashboard from "./pages/Dashboard/Dashboard"
+import ManageUsersPage from "./pages/ManageUsersPage";  
+import SystemSettingsPage from "./pages/SystemSettingsPage";
+import EmailVerification from "./pages/VerifyEmail"; // Ensure this import matches the file structure
 
 function App() {
   return (
@@ -38,19 +42,18 @@ function App() {
         <Route path="/admin/forgetpassword" element={<AdminForgetPassword />} />
         <Route path="/admin/resetpassword" element={<AdminResetPassword />} />
         <Route path="/admin/verification" element={<AdminVerifyEmail />} />
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
               {/* /user path for Manage Users */}
               <Route path="/user" element={<ManageUsersPage />} />
-              <Route path="/settings" element={<SystemSettingsPage />} />
+              <Route path="/admin/settings" element={<SystemSettingsPage />} />
               
               {/* Email verification route */}
-              <Route path="/verify-email/:token" element={<EmailVerification />} />
+              <Route path="/admin/verify-email/:token" element={<EmailVerification />} />
 
       </Routes>
     </Router>
   );
 }
 
-export default App;
 export default App;
