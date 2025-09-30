@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 
-interface HeaderProps {
+interface BudgetHeaderCardProps {
   title: string;
   description: string;
   buttonText: string;
@@ -10,7 +10,7 @@ interface HeaderProps {
   imagePath: string;
 }
 
-const HeaderCard: React.FC<HeaderProps> = ({ 
+const BudgetHeaderCard: React.FC<BudgetHeaderCardProps> = ({ 
   title, 
   description, 
   buttonText, 
@@ -27,7 +27,7 @@ const HeaderCard: React.FC<HeaderProps> = ({
       alignItems: 'center',
       marginBottom: '20px',
       position: 'relative',
-      overflow: 'visible', // Changed from 'hidden' to allow overflow
+      overflow: 'visible',
       minHeight: '240px',
       width: '100%'
     }}>
@@ -67,12 +67,12 @@ const HeaderCard: React.FC<HeaderProps> = ({
       <Box 
         component="img" 
         src={imagePath} 
-        alt="Banner illustration"
+        alt="Budget illustration"
         sx={{
           position: 'absolute',
-          right: '-200px', // Move the image to the right to create overflow
-          top: '-85px', // Move the image up slightly to create overflow
-          width: '70%', // Increase width to make it larger
+          right: '-200px',
+          top: '-85px',
+          width: '70%',
           height: '170%', 
           zIndex: 1,
           objectFit: 'contain'
@@ -82,4 +82,4 @@ const HeaderCard: React.FC<HeaderProps> = ({
   );
 };
 
-export default HeaderCard;
+export default BudgetHeaderCard;

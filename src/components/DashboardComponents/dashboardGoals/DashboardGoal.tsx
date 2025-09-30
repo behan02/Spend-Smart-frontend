@@ -37,7 +37,7 @@ const DashboardGoal = () => {
                     mt: "5px"
                 }}>
                     <Typography variant="h6" component="p" fontSize="14px">Saved: LKR {item.saved}</Typography>
-                    <Typography variant="h6" component="p" fontSize="12px">{item.progress}%</Typography>
+                    <Typography variant="h6" component="p" fontSize="12px">{item.progress.toFixed(1)}%</Typography>
                 </Box>
                 <Divider sx={{m: "18px 0px"}}/>
             </Box>

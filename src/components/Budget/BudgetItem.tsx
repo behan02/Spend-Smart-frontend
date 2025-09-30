@@ -1,24 +1,37 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 
-interface GoalItemProps {
-  goal: {
+interface BudgetItemProps {
+  budget: {
     id: number;
     name: string;
-    savedAmount: number;
-    targetAmount: number;
+    type: 'monthly' | 'annually';
+    totalAmount: number;
+    spentAmount: number;
     progress: number;
+    remainingDays?: number;
   };
   isSelected: boolean;
   onClick: () => void;
 }
 
-const GoalItem: React.FC<GoalItemProps> = ({ goal, isSelected, onClick }) => {
+const BudgetItem: React.FC<BudgetItemProps> = ({ budget, isSelected, onClick }) => {
   // Custom circular progress component
-  const CircularProgress = ({ percentage, size = 50, strokeWidth = 4 }) => {
+  const CircularProgress = ({ percentage, size = 50, strokeWidth = 4 }: {
+    percentage: number;
+    size?: number;
+    strokeWidth?: number;
+  }) => {
     const radius = (size - strokeWidth) / 2;
     const circumference = radius * 2 * Math.PI;
     const offset = circumference - (percentage / 100) * circumference;
+
+    // Determine color based on progress
+    const getProgressColor = () => {
+      if (percentage >= 90) return '#DC2626'; // Red for overspending
+      if (percentage >= 70) return '#F59E0B'; // Orange for warning
+      return '#22C55E'; // Green for good
+    };
 
     return (
       <Box sx={{ position: 'relative', display: 'inline-flex' }}>
@@ -37,7 +50,7 @@ const GoalItem: React.FC<GoalItemProps> = ({ goal, isSelected, onClick }) => {
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke="#22C55E"
+            stroke={getProgressColor()}
             strokeWidth={strokeWidth}
             fill="none"
             strokeDasharray={circumference}
@@ -65,10 +78,10 @@ const GoalItem: React.FC<GoalItemProps> = ({ goal, isSelected, onClick }) => {
             sx={{
               fontSize: '12px',
               fontWeight: 'bold',
-              color: isSelected ? '#22C55E' : '#22C55E',
+              color: isSelected ? getProgressColor() : getProgressColor(),
             }}
           >
-            {percentage}%
+            {percentage.toFixed(1)}%
           </Typography>
         </Box>
       </Box>
@@ -87,7 +100,7 @@ const GoalItem: React.FC<GoalItemProps> = ({ goal, isSelected, onClick }) => {
         border: '1px solid #E5E7EB',
         transition: 'all 0.2s ease',
         '&:hover': {
-          backgroundColor: isSelected ? 'rgb(11, 0, 221)' : ' #F9FAFB',
+          backgroundColor: isSelected ? 'rgb(11, 0, 221)' : '#F9FAFB',
           transform: 'translateY(-1px)',
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
         },
@@ -97,12 +110,12 @@ const GoalItem: React.FC<GoalItemProps> = ({ goal, isSelected, onClick }) => {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         {/* Progress Circle */}
         <CircularProgress 
-          percentage={goal.progress} 
+          percentage={budget.progress} 
           size={50} 
           strokeWidth={4}
         />
         
-        {/* Goal Info */}
+        {/* Budget Info */}
         <Box sx={{ flexGrow: 1 }}>
           <Typography variant="h6" sx={{ 
             fontWeight: 600, 
@@ -110,14 +123,21 @@ const GoalItem: React.FC<GoalItemProps> = ({ goal, isSelected, onClick }) => {
             mb: 0.5,
             color: 'inherit'
           }}>
-            {goal.name}
+            {budget.name}
           </Typography>
           <Typography variant="body2" sx={{ 
             fontSize: '14px',
             opacity: 0.8,
             color: 'inherit'
           }}>
-            ${goal.savedAmount.toFixed(2)} / ${goal.targetAmount.toFixed(2)}
+            LKR {budget.spentAmount.toFixed(2)} / LKR {budget.totalAmount.toFixed(2)}
+          </Typography>
+          <Typography variant="body2" sx={{ 
+            fontSize: '12px',
+            opacity: 0.6,
+            color: 'inherit'
+          }}>
+            {budget.type.charAt(0).toUpperCase() + budget.type.slice(1)}
           </Typography>
         </Box>
       </Box>
@@ -125,4 +145,4 @@ const GoalItem: React.FC<GoalItemProps> = ({ goal, isSelected, onClick }) => {
   );
 };
 
-export default GoalItem;
+export default BudgetItem;
