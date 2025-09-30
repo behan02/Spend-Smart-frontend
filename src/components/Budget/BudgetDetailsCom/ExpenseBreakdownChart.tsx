@@ -1,8 +1,9 @@
 import React from 'react';
-import { Box, Typography, List, ListItem, ListItemText } from '@mui/material';
+import { Box, Typography, List, ListItem, ListItemText, Button, Tooltip } from '@mui/material';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { ExpenseBreakdown } from '../types/BudgetDetails';
 import { getCategoryIconAndColor } from '../../../utils/categoryUtils';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 interface ExpenseBreakdownChartProps {
   data: ExpenseBreakdown[];
@@ -14,6 +15,7 @@ const ExpenseBreakdownChart: React.FC<ExpenseBreakdownChartProps> = ({
   totalSpent 
 }) => {
   // Default colors for categories
+
   const defaultColors = [
     '#4CAF50', '#2196F3', '#FF9800', '#F44336', '#9C27B0', 
     '#607D8B', '#795548', '#009688', '#FFEB3B', '#E91E63'
@@ -29,11 +31,13 @@ const ExpenseBreakdownChart: React.FC<ExpenseBreakdownChartProps> = ({
     };
   });
 
+
   const renderCustomizedLabel = () => {
     return (
       <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="recharts-text">
         <tspan x="50%" dy="-0.5em" fontSize="24" fontWeight="bold">
           ${totalSpent.toFixed(2)}
+
         </tspan>
         <tspan x="50%" dy="1.2em" fontSize="14" fill="#666">
           Total

@@ -81,7 +81,7 @@ const BudgetItem: React.FC<BudgetItemProps> = ({ budget, isSelected, onClick }) 
               color: isSelected ? getProgressColor() : getProgressColor(),
             }}
           >
-            {percentage}%
+            {percentage.toFixed(1)}%
           </Typography>
         </Box>
       </Box>
@@ -130,7 +130,7 @@ const BudgetItem: React.FC<BudgetItemProps> = ({ budget, isSelected, onClick }) 
             opacity: 0.8,
             color: 'inherit'
           }}>
-            ${budget.spentAmount.toFixed(2)} / ${budget.totalAmount.toFixed(2)}
+            LKR {budget.spentAmount.toFixed(2)} / LKR {budget.totalAmount.toFixed(2)}
           </Typography>
           <Typography variant="body2" sx={{ 
             fontSize: '12px',

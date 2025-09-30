@@ -1,5 +1,6 @@
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { UserProvider } from "./context/UserContext";
 import  Dashboard  from "./pages/Dashboard/Dashboard";
 import ReportOverview from "./pages/Report/ReportOverview";
 import Goals from "./pages/Goals/Goals";
@@ -11,28 +12,29 @@ import AdminRegister from "./pages/AdminRegister/AdminRegister";
 import ForgetPassword from "./pages/ForgetPassword";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import BudgetPage from "./pages/Budgets/BudgetPage";
+import BudgetDetailsPage from "./pages/Budgets/BudgetDetailsPage";
 
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<UserLogin />} />
-        <Route path="/register" element={<UserRegister />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/report" element={<ReportOverview />} />
-        <Route path="/goals" element={<Goals />} />{/* Add the route for Goals page */}
-        <Route path="/goals/:id" element={<GoalDetailsPage />} />{/* Add the route for Goal Details page */}
-        <Route path="/transaction" element={<Transaction />} />
-        <Route path="/forgetpassword" element={<ForgetPassword />} />
-        <Route path="/resetpassword" element={<ResetPasswordPage />} />
-        <Route path="/budget" element={<BudgetPage />} />
-
-        
-        <Route path="/admin/register" element={<AdminRegister/>}/>
-        
-      </Routes>
-    </Router>
+    <UserProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<UserLogin />} />
+          <Route path="/register" element={<UserRegister />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/report" element={<ReportOverview />} />
+          <Route path="/goals" element={<Goals />} />{/* Add the route for Goals page */}
+          <Route path="/goals/:id" element={<GoalDetailsPage />} />{/* Add the route for Goal Details page */}
+          <Route path="/transaction" element={<Transaction />} />
+          <Route path="/forgetpassword" element={<ForgetPassword />} />
+          <Route path="/resetpassword" element={<ResetPasswordPage />} />
+          <Route path="/budget" element={<BudgetPage />} />
+          <Route path="/budgets/:id" element={<BudgetDetailsPage />} />
+          <Route path="/admin/register" element={<AdminRegister/>}/>
+        </Routes>
+      </Router>
+    </UserProvider>
   );
 }
 

@@ -1,116 +1,76 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Paper
-} from '@mui/material';
+import { Box, Paper, CircularProgress, Alert, Typography, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import BudgetItem from '../../components/Budget/BudgetItem';
 import BudgetDetails from '../../components/Budget/BudgetDetails';
 import AddBudgetModal from '../../components/Budget/AddBudgetModal';
 import BudgetHeaderCard from '../../components/Budget/BudgetHeaderCard';
-import { budgetCategories } from '../../components/Budget/types/budgetCategories';
-import { Budget, BudgetFormData } from '../../components/Budget/types/budget';
-import Sidebar from '../../components/sidebar/sidebar'; 
+import { budgetApi, BudgetSummary } from '../../api/budgetApi';
+import { useUser } from '../../context/UserContext';
+import Sidebar from '../../components/sidebar/sidebar';
 
 const BudgetPage: React.FC = () => {
-  const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
-  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const { user } = useUser();
+  const [selectedBudget, setSelectedBudget] = useState<BudgetSummary | null>(null);
+  const [budgets, setBudgets] = useState<BudgetSummary[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
+  const [editingBudget, setEditingBudget] = useState<BudgetSummary | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock data - replace with actual data fetching
+  const navigate = useNavigate();
+
+  // Load budgets when component mounts or user changes
   useEffect(() => {
-    const mockBudgets: Budget[] = [
-      {
-        id: 1,
-        name: 'Grocery',
-        type: 'monthly',
-        startDate: '2024-01-01',
-        totalAmount: 1458.30,
-        spentAmount: 1458.30,
-        remainingAmount: 0,
-        progress: 100,
-        remainingDays: 2,
-        categories: [
-          {
-            id: 1,
-            name: 'Food and beverages',
-            allocatedAmount: 1458.30,
-            spentAmount: 1458.30,
-            remainingAmount: 0,
-            icon: '🍔'
-          }
-        ],
-        description: 'Monthly grocery budget'
-      },
-      {
-        id: 2,
-        name: 'Cloths',
-        type: 'monthly',
-        startDate: '2024-01-01',
-        totalAmount: 500.00,
-        spentAmount: 250.00,
-        remainingAmount: 250.00,
-        progress: 50,
-        categories: [
-          {
-            id: 12,
-            name: 'Clothing',
-            allocatedAmount: 500.00,
-            spentAmount: 250.00,
-            remainingAmount: 250.00,
-            icon: '👔'
-          }
-        ],
-        description: 'Monthly clothing budget'
-      },
-      {
-        id: 3,
-        name: 'Transportation',
-        type: 'monthly',
-        startDate: '2024-01-01',
-        totalAmount: 800.00,
-        spentAmount: 400.00,
-        remainingAmount: 400.00,
-        progress: 50,
-        categories: [
-          {
-            id: 2,
-            name: 'Transportation',
-            allocatedAmount: 800.00,
-            spentAmount: 400.00,
-            remainingAmount: 400.00,
-            icon: '🚗'
-          }
-        ],
-        description: 'Monthly transportation budget'
-      },
-      {
-        id: 4,
-        name: 'Education',
-        type: 'monthly',
-        startDate: '2024-01-01',
-        totalAmount: 1200.00,
-        spentAmount: 300.00,
-        remainingAmount: 900.00,
-        progress: 25,
-        categories: [
-          {
-            id: 3,
-            name: 'Education',
-            allocatedAmount: 1200.00,
-            spentAmount: 300.00,
-            remainingAmount: 900.00,
-            icon: '🎓'
-          }
-        ],
-        description: 'Monthly education budget'
-      }
-    ];
+    if (user) {
+      loadBudgets();
+    }
+  }, [user]);
 
-    setBudgets(mockBudgets);
-    setSelectedBudget(mockBudgets[0]); // Select first budget by default
-  }, []);
+  // Add auto-refresh for real-time budget progress updates
+  useEffect(() => {
+    if (user) {
+      const interval = setInterval(() => {
+        loadBudgets(false); // Silent refresh without loading state
+      }, 30000); // Refresh every 30 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const loadBudgets = async (showLoadingState = true) => {
+    if (!user) return;
+
+    try {
+      if (showLoadingState) {
+        setLoading(true);
+      }
+      setError(null);
+      console.log('Loading budgets for user:', user.id);
+
+      const userBudgets = await budgetApi.getUserBudgets(user.id);
+      console.log('Loaded budgets:', userBudgets);
+
+      // Ensure userBudgets is an array
+      const budgetsArray = Array.isArray(userBudgets) ? userBudgets : [];
+      setBudgets(budgetsArray);
+
+      // Set first budget as selected if none selected and budgets exist
+      if (budgetsArray.length > 0 && !selectedBudget) {
+        setSelectedBudget(budgetsArray[0]);
+      } else if (budgetsArray.length === 0) {
+        setSelectedBudget(null);
+      }
+    } catch (error: any) {
+      console.error('Error loading budgets:', error);
+      setError(error.message || 'Failed to load budgets');
+      setBudgets([]); // Set empty array on error
+      setSelectedBudget(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddBudget = () => {
     setIsEditMode(false);
@@ -118,8 +78,8 @@ const BudgetPage: React.FC = () => {
     setIsAddModalOpen(true);
   };
 
-  const handleEditBudget = (id: number) => {
-    const budget = budgets.find(b => b.id === id);
+  const handleEditBudget = (budgetId: number) => {
+    const budget = budgets.find(b => b.budgetId === budgetId);
     if (budget) {
       setEditingBudget(budget);
       setIsEditMode(true);
@@ -127,86 +87,30 @@ const BudgetPage: React.FC = () => {
     }
   };
 
-  const handleDeleteBudget = (id: number) => {
-    setBudgets(prev => prev.filter(b => b.id !== id));
-    if (selectedBudget?.id === id) {
-      setSelectedBudget(budgets.find(b => b.id !== id) || null);
+  const handleDeleteBudget = async (budgetId: number) => {
+    try {
+      await budgetApi.deleteBudget(budgetId);
+      setBudgets(prev => prev.filter(b => b.budgetId !== budgetId));
+      if (selectedBudget?.budgetId === budgetId) {
+        setSelectedBudget(budgets.find(b => b.budgetId !== budgetId) || null);
+      }
+    } catch (error) {
+      console.error('Error deleting budget:', error);
+      setError('Failed to delete budget');
     }
   };
 
-  const handleSaveBudget = (budgetData: BudgetFormData) => {
-    if (isEditMode && editingBudget) {
-      // Update existing budget
-      const updatedBudget: Budget = {
-        ...editingBudget,
-        name: budgetData.name,
-        type: budgetData.type,
-        startDate: budgetData.startDate,
-        totalAmount: budgetData.totalAmount,
-        remainingAmount: budgetData.totalAmount - editingBudget.spentAmount,
-        progress: (editingBudget.spentAmount / budgetData.totalAmount) * 100,
-        categories: budgetData.selectedCategories.map(categoryId => {
-          const category = budgetCategories.find(c => c.id === categoryId);
-          const existingCategory = editingBudget.categories.find(c => c.id === categoryId);
-          return {
-            id: categoryId,
-            name: category?.name || '',
-            allocatedAmount: budgetData.categoryAmounts[categoryId] || 0,
-            spentAmount: existingCategory?.spentAmount || 0,
-            remainingAmount: (budgetData.categoryAmounts[categoryId] || 0) - (existingCategory?.spentAmount || 0),
-            icon: category?.icon
-          };
-        }),
-        description: budgetData.description
-      };
-
-      setBudgets(prev => prev.map(b => b.id === editingBudget.id ? updatedBudget : b));
-      setSelectedBudget(updatedBudget);
-    } else {
-      // Create new budget
-      const newBudget: Budget = {
-        id: Date.now(),
-        name: budgetData.name,
-        type: budgetData.type,
-        startDate: budgetData.startDate,
-        totalAmount: budgetData.totalAmount,
-        spentAmount: 0,
-        remainingAmount: budgetData.totalAmount,
-        progress: 0,
-        categories: budgetData.selectedCategories.map(categoryId => {
-          const category = budgetCategories.find(c => c.id === categoryId);
-          return {
-            id: categoryId,
-            name: category?.name || '',
-            allocatedAmount: budgetData.categoryAmounts[categoryId] || 0,
-            spentAmount: 0,
-            remainingAmount: budgetData.categoryAmounts[categoryId] || 0,
-            icon: category?.icon
-          };
-        }),
-        description: budgetData.description
-      };
-
-      setBudgets(prev => [...prev, newBudget]);
-      setSelectedBudget(newBudget);
-    }
-  };
-
-  const handleViewDetails = (id: number) => {
-    // Navigate to detailed budget view - implement based on your routing
-    console.log('View details for budget:', id);
+  const handleViewDetails = (budgetId: number) => {
+    navigate(`/budgets/${budgetId}`);
   };
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8f9fa', overflowX: 'hidden' }}>
       {/* Sidebar */}
       <Sidebar />
-      
+
       {/* Main Content */}
       <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        {/* Header */}
-        <header />
-        
         {/* Page Content */}
         <Box sx={{ mt: 4, mb: 4, flexGrow: 1, px: 4, maxWidth: '1200px', mx: 'auto', overflowX: 'hidden' }}>
           {/* Hero Section */}
@@ -218,42 +122,94 @@ const BudgetPage: React.FC = () => {
             imagePath="/src/assets/images/Finance-pana1.png"
           />
 
+          {/* Error Alert */}
+          {error && (
+            <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+
           {/* Budget Content */}
-          <Box sx={{ display: 'flex', gap: 3, mt: 4 }}>
-            {/* Budget List */}
-            <Box sx={{ flex: '1 1 400px', maxWidth: '400px' }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {budgets.map(budget => (
-                  <BudgetItem
-                    key={budget.id}
-                    budget={budget}
-                    isSelected={selectedBudget?.id === budget.id}
-                    onClick={() => setSelectedBudget(budget)}
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Box sx={{ display: 'flex', gap: 3, mt: 4 }}>
+              {/* Budget List */}
+              <Box sx={{ flex: '1 1 400px', maxWidth: '400px' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="h6" fontWeight="bold">
+                    Your Budgets
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={loadBudgets}
+                    disabled={loading}
+                    sx={{ minWidth: 'auto', px: 2 }}
+                  >
+                    Refresh
+                  </Button>
+                </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {budgets.map(budget => (
+                    <BudgetItem
+                      key={budget.budgetId}
+                      budget={{
+                        id: budget.budgetId,
+                        name: budget.budgetName,
+                        type: budget.budgetType.toLowerCase() as 'monthly' | 'annually',
+                        totalAmount: budget.totalBudgetAmount,
+                        spentAmount: budget.totalSpentAmount,
+                        progress: budget.progressPercentage
+                      }}
+                      isSelected={selectedBudget?.budgetId === budget.budgetId}
+                      onClick={() => setSelectedBudget(budget)}
+                    />
+                  ))}
+                  {budgets.length === 0 && !loading && (
+                    <Paper sx={{ p: 4, textAlign: 'center' }}>
+                      <Typography variant="body1" color="text.secondary">
+                        No budgets found. Create your first budget to get started!
+                      </Typography>
+                    </Paper>
+                  )}
+                </Box>
+              </Box>
+
+              {/* Budget Details */}
+              <Box sx={{ flex: '1 1 auto' }}>
+                <Paper
+                  elevation={1}
+                  sx={{
+                    p: 4,
+                    borderRadius: 3,
+                    height: 'fit-content',
+                    minHeight: '500px'
+                  }}
+                >
+                  <BudgetDetails
+                    budget={selectedBudget ? {
+                      id: selectedBudget.budgetId,
+                      name: selectedBudget.budgetName,
+                      type: selectedBudget.budgetType.toLowerCase() as 'monthly' | 'annually',
+                      totalAmount: selectedBudget.totalBudgetAmount || 0,
+                      spentAmount: selectedBudget.totalSpentAmount || 0,
+                      remainingAmount: (selectedBudget.totalBudgetAmount || 0) - (selectedBudget.totalSpentAmount || 0),
+                      progress: selectedBudget.progressPercentage || 0,
+                      startDate: selectedBudget.startDate,
+                      endDate: selectedBudget.endDate,
+                      categories: [] // We'll need to load this separately or modify the API
+                    } : null}
+                    onEdit={handleEditBudget}
+                    onDelete={handleDeleteBudget}
+                    onViewDetails={handleViewDetails}
                   />
-                ))}
+                </Paper>
               </Box>
             </Box>
-
-            {/* Budget Details */}
-            <Box sx={{ flex: '1 1 auto' }}>
-              <Paper 
-                elevation={1} 
-                sx={{ 
-                  p: 4, 
-                  borderRadius: 3,
-                  height: 'fit-content',
-                  minHeight: '500px'
-                }}
-              >
-                <BudgetDetails
-                  budget={selectedBudget}
-                  onEdit={handleEditBudget}
-                  onDelete={handleDeleteBudget}
-                  onViewDetails={handleViewDetails}
-                />
-              </Paper>
-            </Box>
-          </Box>
+          )}
         </Box>
       </Box>
 
@@ -261,15 +217,13 @@ const BudgetPage: React.FC = () => {
       <AddBudgetModal
         open={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onSave={handleSaveBudget}
+        onSave={loadBudgets} // Refresh the budget list after save
         initialData={editingBudget}
         isEditMode={isEditMode}
       />
 
-        {/* Footer */}
+      {/* Footer */}
     </Box>
-
-                
   );
 };
 

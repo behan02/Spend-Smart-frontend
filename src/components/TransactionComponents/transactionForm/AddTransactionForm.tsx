@@ -2,21 +2,26 @@ import { Close } from "@mui/icons-material";
 import { Box, Button, FormControl, IconButton, InputLabel, MenuItem, Modal, Paper, Select, TextField, ThemeProvider, Typography } from "@mui/material";
 import theme from "../../../assets/styles/theme";
 import { useEffect, useState } from "react";
+import { categoryApi, Category } from "../../../api/categoryApi";
+import { transactionApi } from "../../../api/transactionApi";
+import { useUser } from "../../../context/UserContext";
 
 interface TransactionFormProps {
     addTransaction: boolean;
     setAddTransaction: (clicked: boolean) => void;
+    onTransactionCreated?: () => void; // Optional callback for when transaction is created
 }
 
-const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, setAddTransaction}) => {
-
+const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, setAddTransaction, onTransactionCreated}) => {
+    const { user } = useUser();
     const [type, setType] = useState("");
     const [amount, setAmount] = useState('');
     const [categoryID, setCategoryID] = useState('');
     const [date, setDate] = useState('');
     const [description, setDescription] = useState('');
 
-    const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [loading, setLoading] = useState(false);
 
 
     // function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -28,14 +33,11 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
     useEffect(() => {
         async function fetchCategories() {
             try{
-                const response = await fetch("http://localhost:5110/api/Category");
-                if(!response.ok){
-                    throw new Error("Failed to fetch categories");
-                }
-                const data = await response.json();
-                setCategories(data);
+                const result = await categoryApi.getAllCategories();
+                setCategories(result);
             }catch(error){
                 console.error("Error fetching categories:", error);
+                setCategories([]);
             }
         }
         fetchCategories();
@@ -44,35 +46,56 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
+        if (!user) {
+            alert("Please log in to add transactions");
+            return;
+        }
+
+        setLoading(true);
+
         const transactionData = {
-            type: type,
-            categoryID: categoryID,
+            categoryId: parseInt(categoryID),
+            transactionType: type.charAt(0).toUpperCase() + type.slice(1), // Capitalize first letter
             amount: parseFloat(amount),
-            date: date,
             description: description,
-            userId: 1,
+            transactionDate: date,
+            isRecurring: false
         };
 
         try{
-            const response = await fetch("http://localhost:5110/api/Transaction", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(transactionData),
-            });
-            if(!response.ok){
-                throw new Error("Failed to add transaction");
+            const result = await transactionApi.createTransaction(user.id, transactionData);
+            console.log("Transaction added successfully", result);
+            
+            // Check if budget was impacted
+            if (result.budgetImpacts && result.budgetImpacts.length > 0) {
+                console.log("Budget impacts:", result.budgetImpacts);
+                const impactSummary = result.budgetImpacts.map(impact => 
+                    `${impact.budgetName}: $${impact.impactAmount}`
+                ).join(', ');
+                alert(`Transaction added successfully! Budget impacts: ${impactSummary}`);
+            } else {
+                alert("Transaction added successfully!");
             }
-            const data = await response.json();
-            console.log("Transaction added successfully:", data);
-            alert("Transaction added successfully!");
+            
             setAddTransaction(false);
+            
+            // Call the callback to refresh parent component (e.g., budget list)
+            if (onTransactionCreated) {
+                onTransactionCreated();
+            }
+            
+            // Reset form
+            setType("");
+            setAmount("");
+            setCategoryID("");
+            setDate("");
+            setDescription("");
         }catch(error){
             console.error("Error adding transaction:", error);
             alert("Failed to add transaction. Please try again.");
+        } finally {
+            setLoading(false);
         }
-
     }
     
       
@@ -174,7 +197,7 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
                                 >
                                     {categories.map((category) => (
                                         <MenuItem key={category.id} value={category.id}>
-                                            {category.name}
+                                            {category.categoryName}
                                         </MenuItem>
                                     ))}
                                 </Select>
@@ -207,12 +230,13 @@ const AddTransactionForm: React.FC<TransactionFormProps> = ({ addTransaction, se
                                 type="submit"
                                 variant="contained"
                                 disableRipple
+                                disabled={loading}
                                 sx={{
                                     borderRadius: "15px",
                                     bgcolor: "primary.main"
                                 }}
                             >
-                                Submit
+                                {loading ? "Adding..." : "Submit"}
                             </Button>
                         </Box>
                     </Paper>

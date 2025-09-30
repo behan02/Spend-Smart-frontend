@@ -13,19 +13,40 @@ import {
   Step,
   Stepper,
   StepLabel,
-  Divider
+  Divider,
+  CircularProgress,
+  Alert
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
-import { budgetCategories } from './types/budgetCategories';
-import { BudgetFormData } from './types/budget';
+import CategoryIcons, { iconType } from '../../assets/categoryIcons/CategoryIcons';
+import { categoryApi, Category } from '../../api/categoryApi';
+import { budgetApi, CreateBudgetRequest } from '../../api/budgetApi';
+import { useUser } from '../../context/UserContext';
+
+interface BudgetFormData {
+  name: string;
+  type: 'Monthly' | 'Annually';
+  startDate: string;
+  selectedCategories: number[];
+  categoryAmounts: { [key: number]: number };
+  totalAmount: number;
+  description: string;
+}
 
 interface AddBudgetModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (budget: BudgetFormData) => void;
+  onSave: () => void; // Changed to just trigger refresh
   initialData?: any;
   isEditMode?: boolean;
+}
+
+// Create a local Category type that matches the structure we need
+interface LocalCategory {
+  id: number;
+  categoryName: string;
+  type: string;
 }
 
 const AddBudgetModal: React.FC<AddBudgetModalProps> = ({ 
@@ -35,11 +56,15 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
   initialData, 
   isEditMode = false 
 }) => {
+  const { user } = useUser();
   const [activeStep, setActiveStep] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<LocalCategory[]>([]);
   const [formData, setFormData] = useState<BudgetFormData>({
     name: '',
-    type: 'monthly',
-    startDate: '',
+    type: 'Monthly',
+    startDate: new Date().toISOString().split('T')[0], // Default to today
     selectedCategories: [],
     categoryAmounts: {},
     totalAmount: 0,
@@ -48,43 +73,79 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
 
   const steps = ['Budget Details', 'Set Amounts'];
 
-  // Reset form when modal opens
+  // Load categories from CategoryIcons when modal opens
   useEffect(() => {
     if (open) {
-      if (isEditMode && initialData) {
-        setFormData({
-          name: initialData.name || '',
-          type: initialData.type || 'monthly',
-          startDate: initialData.startDate?.split('T')[0] || '',
-          selectedCategories: initialData.categories?.map((cat: any) => cat.id) || [],
-          categoryAmounts: initialData.categories?.reduce((acc: any, cat: any) => {
-            acc[cat.id] = cat.allocatedAmount;
-            return acc;
-          }, {}) || {},
-          totalAmount: initialData.totalAmount || 0,
-          description: initialData.description || ''
-        });
-      } else {
-        setFormData({
-          name: '',
-          type: 'monthly',
-          startDate: '',
-          selectedCategories: [],
-          categoryAmounts: {},
-          totalAmount: 0,
-          description: ''
-        });
-      }
-      setActiveStep(0);
+      loadCategoriesFromIcons();
+      resetForm();
     }
-  }, [open, isEditMode, initialData]);
+  }, [open]);
+
+  const loadCategoriesFromIcons = () => {
+    try {
+      // Filter out income categories (we only want expense categories for budgets)
+      const expenseCategories = CategoryIcons
+        .filter(icon => !icon.category.toLowerCase().includes('income') && 
+                       !icon.category.toLowerCase().includes('salary'))
+        .map((icon, index) => ({
+          id: icon.id,
+          categoryName: icon.category,
+          type: 'Expense'
+        }));
+      
+      setCategories(expenseCategories);
+      setError(null);
+    } catch (error) {
+      console.error('Error loading categories from icons:', error);
+      setError('Failed to load categories');
+    }
+  };
+
+  const resetForm = () => {
+    if (isEditMode && initialData) {
+      setFormData({
+        name: initialData.budgetName || '',
+        type: initialData.budgetType || 'Monthly',
+        startDate: initialData.startDate?.split('T')[0] || '',
+        selectedCategories: initialData.categories?.map((cat: any) => cat.categoryId) || [],
+        categoryAmounts: initialData.categories?.reduce((acc: any, cat: any) => {
+          acc[cat.categoryId] = cat.allocatedAmount;
+          return acc;
+        }, {}) || {},
+        totalAmount: initialData.totalBudgetAmount || 0,
+        description: initialData.description || ''
+      });
+    } else {
+      setFormData({
+        name: '',
+        type: 'Monthly',
+        startDate: new Date().toISOString().split('T')[0], // Default to today
+        selectedCategories: [],
+        categoryAmounts: {},
+        totalAmount: 0,
+        description: ''
+      });
+    }
+    setActiveStep(0);
+    setError(null);
+  };
 
   const handleNext = () => {
     if (activeStep === 0) {
       // Validate first step
-      if (!formData.name || !formData.startDate || formData.selectedCategories.length === 0) {
+      if (!formData.name.trim()) {
+        setError('Please enter a budget name');
         return;
       }
+      if (!formData.startDate) {
+        setError('Please select a start date');
+        return;
+      }
+      if (formData.selectedCategories.length === 0) {
+        setError('Please select at least one category');
+        return;
+      }
+      setError(null);
     }
     setActiveStep((prev) => prev + 1);
   };
@@ -117,21 +178,99 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
     return Object.values(formData.categoryAmounts).reduce((sum, amount) => sum + amount, 0);
   };
 
-  const handleSave = () => {
-    const totalAmount = calculateTotalAmount();
-    const budgetData = {
-      ...formData,
-      totalAmount,
-      ...(isEditMode && initialData?.id && { id: initialData.id })
-    };
-    onSave(budgetData);
-    onClose();
+  const handleSave = async () => {
+    if (!user) {
+      setError('User not found');
+      return;
+    }
+
+    // Check if all categories have amounts
+    const missingAmounts = formData.selectedCategories.some(
+      categoryId => !formData.categoryAmounts[categoryId] && formData.categoryAmounts[categoryId] !== 0
+    );
+
+    if (missingAmounts) {
+      setError('Please enter amounts for all selected categories');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const totalAmount = calculateTotalAmount();
+
+      // Map our local category IDs to the budget request
+      const budgetRequest: CreateBudgetRequest = {
+        budgetName: formData.name,
+        budgetType: formData.type,
+        startDate: formData.startDate,
+        description: formData.description,
+        categoryAllocations: formData.selectedCategories.map(categoryId => {
+          // Find the corresponding category
+          const category = categories.find(cat => cat.id === categoryId);
+          
+          return {
+            categoryId,
+            allocatedAmount: formData.categoryAmounts[categoryId] || 0
+          };
+        })
+      };
+
+      console.log('Sending budget request:', budgetRequest);
+      console.log('User ID:', user.id);
+
+      if (isEditMode && initialData?.budgetId) {
+        await budgetApi.updateBudget(initialData.budgetId, budgetRequest);
+      } else {
+        await budgetApi.createBudget(user.id, budgetRequest);
+      }
+
+      console.log('Budget saved successfully!');
+      onSave(); // Trigger refresh
+      onClose();
+
+      // Reset form data
+      setFormData({
+        name: '',
+        type: 'Monthly',
+        startDate: new Date().toISOString().split('T')[0],
+        selectedCategories: [],
+        categoryAmounts: {},
+        totalAmount: 0,
+        description: ''
+      });
+      setActiveStep(0);
+    } catch (error: any) {
+      console.error('Error saving budget:', error);
+      console.error('Error response:', error.response);
+      setError(error.response?.data?.message || error.message || 'Failed to save budget');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClose = () => {
     setActiveStep(0);
+    setError(null);
     onClose();
   };
+
+  // Get category icon and details
+  const getCategoryDetails = (categoryId: number) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    // Get icon directly from CategoryIcons since we're using the same IDs
+    const iconDetails = CategoryIcons.find(icon => icon.id === categoryId);
+    
+    return {
+      name: category?.categoryName || 'Unknown',
+      icon: iconDetails?.icon || '❓',
+      color: iconDetails?.color || '#ccc'
+    };
+  };
+
+  // Only show expense categories for budget selection
+  const availableCategories = categories;
 
   const renderStepContent = () => {
     switch (activeStep) {
@@ -143,13 +282,13 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
               <ToggleButtonGroup
                 value={formData.type}
                 exclusive
-                onChange={(e, newType) => newType && setFormData(prev => ({ ...prev, type: newType }))}
+                onChange={(e, newType) => newType && setFormData(prev => ({ ...prev, type: newType as 'Monthly' | 'Annually' }))}
                 sx={{ borderRadius: 2 }}
               >
-                <ToggleButton value="monthly" sx={{ px: 3, textTransform: 'none' }}>
+                <ToggleButton value="Monthly" sx={{ px: 3, textTransform: 'none' }}>
                   Monthly
                 </ToggleButton>
-                <ToggleButton value="annually" sx={{ px: 3, textTransform: 'none' }}>
+                <ToggleButton value="Annually" sx={{ px: 3, textTransform: 'none' }}>
                   Annually
                 </ToggleButton>
               </ToggleButtonGroup>
@@ -192,34 +331,29 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
                 Categories
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                {formData.selectedCategories.map(categoryId => {
-                  const category = budgetCategories.find(cat => cat.id === categoryId);
-                  return (
-                    <Chip
-                      key={categoryId}
-                      label={category?.name}
-                      onDelete={() => handleCategoryToggle(categoryId)}
-                      sx={{ 
-                        backgroundColor: '#e3f2fd',
-                        '& .MuiChip-deleteIcon': { color: '#1976d2' }
-                      }}
-                    />
-                  );
-                })}
+                {formData.selectedCategories.length > 0 ? (
+                  formData.selectedCategories.map(categoryId => {
+                    const categoryDetails = getCategoryDetails(categoryId);
+                    return (
+                      <Chip
+                        key={categoryId}
+                        icon={<span style={{ fontSize: '1.2rem', marginLeft: '8px' }}>{categoryDetails.icon}</span>}
+                        label={categoryDetails.name}
+                        onDelete={() => handleCategoryToggle(categoryId)}
+                        sx={{ 
+                          backgroundColor: categoryDetails.color + '20',  // Add transparency
+                          color: 'rgba(0,0,0,0.87)',
+                          '& .MuiChip-deleteIcon': { color: 'rgba(0,0,0,0.54)' }
+                        }}
+                      />
+                    );
+                  })
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    No categories selected. Please select from the list below.
+                  </Typography>
+                )}
               </Box>
-              <Button
-                startIcon={<AddIcon />}
-                onClick={() => {/* Show category selection */}}
-                sx={{ 
-                  backgroundColor: '#2952CC',
-                  color: 'white',
-                  textTransform: 'none',
-                  borderRadius: 2,
-                  px: 3
-                }}
-              >
-                Add
-              </Button>
             </Box>
 
             {/* Category Selection Grid */}
@@ -227,29 +361,42 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
               display: 'grid', 
               gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', 
               gap: 1,
-              mb: 3 
+              mb: 3,
+              maxHeight: '300px',
+              overflowY: 'auto',
+              p: 1
             }}>
-              {budgetCategories.map(category => (
-                <Button
-                  key={category.id}
-                  onClick={() => handleCategoryToggle(category.id)}
-                  sx={{
-                    p: 1,
-                    border: '1px solid #e0e0e0',
-                    borderRadius: 1,
-                    backgroundColor: formData.selectedCategories.includes(category.id) 
-                      ? '#e3f2fd' 
-                      : 'transparent',
-                    color: formData.selectedCategories.includes(category.id) 
-                      ? '#1976d2' 
-                      : 'inherit',
-                    textTransform: 'none',
-                    fontSize: '0.875rem'
-                  }}
-                >
-                  {category.icon} {category.name}
-                </Button>
-              ))}
+              {availableCategories.map(category => {
+                const categoryDetails = getCategoryDetails(category.id);
+                return (
+                  <Button
+                    key={category.id}
+                    onClick={() => handleCategoryToggle(category.id)}
+                    sx={{
+                      p: 1.5,
+                      border: '1px solid #e0e0e0',
+                      borderRadius: 2,
+                      backgroundColor: formData.selectedCategories.includes(category.id) 
+                        ? '#e3f2fd' 
+                        : 'transparent',
+                      color: formData.selectedCategories.includes(category.id) 
+                        ? '#1976d2' 
+                        : 'inherit',
+                      textTransform: 'none',
+                      fontSize: '0.875rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-start',
+                      gap: 1
+                    }}
+                  >
+                    <span style={{ fontSize: '1.2rem' }}>{categoryDetails.icon}</span> 
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {categoryDetails.name}
+                    </span>
+                  </Button>
+                );
+              })}
             </Box>
           </Box>
         );
@@ -262,13 +409,13 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
               <ToggleButtonGroup
                 value={formData.type}
                 exclusive
-                onChange={(e, newType) => newType && setFormData(prev => ({ ...prev, type: newType }))}
+                onChange={(e, newType) => newType && setFormData(prev => ({ ...prev, type: newType as 'Monthly' | 'Annually' }))}
                 sx={{ borderRadius: 2 }}
               >
-                <ToggleButton value="monthly" sx={{ px: 3, textTransform: 'none' }}>
+                <ToggleButton value="Monthly" sx={{ px: 3, textTransform: 'none' }}>
                   Monthly
                 </ToggleButton>
-                <ToggleButton value="annually" sx={{ px: 3, textTransform: 'none' }}>
+                <ToggleButton value="Annually" sx={{ px: 3, textTransform: 'none' }}>
                   Annually
                 </ToggleButton>
               </ToggleButtonGroup>
@@ -277,11 +424,26 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
             {/* Category Amounts */}
             <Box sx={{ mb: 3 }}>
               {formData.selectedCategories.map(categoryId => {
-                const category = budgetCategories.find(cat => cat.id === categoryId);
+                const categoryDetails = getCategoryDetails(categoryId);
                 return (
                   <Box key={categoryId} sx={{ mb: 2 }}>
-                    <Typography variant="body1" sx={{ mb: 1, fontWeight: 'bold' }}>
-                      {category?.name}
+                    <Typography variant="body1" sx={{ 
+                      mb: 1, 
+                      fontWeight: 'bold',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}>
+                      <span style={{ 
+                        fontSize: '1.2rem', 
+                        backgroundColor: categoryDetails.color + '30',
+                        padding: '4px',
+                        borderRadius: '4px',
+                        display: 'inline-flex'
+                      }}>
+                        {categoryDetails.icon}
+                      </span> 
+                      {categoryDetails.name}
                     </Typography>
                     <TextField
                       fullWidth
@@ -291,6 +453,9 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
                       onChange={(e) => handleCategoryAmountChange(categoryId, e.target.value)}
                       placeholder="Enter amount"
                       size="small"
+                      InputProps={{
+                        startAdornment: <span style={{ marginRight: 8 }}>LKR</span>,
+                      }}
                     />
                   </Box>
                 );
@@ -335,6 +500,21 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
       default:
         return null;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   };
 
   return (
@@ -381,8 +561,22 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
 
         <Divider sx={{ mb: 3 }} />
 
-        {/* Step Content */}
-        {renderStepContent()}
+        {/* Error Alert */}
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        )}
+
+        {/* Loading State */}
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          /* Step Content */
+          renderStepContent()
+        )}
 
         {/* Action Buttons */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
@@ -393,23 +587,25 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
           >
             {activeStep === 0 ? 'Cancel' : 'Back'}
           </Button>
-          
+
           {activeStep === steps.length - 1 ? (
             <Button
               onClick={handleSave}
               variant="contained"
+              disabled={loading}
               sx={{ 
                 textTransform: 'none', 
                 borderRadius: 2,
                 backgroundColor: '#2952CC'
               }}
             >
-              Save
+              {loading ? <CircularProgress size={20} color="inherit" /> : 'Save'}
             </Button>
           ) : (
             <Button
               onClick={handleNext}
               variant="contained"
+              disabled={loading || formData.name.trim() === '' || formData.selectedCategories.length === 0}
               sx={{ 
                 textTransform: 'none', 
                 borderRadius: 2,
@@ -423,6 +619,5 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
       </Paper>
     </Modal>
   );
-};
-
+}
 export default AddBudgetModal;

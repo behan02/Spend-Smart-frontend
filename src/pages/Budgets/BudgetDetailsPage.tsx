@@ -163,7 +163,6 @@ const BudgetDetailsPage: React.FC<BudgetDetailsPageProps> = ({
     try {
       setLoading(true);
       setError(null);
-      
       await Promise.all([
         fetchBudget(budgetId),
         fetchTransactions(budgetId),
@@ -361,7 +360,6 @@ const BudgetDetailsPage: React.FC<BudgetDetailsPageProps> = ({
               onDeleteTransaction={handleTransactionDelete}
             />
           </Paper>
-
           {/* Budget Period Chart */}
           <Paper elevation={2} sx={{ p: 3, borderRadius: 3, backgroundColor: 'white' }}>
             <BudgetPeriodChart 
