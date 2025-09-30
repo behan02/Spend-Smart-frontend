@@ -1,5 +1,3 @@
-//BudgetDetailsPage.tsx
-
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, CssBaseline } from '@mui/material';
 import { useParams } from 'react-router-dom';
@@ -73,7 +71,7 @@ const BudgetPeriodChart: React.FC<{ data: any[]; budgetType: string }> = ({ data
               y={budgetLimit} 
               stroke="#ff4444" 
               strokeDasharray="5 5"
-              label={{ value: `Budget: LKR ${budgetLimit.toFixed(2)}`, position: 'top' }}
+              label={{ value: `Budget: $${budgetLimit.toFixed(2)}`, position: 'top' }}
             />
             
             {/* Cumulative spending line */}
@@ -105,7 +103,7 @@ const BudgetPeriodChart: React.FC<{ data: any[]; budgetType: string }> = ({ data
             Current Spending
           </Typography>
           <Typography variant="h6" fontWeight="bold" color="primary.main">
-            LKR {chartData[chartData.length - 1]?.cumulativeAmount.toFixed(2) || '0.00'}
+            ${chartData[chartData.length - 1]?.cumulativeAmount.toFixed(2) || '0.00'}
           </Typography>
         </Box>
         <Box sx={{ textAlign: 'center' }}>
@@ -113,7 +111,7 @@ const BudgetPeriodChart: React.FC<{ data: any[]; budgetType: string }> = ({ data
             Budget Limit
           </Typography>
           <Typography variant="h6" fontWeight="bold">
-            LKR {budgetLimit.toFixed(2)}
+            ${budgetLimit.toFixed(2)}
           </Typography>
         </Box>
         <Box sx={{ textAlign: 'center' }}>
@@ -125,7 +123,7 @@ const BudgetPeriodChart: React.FC<{ data: any[]; budgetType: string }> = ({ data
             fontWeight="bold" 
             color={chartData[chartData.length - 1]?.cumulativeAmount > budgetLimit ? 'error.main' : 'success.main'}
           >
-            LKR {Math.abs(budgetLimit - (chartData[chartData.length - 1]?.cumulativeAmount || 0)).toFixed(2)}
+            ${Math.abs(budgetLimit - (chartData[chartData.length - 1]?.cumulativeAmount || 0)).toFixed(2)}
           </Typography>
         </Box>
       </Box>
@@ -151,7 +149,6 @@ const BudgetDetailsPage: React.FC<BudgetDetailsPageProps> = ({
   const [periodData, setPeriodData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     if (currentBudgetId) {
@@ -160,27 +157,18 @@ const BudgetDetailsPage: React.FC<BudgetDetailsPageProps> = ({
       // Default to budget ID 1 if no ID is provided
       fetchBudgetDetails('1');
     }
-  }, [currentBudgetId, refreshTrigger]);
+  }, [currentBudgetId]);
 
   const fetchBudgetDetails = async (budgetId: string) => {
     try {
       setLoading(true);
       setError(null);
-      
-      const budgetIdNumber = parseInt(budgetId, 10);
-      if (isNaN(budgetIdNumber)) {
-        throw new Error('Invalid budget ID');
-      }
-      
-      // Fetch budget and expense breakdown first
       await Promise.all([
-        fetchBudget(budgetIdNumber),
-        fetchExpenseBreakdown(budgetIdNumber),
-        fetchPeriodData(budgetIdNumber)
+        fetchBudget(budgetId),
+        fetchTransactions(budgetId),
+        fetchExpenseBreakdown(budgetId),
+        fetchPeriodData(budgetId)
       ]);
-      
-      // Then fetch transactions (which can use expense breakdown data for icons)
-      await fetchTransactions(budgetIdNumber);
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch budget details');
@@ -189,67 +177,54 @@ const BudgetDetailsPage: React.FC<BudgetDetailsPageProps> = ({
     }
   };
 
-  const fetchBudget = async (budgetId: number) => {
-    try {
-      const budget = await budgetService.getBudgetById(budgetId);
-      setBudget(budget);
-      
-      // If there's an onBudgetUpdate callback, call it with the fetched budget
-      if (onBudgetUpdate && budget) {
-        onBudgetUpdate(budget);
-      }
-    } catch (error) {
-      console.error('Error fetching budget:', error);
-      throw error;
-    }
+  const fetchBudget = async (budgetId: string) => {
+    const budget = await budgetService.getBudgetById(budgetId);
+    setBudget(budget);
   };
 
-  const fetchTransactions = async (budgetId: number) => {
-    try {
-      console.log(`Fetching transactions for budget ID: ${budgetId}`);
-      const transactions = await budgetService.getTransactionsByBudgetId(budgetId);
-      console.log(`Fetched ${transactions.length} transactions:`, transactions);
-      setTransactions(transactions);
-    } catch (error) {
-      console.error('Error fetching transactions:', error);
-      throw error;
-    }
+  const fetchTransactions = async (budgetId: string) => {
+    const transactions = await budgetService.getTransactionsByBudgetId(budgetId);
+    setTransactions(transactions);
   };
 
-  const fetchExpenseBreakdown = async (budgetId: number) => {
-    try {
-      const breakdown = await budgetService.getExpenseBreakdown(budgetId);
-      console.log("Fetched expense breakdown:", breakdown);
-      
-      // Use the breakdown data directly from the database (with icons and colors)
-      setExpenseBreakdown(breakdown);
-    } catch (error) {
-      console.error('Error fetching expense breakdown:', error);
-      throw error;
-    }
+  const fetchExpenseBreakdown = async (budgetId: string) => {
+    const breakdown = await budgetService.getExpenseBreakdown(budgetId);
+    
+    // Enhance breakdown data with CategoryIcons
+    const enhancedBreakdown = breakdown.map(item => {
+      const { icon, color } = getCategoryIconAndColor(item.label);
+      return {
+        ...item,
+        icon: icon,
+        color: item.color || color
+      };
+    });
+    
+    setExpenseBreakdown(enhancedBreakdown);
   };
 
-  const fetchPeriodData = async (budgetId: number) => {
-    try {
-      const data = await budgetService.getPeriodData(budgetId);
-      setPeriodData(data);
-    } catch (error) {
-      console.error('Error fetching period data:', error);
-      throw error;
-    }
+  const fetchPeriodData = async (budgetId: string) => {
+    const data = await budgetService.getPeriodData(budgetId);
+    setPeriodData(data);
   };
+
+
 
   const handleTransactionUpdate = async () => {
-    console.log("Refreshing budget data after transaction update");
-    // Trigger a refresh of all data by incrementing the refresh trigger
-    setRefreshTrigger(prev => prev + 1);
+    if (currentBudgetId) {
+      await Promise.all([
+        fetchTransactions(currentBudgetId),
+        fetchBudget(currentBudgetId),
+        fetchExpenseBreakdown(currentBudgetId),
+        fetchPeriodData(currentBudgetId)
+      ]);
+    }
   };
 
   const handleTransactionDelete = async (transactionId: number) => {
     try {
       await budgetService.deleteTransaction(transactionId);
-      // Trigger refresh after deletion
-      handleTransactionUpdate();
+      await handleTransactionUpdate();
     } catch (err) {
       console.error('Failed to delete transaction:', err);
     }
@@ -365,15 +340,6 @@ const BudgetDetailsPage: React.FC<BudgetDetailsPageProps> = ({
               <ExpenseBreakdownChart 
                 data={expenseBreakdown}
                 totalSpent={budget?.spentAmount || 0}
-                onRefresh={() => {
-                  if (currentBudgetId) {
-                    const budgetIdNumber = parseInt(currentBudgetId, 10);
-                    if (!isNaN(budgetIdNumber)) {
-                      console.log("Manually refreshing expense breakdown");
-                      fetchExpenseBreakdown(budgetIdNumber);
-                    }
-                  }
-                }}
               />
             </Paper>
 
@@ -394,8 +360,13 @@ const BudgetDetailsPage: React.FC<BudgetDetailsPageProps> = ({
               onDeleteTransaction={handleTransactionDelete}
             />
           </Paper>
-
-         
+          {/* Budget Period Chart */}
+          <Paper elevation={2} sx={{ p: 3, borderRadius: 3, backgroundColor: 'white' }}>
+            <BudgetPeriodChart 
+              data={periodData}
+              budgetType={budget?.type || 'monthly'}
+            />
+          </Paper>
         </Box>
       </Box>
     </Box>

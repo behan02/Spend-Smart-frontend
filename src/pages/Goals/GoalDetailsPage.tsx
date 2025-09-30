@@ -6,19 +6,21 @@ import AddSavingRecordButton from '../../components/GoalDetailsPageComponents/Ad
 import SavingRecordsHistoryTable from '../../components/GoalDetailsPageComponents/SavingRecordsHistoryTable';
 import AddSavingRecodPopup from '../../components/GoalDetailsPageComponents/AddSavingRecodPopup';
 import CardWithCircularProgressBar from '../../components/GoalDetailsPageComponents/CardWithCircularProgressBar';
-import ProgressBarChart from '../../components/GoalDetailsPageComponents/ProgressBarChart';
+import OptimizedProgressBarChart from '../../components/GoalDetailsPageComponents/OptimizedProgressBarChart';
 import Footer from '../../components/footer/Footer';
 import Header from '../../components/header/header';
 import Sidebar from '../../components/sidebar/sidebar';
 import theme from '../../assets/styles/theme';
 import { savingRecordService, SavingRecordFormData } from '../../services/savingRecordService';
-import { goalService } from '../../services/goalService';
+import { goalService, Goal } from '../../services/goalService';
+import SavingsIcon from '@mui/icons-material/Savings';
 
-// Local interface for component compatibility with Date object
+// Local interface for component compatibility
 interface SavingRecord {
   id: number;
   amount: number;
-  date: Date;
+  date: string; // Date part
+  time: string; // Time part
   description?: string;
   goalId: number;
   userId?: number;
@@ -26,21 +28,23 @@ interface SavingRecord {
   updatedAt?: string;
 }
 
-interface Goal {
+interface SavingRecord {
   id: number;
-  name: string;
-  savedAmount: number;
-  targetAmount: number;
-  progress: number;
-  deadline?: Date;
+  amount: number;
+  date: string; // Date part
+  time: string; // Time part
   description?: string;
-  remainingDays?: number;
+  goalId: number;
+  userId?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 const GoalDetailsPage: React.FC = () => {
   const location = useLocation();
   const [addRecordModalOpen, setAddRecordModalOpen] = useState(false);
   const [savingRecords, setSavingRecords] = useState<SavingRecord[]>([]);
+  const [currentGoal, setCurrentGoal] = useState<Goal | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -48,29 +52,33 @@ const GoalDetailsPage: React.FC = () => {
     severity: 'success' as 'success' | 'error'
   });
   
-  // Get goal data from navigation state
-  const goalData: Goal | undefined = location.state?.goal;
-  const goalName = goalData?.name || 'Goal Details';
+  // Get initial goal data from navigation state
+  const initialGoalData: Goal | undefined = location.state?.goal;
+  const goalName = currentGoal?.name || initialGoalData?.name || 'Goal Details';
 
-  // Fetch saving records when component mounts
+  // Initialize currentGoal with data from navigation state
   useEffect(() => {
-    if (goalData?.id) {
-      fetchSavingRecords(goalData.id);
+    if (initialGoalData) {
+      setCurrentGoal(initialGoalData);
     }
-  }, [goalData?.id]);
+  }, [initialGoalData]);
+
+  // Fetch saving records when component mounts or goal changes
+  useEffect(() => {
+    const goalId = currentGoal?.id || initialGoalData?.id;
+    if (goalId) {
+      fetchSavingRecords(goalId);
+    }
+  }, [currentGoal?.id, initialGoalData?.id]);
 
   const fetchSavingRecords = async (goalId: number) => {
     setIsLoading(true);
     try {
       const records = await savingRecordService.getByGoalId(goalId);
       
-      // Convert date strings to Date objects for component compatibility
-      const adaptedRecords: SavingRecord[] = records.map(record => ({
-        ...record,
-        date: new Date(record.date)
-      }));
-      
-      setSavingRecords(adaptedRecords);
+      // Keep records as they come from the API (with separate date and time)
+      console.log('Fetched records:', records); // Debug log
+      setSavingRecords(records);
     } catch (err) {
       console.error('Error fetching saving records:', err);
       setSnackbar({
@@ -83,6 +91,17 @@ const GoalDetailsPage: React.FC = () => {
     }
   };
 
+  const refreshGoalData = async (goalId: number) => {
+    try {
+      const updatedGoal = await goalService.getById(goalId);
+      setCurrentGoal(updatedGoal);
+      console.log('Goal data refreshed:', updatedGoal);
+    } catch (err) {
+      console.error('Error refreshing goal data:', err);
+      // Don't show error to user as this is not critical
+    }
+  };
+
   const handleAddSavingRecord = () => {
     setAddRecordModalOpen(true);
   };
@@ -92,7 +111,8 @@ const GoalDetailsPage: React.FC = () => {
   };
 
   const handleSaveRecord = async (recordData: { amount: number; date: string | Date; description?: string }) => {
-    if (!goalData?.id) {
+    const goalId = currentGoal?.id || initialGoalData?.id;
+    if (!goalId) {
       setSnackbar({
         open: true,
         message: 'Cannot add record: Goal ID is missing',
@@ -108,31 +128,20 @@ const GoalDetailsPage: React.FC = () => {
         amount: recordData.amount,
         date: recordData.date instanceof Date ? recordData.date.toISOString() : recordData.date,
         description: recordData.description || '',
-        goalId: goalData.id,
+        goalId: goalId,
+        userId: 1 // Default user ID, update when you have authentication
       };
 
       // Call the service to create the record
-      const newRecord = await savingRecordService.create(formData);
+      await savingRecordService.create(formData);
       
-      // Convert the date string to a Date object for component compatibility
-      const adaptedRecord: SavingRecord = {
-        ...newRecord,
-        date: new Date(newRecord.date)
-      };
+      // Refresh saving records after creating to ensure consistency
+      await fetchSavingRecords(goalId);
       
-      // Update local state with the new record
-      setSavingRecords(prevRecords => [...prevRecords, adaptedRecord]);
+      // Refresh goal data to get updated currentAmount
+      await refreshGoalData(goalId);
+
       
-      // Update goal's current amount (if your API doesn't handle this automatically)
-      if (goalData) {
-        try {
-          await goalService.update(goalData.id, {
-            currentAmount: (goalData.savedAmount || 0) + recordData.amount,
-          });
-        } catch (err) {
-          console.error('Error updating goal amount:', err);
-        }
-      }
 
       setSnackbar({
         open: true,
@@ -152,6 +161,46 @@ const GoalDetailsPage: React.FC = () => {
     }
   };
 
+  const handleDeleteRecord = async (recordId: number) => {
+    const goalId = currentGoal?.id || initialGoalData?.id;
+    if (!goalId) {
+      setSnackbar({
+        open: true,
+        message: 'Cannot delete record: Goal ID is missing',
+        severity: 'error'
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Call the service to delete the record
+      await savingRecordService.delete(recordId);
+      
+      // Refresh saving records after deleting
+      await fetchSavingRecords(goalId);
+      
+      // Refresh goal data to get updated currentAmount
+      await refreshGoalData(goalId);
+
+     
+      setSnackbar({
+        open: true,
+        message: 'Saving record deleted successfully!',
+        severity: 'success'
+      });
+    } catch (err) {
+      console.error('Error deleting record:', err);
+      setSnackbar({
+        open: true,
+        message: 'Failed to delete record',
+        severity: 'error'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleCloseSnackbar = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
@@ -159,175 +208,161 @@ const GoalDetailsPage: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
         {/* Sidebar */}
-        <Box 
-          component="nav" 
-          sx={{ 
-            width: { xs: 0, md: 260 }, // Hide sidebar on mobile, show on desktop
-            flexShrink: 0,
-            position: { xs: 'fixed', md: 'sticky' },
-            top: 0,
-            left: { xs: '-260px', md: 0 }, // Move sidebar off-screen on mobile
-            height: '100vh',
-            zIndex: 1000,
-            overflow: 'hidden', // Hide all overflow to prevent scroll bars
-            borderRight: `1px solid ${theme.palette.divider}`,
-            transition: 'left 0.3s ease-in-out', // Smooth transition for mobile
-            display: { xs: 'none', md: 'block' }, // Completely hide on mobile
-          }}
-        >
-          <Sidebar />
-        </Box>
+        <Sidebar />
 
         {/* Main content */}
         <Box 
           component="main" 
           sx={{ 
             flexGrow: 1,
-            width: '100%', // Full width always
-            minWidth: 0, // Prevent flex item from growing beyond container
+            width: '100%',
+            minWidth: 0,
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
-            backgroundColor: theme.palette.background.default,
-            marginLeft: { xs: 0, md: '260px' }, // Add margin to account for sidebar
           }}
         >
           {/* Content container */}
           <Box sx={{ 
-            maxWidth: 1400,
+            maxWidth: 1200,
             width: '100%',
             mx: 'auto',
-            px: { xs: 2, sm: 3, md: 4 },
+            px: { xs: 2, sm: 3 },
             pt: 3,
-            pb: 8,
+            pb: 4,
             flexGrow: 1,
-            display: 'flex',
-            flexDirection: 'column'
           }}>
-            {/* Header */}
-            <Header pageName="" />
-
-            {/* Goal Name Bar */}
-            <Box sx={{ p: 0.5, mb: 5 }}>
+            {/* Header with Goal Name */}
+            <Box sx={{ mb: 4 }}>
               <GoalNameBar goalName={goalName} />
             </Box>
 
-            {/* Main content section with Progress Bar and Chart */}
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: { xs: 'column', lg: 'row' },
-                justifyContent: 'space-between',
-                alignItems: { xs: 'center', lg: 'flex-start' },
-                gap: { xs: 6, md: 8, lg: 12 },
-                mb: 6,
-                mx: 'auto',
-                maxWidth: '1200px',
-                width: '100%',
-                px: { xs: 0, lg: 2 }
-              }}
-            >
-              {/* Left side - Goal Progress Card */}
-              <Box sx={{ 
-                width: { xs: '100%', sm: '85%', md: '75%', lg: '48%' },
-                minWidth: { lg: '450px' },
-                maxWidth: { lg: '550px' },
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'stretch'
-              }}>
-                {goalData && (
-                  <CardWithCircularProgressBar
-                    goal={goalData}
-                    savingRecords={savingRecords}
-                    onEdit={() => {
-                      console.log('Edit goal clicked');
-                    }}
-                    onDelete={() => {
-                      console.log('Delete goal clicked');
-                    }}
-                  />
-                )}
-              </Box>
-
-              {/* Right side - Progress Bar Chart */}
-              <Box sx={{ 
-                width: { xs: '100%', sm: '85%', md: '75%', lg: '48%' },
-                minWidth: { lg: '450px' },
-                maxWidth: { lg: '550px' },
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'stretch'
-              }}>
-                {goalData && (
-                  <ProgressBarChart
-                    savingRecords={savingRecords}
-                    goalTargetAmount={goalData.targetAmount}
-                  />
-                )}
-              </Box>
-            </Box>
-
-            {/* Add Saving Record Button - Centered below both components */}
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                width: '100%',
-                mb: 6,
-                position: 'relative'
-              }}
-            >
-              {/* Decorative background */}
-              <Box sx={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '300px',
-                height: '300px',
-                background: 'radial-gradient(circle, rgba(74, 144, 226, 0.05) 0%, transparent 70%)',
-                borderRadius: '50%',
-                zIndex: 0
-              }} />
-              <Box sx={{ position: 'relative', zIndex: 1 }}>
-                <AddSavingRecordButton onClick={handleAddSavingRecord} />
-              </Box>
-            </Box>
-
-            {/* History Table - Fixed container */}
+            {/* Main Stats Section */}
             <Box sx={{ 
-              width: '100%',
-              mb: 5,
-              overflow: 'hidden', // Prevent overflow
-              '& .MuiTableContainer-root': {
-                maxWidth: '95%',
-                marginLeft:'25px',
-                overflowX: 'auto', // Enable horizontal scroll for table if needed
+              display: 'flex',
+              flexDirection: { xs: 'column', lg: 'row' },
+              gap: 4,
+              mb: 4,
+              alignItems: 'flex-start'
+            }}>
+              {/* Goal Progress Card */}
+              <Box sx={{ 
+                width: { xs: '100%', lg: '350px' },
+                flexShrink: 0,
+                display: 'flex',
+                justifyContent: 'center'
+              }}>
+                {currentGoal && (
+                  <CardWithCircularProgressBar
+                    goal={currentGoal}
+                    savingRecords={savingRecords}
+                  />
+                )}
+              </Box>
+
+              {/* Progress Chart */}
+              <Box sx={{
+                flex: 1,
+                backgroundColor: '#ffffff',
+                borderRadius: '16px',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                border: '1px solid #e2e8f0',
+                overflow: 'hidden',
+                minHeight: '400px'
+              }}>
+                {currentGoal && (
+                  <OptimizedProgressBarChart
+                    savingRecords={savingRecords}
+                    goalTargetAmount={currentGoal.targetAmount}
+                    goalDeadline={currentGoal.deadline}
+                    goalCreationDate={currentGoal.createdAt ? new Date(currentGoal.createdAt) : (currentGoal.startDate ? new Date(currentGoal.startDate) : undefined)}
+                  />
+                )}
+              </Box>
+            </Box>
+
+            {/* Action Section */}
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'flex-start',
+              mb: 4,
+              ml: '100mm'
+            }}>
+              <AddSavingRecordButton onClick={handleAddSavingRecord} />
+            </Box>
+
+            {/* History Section */}
+            <Box sx={{
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e2e8f0',
+              overflow: 'hidden',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
+                transform: 'translateY(-2px)',
+                borderColor: '#cbd5e1'
               }
             }}>
-              {isLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 5 }}>
-                  <CircularProgress />
-                  <Typography variant="body2" sx={{ ml: 2 }}>Loading saving records...</Typography>
+              <Box sx={{ p: 3, borderBottom: '1px solid #e2e8f0' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box sx={{
+                    backgroundColor: '#ece8c1ff',
+                    borderRadius: '20%',
+                    width: 40,
+                    height: 40,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <SavingsIcon sx={{ fontSize: 20, color: '#f58b22ff' }} />
+                  </Box>
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 600,
+                    color: '#1e293b',
+                    fontSize: '18px'
+                  }}>
+                    Savings History
+                  </Typography>
                 </Box>
-              ) : (
-                <SavingRecordsHistoryTable 
-                  records={savingRecords.map(record => ({
-                    ...record,
-                    date: record.date.toISOString()
-                  }))} 
-                />
-              )}
+                <Typography variant="body2" sx={{ 
+                  color: '#64748b',
+                  mt: 0.5
+                }}>
+                  Track all your saving contributions
+                </Typography>
+              </Box>
+              
+              <Box sx={{ minHeight: '200px' }}>
+                {isLoading ? (
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    p: 5,
+                    flexDirection: 'column',
+                    gap: 2
+                  }}>
+                    <CircularProgress size={40} />
+                    <Typography variant="body2" color="text.secondary">
+                      Loading saving records...
+                    </Typography>
+                  </Box>
+                ) : (
+                  <SavingRecordsHistoryTable 
+                    records={savingRecords} 
+                    onDeleteRecord={handleDeleteRecord}
+                  />
+                )}
+              </Box>
             </Box>
           </Box>
 
-          {/* Footer */}
-          <Box sx={{ mt: 'auto' }}>
-            <Footer />
-          </Box>
+         
         </Box>
       </Box>
 
@@ -336,7 +371,9 @@ const GoalDetailsPage: React.FC = () => {
         open={addRecordModalOpen}
         onClose={handleCloseModal}
         onSave={handleSaveRecord}
-        goalId={goalData?.id || 0}
+        goalId={(currentGoal?.id || initialGoalData?.id) || 0}
+        goal={currentGoal || initialGoalData}
+        savingRecords={savingRecords}
       />
 
       {/* Snackbar for notifications */}

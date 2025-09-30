@@ -1,23 +1,46 @@
-import React from 'react';
-import { Box, Typography, Card, IconButton } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import React, { useState } from 'react';
+import { Goal as BaseGoal } from '../../services/goalService';
 
-interface Goal {
-  id: number;
-  name: string;
-  savedAmount: number;
-  targetAmount: number;
-  progress: number;
-  deadline?: Date;
-  description?: string;
+// Extend the Goal interface to include remainingDays
+interface Goal extends BaseGoal {
   remainingDays?: number;
 }
+
+// Material UI style icons as SVG components
+const TrendingUpIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <path d="m7 14 5-5 5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="m21 7-6 6-4-4-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const TargetIcon = ({ size = 16, color = "currentColor" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2"/>
+    <circle cx="12" cy="12" r="6" stroke={color} strokeWidth="2"/>
+    <circle cx="12" cy="12" r="2" stroke={color} strokeWidth="2"/>
+  </svg>
+);
+
+const AccountBalanceIcon = ({ size = 16, color = "currentColor" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M4 10h16M4 10l8-6 8 6v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V10zM9 21V12h6v9" 
+          stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const ScheduleIcon = ({ size = 16, color = "currentColor" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2"/>
+    <polyline points="12,6 12,12 16,14" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
 interface SavingRecord {
   id: number;
   amount: number;
-  date: Date;
+  date: string;
+  time?: string;
   description?: string;
   goalId: number;
 }
@@ -25,456 +48,536 @@ interface SavingRecord {
 interface CardWithCircularProgressBarProps {
   goal: Goal;
   savingRecords: SavingRecord[];
-  onEdit?: () => void;
-  onDelete?: () => void;
 }
+
+// Enhanced Goal Status Algorithm
+const calculateGoalStatus = (goal: Goal) => {
+  const currentAmount = goal.currentAmount;
+  const targetAmount = goal.targetAmount;
+  const remainingDays = goal.remainingDays || 0;
+  
+  // Calculate progress percentages
+  const amountProgress = targetAmount > 0 ? (currentAmount / targetAmount) * 100 : 0;
+  
+  // Calculate timeline progress (assuming goal has a total duration)
+  // We need to derive total duration from remaining days and current progress
+  // For this calculation, we'll assume the goal started when currentAmount was 0
+  // and estimate total duration based on current progress and remaining days
+  
+  let timelineProgress = 0;
+  let totalDuration = 0;
+  
+  if (remainingDays >= 0) {
+    // If we know remaining days, we can estimate total duration
+    // Using a simple estimation: if we have some progress, we can estimate how long it took
+    if (amountProgress > 0 && remainingDays > 0) {
+      // Estimate total duration based on current progress rate
+      const estimatedTotalDays = (remainingDays * 100) / (100 - amountProgress);
+      totalDuration = estimatedTotalDays;
+      const elapsedDays = totalDuration - remainingDays;
+      timelineProgress = (elapsedDays / totalDuration) * 100;
+    } else if (remainingDays === 0) {
+      // Goal deadline has passed
+      timelineProgress = 100;
+      totalDuration = 1; // Avoid division by zero
+    } else if (amountProgress === 0) {
+      // No progress yet, assume just started
+      timelineProgress = 5; // Assume minimal time has passed
+      totalDuration = remainingDays / 0.95; // Rough estimate
+    }
+  }
+  
+  // Ensure values are within bounds
+  const clampedAmountProgress = Math.max(0, Math.min(100, amountProgress));
+  const clampedTimelineProgress = Math.max(0, Math.min(100, timelineProgress));
+  
+  // Calculate the difference between amount progress and timeline progress
+  const progressDifference = clampedAmountProgress - clampedTimelineProgress;
+  
+  // Enhanced status determination algorithm
+  const getGoalStatus = () => {
+    // Goal completed
+    if (clampedAmountProgress >= 100) {
+      if (remainingDays > 0) {
+        return {
+          status: 'Completed Early',
+          color: '#10B981', // Green
+          priority: 'excellent'
+        };
+      } else {
+        return {
+          status: 'Completed',
+          color: '#10B981', // Green
+          priority: 'excellent'
+        };
+      }
+    }
+    
+    // Goal overdue
+    if (remainingDays <= 0 && clampedAmountProgress < 100) {
+      return {
+        status: 'Overdue',
+        color: '#DC2626', // Red
+        priority: 'urgent'
+      };
+    }
+    
+    // Very close to deadline
+    if (remainingDays <= 7 && remainingDays > 0) {
+      if (clampedAmountProgress >= 90) {
+        return {
+          status: 'Almost Done',
+          color: '#10B981', // Green
+          priority: 'good'
+        };
+      } else if (clampedAmountProgress >= 70) {
+        return {
+          status: 'Final Push',
+          color: '#F59E0B', // Yellow
+          priority: 'warning'
+        };
+      } else {
+        return {
+          status: 'Critical',
+          color: '#EF4444', // Red
+          priority: 'urgent'
+        };
+      }
+    }
+    
+    // Progress-based status (for non-critical timelines)
+    if (progressDifference >= 15) {
+      // Significantly ahead of schedule
+      return {
+        status: 'Ahead of Schedule',
+        color: '#059669', // Dark green
+        priority: 'excellent'
+      };
+    } else if (progressDifference >= 5) {
+      // Slightly ahead
+      return {
+        status: 'Ahead',
+        color: '#10B981', // Green
+        priority: 'good'
+      };
+    } else if (progressDifference >= -5) {
+      // On track (within 5% tolerance)
+      return {
+        status: 'On Track',
+        color: '#3B82F6', // Blue
+        priority: 'good'
+      };
+    } else if (progressDifference >= -15) {
+      // Slightly behind
+      return {
+        status: 'Behind Schedule',
+        color: '#F59E0B', // Orange
+        priority: 'warning'
+      };
+    } else if (progressDifference >= -25) {
+      // Significantly behind
+      return {
+        status: 'Falling Behind',
+        color: '#EF4444', // Red
+        priority: 'urgent'
+      };
+    } else {
+      // Very far behind
+      return {
+        status: 'Needs Attention',
+        color: '#DC2626', // Dark red
+        priority: 'critical'
+      };
+    }
+  };
+  
+  const statusInfo = getGoalStatus();
+  
+  return {
+    ...statusInfo,
+    amountProgress: clampedAmountProgress,
+    timelineProgress: clampedTimelineProgress,
+    progressDifference,
+    remainingDays,
+    debugInfo: {
+      amountProgress: clampedAmountProgress.toFixed(1),
+      timelineProgress: clampedTimelineProgress.toFixed(1),
+      progressDifference: progressDifference.toFixed(1),
+      totalDuration: totalDuration.toFixed(1)
+    }
+  };
+};
 
 const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = ({
   goal,
-  savingRecords,
-  onEdit,
-  onDelete
+  savingRecords
 }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+
   // Calculate total saved amount from records
   const totalSavedFromRecords = savingRecords.reduce((total, record) => total + record.amount, 0);
   
-  // Calculate current saved amount (initial saved + records)
-  const currentSavedAmount = goal.savedAmount + totalSavedFromRecords;
+  // The backend already includes saving records in currentAmount,
+  // so we use the goal's currentAmount directly to avoid double counting
+  const currentSavedAmount = goal.currentAmount;
   
-  // Calculate progress percentage
-  const progressPercentage = goal.targetAmount > 0 
-    ? Math.min(100, Math.round((currentSavedAmount / goal.targetAmount) * 100))
-    : 0;
+  // Use the enhanced algorithm to get goal status
+  const goalStatusInfo = calculateGoalStatus(goal);
   
-  // Calculate remaining days
-  const remainingDays = goal.remainingDays || 0;
+  // Calculate progress percentage for the circle
+  const progressPercentage = Math.min(100, Math.round(goalStatusInfo.amountProgress));
+  
+  // Calculate remaining amount
+  const remainingAmount = Math.max(0, goal.targetAmount - currentSavedAmount);
 
-  // Circle properties - reduced filled range for more attractive look
-  const radius = 55;
+
+  // Circle properties
+  const radius = 90;
   const circumference = 2 * Math.PI * radius;
-  // Reduce the maximum fill to 75% of the circle for better aesthetics
-  const maxFillPercentage = 75;
-  const adjustedProgress = (progressPercentage / 100) * (maxFillPercentage / 100);
-  const strokeDashoffset = circumference - (adjustedProgress * circumference);
+  const strokeDashoffset = progressPercentage === 100 
+    ? 0 
+    : circumference - (progressPercentage / 100) * circumference;
 
   return (
-    <Card 
-      sx={{ 
-        p: "6px",
-        marginLeft: 3,
-        borderRadius: "24px", 
-        boxShadow: "0 8px 32px rgba(0, 119, 182, 0.15), 0 2px 8px rgba(0, 119, 182, 0.08)",
-        border: "2px solid rgba(0, 119, 182, 0.1)",
-        background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e0f2fe 100%)",
-        width: '450px',
-        height: '500px',
+    <div 
+      style={{ 
+        padding: '28px',
+        borderRadius: '20px',
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+        boxShadow: isHovered 
+          ? '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' 
+          : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: "1px solid rgba(226, 232, 240, 0.8)",
+        width: '480px',
+        height: '406px',
+        display: 'flex',
+        flexDirection: 'column',
         position: 'relative',
-        transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-        overflow: 'hidden',
-        "&:hover": {
-          boxShadow: "0 16px 48px rgba(0, 119, 182, 0.2), 0 4px 16px rgba(0, 119, 182, 0.15)",
-          transform: "translateY(-4px) scale(1.02)",
-          border: "2px solid rgba(0, 119, 182, 0.2)"
-        },
-        "&::before": {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '4px',
-          background: "linear-gradient(90deg, #0077B6 0%, #00B4D8 50%, #0077B6 100%)",
-          borderRadius: "24px 24px 0 0",
-          animation: 'shimmer 3s ease-in-out infinite'
-        },
-        "@keyframes shimmer": {
-          "0%": { backgroundPosition: "-200px 0" },
-          "100%": { backgroundPosition: "200px 0" }
-        }
+        cursor: 'pointer',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+        overflow: 'hidden'
       }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={() => setShowDetails(!showDetails)}
     >
-      {/* Decorative background elements */}
-      <Box sx={{
+      {/* Background Pattern */}
+      <div style={{
         position: 'absolute',
-        top: -50,
-        right: -50,
-        width: 150,
-        height: 150,
+        top: 0,
+        right: 0,
+        width: '200px',
+        height: '200px',
+        background: 'radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%)',
         borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(0, 119, 182, 0.08) 0%, transparent 70%)',
-        zIndex: 0,
-        animation: 'float 6s ease-in-out infinite'
-      }} />
-      
-      <Box sx={{
-        position: 'absolute',
-        bottom: -30,
-        left: -30,
-        width: 100,
-        height: 100,
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(0, 180, 216, 0.06) 0%, transparent 70%)',
-        zIndex: 0,
-        animation: 'float 8s ease-in-out infinite reverse'
+        transform: 'translate(50%, -50%)'
       }} />
 
-      {/* Main Content */}
-      <Box sx={{ 
-        p: 3, 
-        height: '100%', 
-        display: 'flex', 
-        flexDirection: 'column',
+      {/* Header Section */}
+      <div style={{ 
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: '16px',
         position: 'relative',
         zIndex: 1
       }}>
-        {/* Header with Goal Name */}
-        <Box sx={{ 
-          mb: 3,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2
-        }}>
-          <Box sx={{
-            width: 48,
-            height: 48,
-            borderRadius: '16px',
-            background: "linear-gradient(135deg, #0077B6 0%, #00B4D8 100%)",
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: "0 4px 16px rgba(0, 119, 182, 0.3)",
-            animation: 'pulse 2s ease-in-out infinite'
-          }}>
-            <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold' }}>
-              🎯
-            </Typography>
-          </Box>
-          <Box sx={{ flex: 1 }}>
-            <Typography 
-              variant="h5" 
-              fontWeight="800" 
-              sx={{ 
-                background: "linear-gradient(135deg, #0077B6 0%, #023E8A 100%)",
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                color: "transparent",
-                letterSpacing: '-0.02em',
-                fontSize: '1.3rem',
-                lineHeight: 1.2
-              }}
-            >
-              {goal.name || 'Savings Goal'}
-            </Typography>
-            {goal.description && (
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: '#6b7280',
-                  mt: 0.5,
-                  lineHeight: 1.4,
-                  fontWeight: 500
-                }}
-              >
-                {goal.description}
-              </Typography>
-            )}
-          </Box>
-        </Box>
-
-        {/* Progress and Amount Section */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1 }}>
-          {/* Circular Progress */}
-          <Box sx={{ 
-            position: 'relative', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            background: 'rgba(255, 255, 255, 0.8)',
-            borderRadius: '50%',
-            padding: '15px',
-            backdropFilter: 'blur(10px)',
-            border: '2px solid rgba(0, 119, 182, 0.1)',
-            boxShadow: '0 8px 24px rgba(0, 119, 182, 0.15)',
-            animation: 'breathe 4s ease-in-out infinite'
-          }}>
-            <svg width="130" height="130">
-              {/* Background circle */}
-              <circle
-                cx="65"
-                cy="65"
-                r={radius}
-                stroke="rgba(0, 119, 182, 0.1)"
-                strokeWidth="10"
-                fill="transparent"
-                strokeDasharray={`${circumference * (maxFillPercentage / 100)} ${circumference}`}
-                transform="rotate(-135 65 65)"
-              />
-              {/* Progress circle */}
-              <circle
-                cx="65"
-                cy="65"
-                r={radius}
-                stroke={progressPercentage > 0 ? 
-                  `url(#gradient-${goal.id})` : "rgba(0, 119, 182, 0.1)"}
-                strokeWidth="10"
-                fill="transparent"
-                strokeDasharray={`${circumference * (maxFillPercentage / 100)} ${circumference}`}
-                strokeDashoffset={strokeDashoffset}
-                strokeLinecap="round"
-                transform="rotate(-135 65 65)"
-                style={{
-                  transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
-                  filter: 'drop-shadow(0 2px 8px rgba(0, 119, 182, 0.3))'
-                }}
-              />
-              {/* Gradient definition */}
-              <defs>
-                <linearGradient id={`gradient-${goal.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#0077B6" />
-                  <stop offset="50%" stopColor="#00B4D8" />
-                  <stop offset="100%" stopColor="#0077B6" />
-                </linearGradient>
-              </defs>
-            </svg>
-            
-            {/* Percentage text in center - Updated with Poppins font */}
-            <Box sx={{ 
-              position: 'absolute',
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%)',
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
             }}>
-              <Typography
-                variant="h4"
-                fontWeight="700"
-                sx={{
-                  fontFamily: 'Poppins, Arial, sans-serif',
-                  color: '#22223b',
-                  fontSize: '1.4rem', // Reduced font size
-                  textAlign: 'center',
-                  lineHeight: 1.2,
-                  letterSpacing: '-0.01em',
-                  mb: '-2px',
-                }}
-              >
-                {currentSavedAmount.toLocaleString()}
-                <Typography
-                  component="span"
-                  variant="subtitle2"
-                  sx={{
-                    display: 'block',
-                    fontFamily: 'Poppins, Arial, sans-serif',
-                    fontWeight: 400,
-                    fontSize: '0.75rem', // Reduced font size
-                    color: '#4a4e69',
-                    mt: 0.3,
-                  }}
-                >
-                  LKR Saved
-                </Typography>
-              </Typography>
-            </Box>
-          </Box>
-
-          {/* Amount Information - Enhanced styling */}
-          <Box sx={{ 
-            flexGrow: 1, 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'flex-end', 
-            gap: 2.5 
+              <TargetIcon size={20} color="white" />
+            </div>
+            <div style={{
+              padding: '4px 12px',
+              backgroundColor: goalStatusInfo.color + '15',
+              borderRadius: '20px',
+              border: `1px solid ${goalStatusInfo.color}30`
+            }}>
+              <span style={{ 
+                color: goalStatusInfo.color,
+                fontSize: '11px',
+                fontWeight: '600',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                {goalStatusInfo.status}
+              </span>
+            </div>
+          </div>
+          
+          <h3 style={{ 
+            margin: '0 0 6px 0',
+            fontWeight: "700",
+            color: "#1F2937",
+            fontSize: '24px',
+            fontFamily: '"Inter", system-ui, sans-serif',
+            lineHeight: 1.2,
+            letterSpacing: '-0.5px'
           }}>
-            <Box sx={{ 
-              textAlign: 'right',
-              background: 'rgba(255, 255, 255, 0.8)',
-              borderRadius: '16px',
-              p: 2,
-              minWidth: '140px',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(0, 119, 182, 0.1)',
-              boxShadow: '0 4px 16px rgba(0, 119, 182, 0.1)',
-              transition: 'all 0.3s ease'
-            }}>
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: '#0077B6',
-                  fontSize: '0.7rem',
-                  fontWeight: '600',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}
-              >
-                🎯 Target Goal
-              </Typography>
-              <Typography 
-                variant="h6" 
-                fontWeight="700" 
-                sx={{ 
-                  color: '#0077B6',
-                  lineHeight: 1.2,
-                  fontSize: '1.2rem',
-                  mt: 0.5
-                }}
-              >
-                {goal.targetAmount.toLocaleString()} LKR
-              </Typography>
-            </Box>
+            {goal.name || 'Savings Goal'}
+          </h3>
 
-            <Box sx={{ 
-              textAlign: 'right',
-              background: 'rgba(255, 255, 255, 0.8)',
-              borderRadius: '16px',
-              p: 2,
-              minWidth: '140px',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(5, 150, 105, 0.1)',
-              boxShadow: '0 4px 16px rgba(5, 150, 105, 0.1)',
-              transition: 'all 0.3s ease'
+          {goal.description && (
+            <p style={{ 
+              margin: 0,
+              color: '#6B7280',
+              fontSize: '14px',
+              fontFamily: '"Inter", system-ui, sans-serif',
+              lineHeight: 1.5,
+              opacity: showDetails ? 1 : 0.8
             }}>
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: '#059669',
-                  fontSize: '0.7rem',
-                  fontWeight: '600',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}
-              >
-                💰 Saved Amount
-              </Typography>
-              <Typography 
-                variant="h6" 
-                fontWeight="700" 
-                sx={{ 
-                  color: '#059669',
-                  lineHeight: 1.2,
-                  fontSize: '1.2rem',
-                  mt: 0.5
-                }}
-              >
-                {currentSavedAmount.toLocaleString()} LKR
-              </Typography>
-            </Box>
+              {goal.description}
+            </p>
+          )}
+        </div>
+      </div>
 
-            <Box sx={{ 
-              textAlign: 'right',
-              background: 'rgba(255, 255, 255, 0.8)',
-              borderRadius: '16px',
-              p: 2,
-              minWidth: '140px',
-              backdropFilter: 'blur(10px)',
-              border: `1px solid ${remainingDays > 30 ? 'rgba(0, 119, 182, 0.1)' : 'rgba(220, 38, 38, 0.1)'}`,
-              boxShadow: `0 4px 16px ${remainingDays > 30 ? 'rgba(0, 119, 182, 0.1)' : 'rgba(220, 38, 38, 0.1)'}`,
-              transition: 'all 0.3s ease'
-            }}>
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: remainingDays > 30 ? '#0077B6' : '#dc2626',
-                  fontSize: '0.7rem',
-                  fontWeight: '600',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}
-              >
-                ⏰ Days Left
-              </Typography>
-              <Typography 
-                variant="h6" 
-                fontWeight="700" 
-                sx={{ 
-                  color: remainingDays > 30 ? '#0077B6' : '#dc2626',
-                  lineHeight: 1.2,
-                  fontSize: '1.2rem',
-                  mt: 0.5
-                }}
-              >
-                {remainingDays} Days
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
-
-        {/* Bottom Action Buttons - Enhanced with matching style */}
-        <Box sx={{ 
+      {/* Main Content */}
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        gap: '32px', 
+        flex: 1,
+        minHeight: '240px'
+      }}>
+        {/* Enhanced Circular Progress */}
+        <div style={{ 
+          position: 'relative', 
           display: 'flex', 
-          justifyContent: 'flex-end', 
-          gap: 1.5,
-          mt: 2,
-          pt: 2,
-          borderTop: '2px solid rgba(0, 119, 182, 0.1)'
+          alignItems: 'center', 
+          justifyContent: 'center',
+          flexShrink: 0,
+          flex: 1
         }}>
-          <IconButton 
-            onClick={onEdit}
-            sx={{
-              background: 'linear-gradient(135deg, rgba(0, 119, 182, 0.1) 0%, rgba(0, 180, 216, 0.15) 100%)',
-              color: '#0077B6',
-              width: 48,
-              height: 48,
-              border: '2px solid rgba(0, 119, 182, 0.15)',
-              backdropFilter: 'blur(10px)',
-              boxShadow: '0 4px 16px rgba(0, 119, 182, 0.2)',
-              '&:hover': {
-                background: 'linear-gradient(135deg, rgba(0, 119, 182, 0.15) 0%, rgba(0, 180, 216, 0.2) 100%)',
-                transform: 'translateY(-2px) scale(1.05)',
-                boxShadow: '0 8px 24px rgba(0, 119, 182, 0.3)',
-                border: '2px solid rgba(0, 119, 182, 0.25)'
-              },
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-            }}
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
-          <IconButton 
-            onClick={onDelete}
-            sx={{
-              background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(239, 68, 68, 0.15) 100%)',
-              color: '#dc2626',
-              width: 48,
-              height: 48,
-              border: '2px solid rgba(220, 38, 38, 0.15)',
-              backdropFilter: 'blur(10px)',
-              boxShadow: '0 4px 16px rgba(220, 38, 38, 0.2)',
-              '&:hover': {
-                background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.15) 0%, rgba(239, 68, 68, 0.2) 100%)',
-                transform: 'translateY(-2px) scale(1.05)',
-                boxShadow: '0 8px 24px rgba(220, 38, 38, 0.3)',
-                border: '2px solid rgba(220, 38, 38, 0.25)'
-              },
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-            }}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Box>
-      </Box>
+          {/* Outer glow effect */}
+          <div style={{
+            position: 'absolute',
+            width: '220px',
+            height: '220px',
+            borderRadius: '50%',
+            background: `conic-gradient(from 0deg, ${goalStatusInfo.color}20 0deg, ${goalStatusInfo.color}10 ${progressPercentage * 3.6}deg, transparent ${progressPercentage * 3.6}deg)`,
+            filter: 'blur(10px)',
+            opacity: 0.6
+          }} />
+          
+          <svg width="200" height="200" style={{ position: 'relative', zIndex: 1 }}>
+            {/* Background circle */}
+            <circle
+              cx="100"
+              cy="100"
+              r="90"
+              stroke="rgba(229, 231, 235, 0.8)"
+              strokeWidth="6"
+              fill="transparent"
+            />
+            {/* Progress circle */}
+            <circle
+              cx="100"
+              cy="100"
+              r="90"
+              stroke={goalStatusInfo.color}
+              strokeWidth="6"
+              fill="transparent"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              transform="rotate(-90 100 100)"
+              style={{
+                transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+              }}
+            />
+          </svg>
+          
+          {/* Center content */}
+          <div style={{ 
+            position: 'absolute',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div style={{ 
+              fontSize: '32px',
+              fontWeight: "800",
+              color: goalStatusInfo.color,
+              lineHeight: 1,
+              margin: 0,
+              fontFamily: '"Inter", system-ui, sans-serif'
+            }}>
+              {progressPercentage}%
+            </div>
+            <div style={{ 
+              color: '#9CA3AF',
+              fontSize: '12px',
+              fontWeight: '600',
+              marginTop: '2px',
+              textTransform: 'uppercase',
+              letterSpacing: '1px'
+            }}>
+              Progress
+            </div>
+          </div>
+        </div>
 
-      {/* CSS animations */}
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(180deg); }
-        }
-        
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-        }
-        
-        @keyframes breathe {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-        }
-        
-        @keyframes celebrate {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-        }
-      `}</style>
-    </Card>
+        {/* Statistics Grid */}
+        <div style={{ 
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          gap: '12px',
+          height: '100%',
+          minHeight: '220px'
+        }}>
+          {/* Target Amount */}
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(147, 197, 253, 0.05) 100%)',
+            borderRadius: '10px',
+            padding: '10px',
+            border: '1px solid rgba(59, 130, 246, 0.1)',
+            transition: 'all 0.3s ease',
+            transform: isHovered ? 'scale(1.02)' : 'scale(1)',
+            flex: '1',
+            width: '100%',
+            height: '60px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+              <TargetIcon size={14} color="#3B82F6" />
+              <span style={{ 
+                color: '#6B7280',
+                fontSize: '10px',
+                fontWeight: '600',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                Target Goal
+              </span>
+            </div>
+            <div style={{ 
+              color: '#1F2937',
+              fontSize: '18px',
+              fontWeight: '700',
+              fontFamily: '"Inter", system-ui, sans-serif'
+            }}>
+              {goal.targetAmount.toLocaleString()} LKR
+            </div>
+          </div>
+
+          {/* Current Savings */}
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(110, 231, 183, 0.05) 100%)',
+            borderRadius: '10px',
+            padding: '10px',
+            border: '1px solid rgba(16, 185, 129, 0.1)',
+            transition: 'all 0.3s ease',
+            transform: isHovered ? 'scale(1.02)' : 'scale(1)',
+            flex: '1',
+            width: '100%',
+            height: '60px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+              <AccountBalanceIcon size={14} color="#10B981" />
+              <span style={{ 
+                color: '#6B7280',
+                fontSize: '10px',
+                fontWeight: '600',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                Current Savings
+              </span>
+            </div>
+            <div style={{ 
+              color: '#1F2937',
+              fontSize: '18px',
+              fontWeight: '700',
+              fontFamily: '"Inter", system-ui, sans-serif'
+            }}>
+              {currentSavedAmount.toLocaleString()} LKR
+            </div>
+          </div>
+
+          {/* Days Remaining */}
+          <div style={{
+            background: goal.remainingDays <= 30 
+              ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(252, 165, 165, 0.05) 100%)'
+              : 'linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(251, 191, 36, 0.05) 100%)',
+            borderRadius: '10px',
+            padding: '10px',
+            border: `1px solid ${goal.remainingDays <= 30 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)'}`,
+            transition: 'all 0.3s ease',
+            transform: isHovered ? 'scale(1.02)' : 'scale(1)',
+            flex: '1',
+            width: '100%',
+            height: '60px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+              <ScheduleIcon size={14} color={goal.remainingDays <= 30 ? '#EF4444' : '#F59E0B'} />
+              <span style={{ 
+                color: '#6B7280',
+                fontSize: '10px',
+                fontWeight: '600',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                Time Remaining
+              </span>
+            </div>
+            <div style={{ 
+              color: goal.remainingDays <= 30 ? '#EF4444' : '#1F2937',
+              fontSize: '18px',
+              fontWeight: '700',
+              fontFamily: '"Inter", system-ui, sans-serif'
+            }}>
+              {goal.remainingDays} Days
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer with additional info */}
+      {showDetails && (
+        <div style={{
+          marginTop: '20px',
+          padding: '16px 0',
+          borderTop: '1px solid rgba(229, 231, 235, 0.5)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          animation: 'fadeIn 0.3s ease',
+          flexShrink: 0
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <TrendingUpIcon />
+            <span style={{ fontSize: '12px', color: '#6B7280', fontWeight: '500' }}>
+              {remainingAmount > 0 ? `${remainingAmount.toLocaleString()} LKR remaining` : 'Goal achieved!'}
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+            <span style={{ fontSize: '12px', color: '#9CA3AF', fontFamily: '"Inter", system-ui, sans-serif' }}>
+              {savingRecords.length} transactions
+            </span>
+            {/* Debug info - remove in production */}
+            <span style={{ fontSize: '10px', color: '#D1D5DB', fontFamily: 'monospace' }}>
+              Progress Diff: {goalStatusInfo.progressDifference.toFixed(1)}%
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

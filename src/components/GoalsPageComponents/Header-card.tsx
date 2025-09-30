@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 
@@ -17,20 +17,30 @@ const HeaderCard: React.FC<HeaderProps> = ({
   onButtonClick,
   imagePath 
 }) => {
+  const [isHovered, setIsHovered] = useState(false);
   return (
-    <Box sx={{
-      backgroundColor: '#9ebbd9',
-      borderRadius: '12px',
-      padding: '0',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '20px',
-      position: 'relative',
-      overflow: 'visible', // Changed from 'hidden' to allow overflow
-      minHeight: '240px',
-      width: '100%'
-    }}>
+    <Box 
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      sx={{
+        backgroundColor: '#9ebbd9',
+        borderRadius: '12px',
+        padding: '0',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '20px',
+        position: 'relative',
+        overflow: 'visible', // Changed from 'hidden' to allow overflow
+        minHeight: '240px',
+        width: '100%',
+        transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
+        boxShadow: isHovered 
+          ? '0 8px 25px rgba(0,0,0,0.12)' 
+          : '0 2px 8px rgba(0,0,0,0.08)',
+        transition: 'all 0.3s ease',
+        cursor: 'pointer'
+      }}>
       <Box sx={{
         maxWidth: '55%',
         zIndex: 1,

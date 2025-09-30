@@ -4,7 +4,8 @@ import { TableRow, TableCell, Typography } from '@mui/material';
 export interface SavingRecord {
   id: number;
   amount: number;
-  date: string; // ISO string format for API compatibility
+  date: string; // Date part
+  time: string; // Time part
   description?: string;
   goalId: number;
   userId?: number;
@@ -36,7 +37,7 @@ const SavingRecord: React.FC<SavingRecordProps> = ({ record }) => {
   };
 
   const formatAmount = (amount: number) => {
-    return `+$${amount.toFixed(2)}`;
+    return `+${amount.toFixed(2)} LKR`;
   };
 
   return (
@@ -53,7 +54,7 @@ const SavingRecord: React.FC<SavingRecordProps> = ({ record }) => {
       </TableCell>
       <TableCell>
         <Typography variant="body2" color="textSecondary">
-          {record.description || 'Necessities'}
+          {record.description || ''}
         </Typography>
       </TableCell>
       <TableCell align="right">

@@ -20,20 +20,19 @@ const AddSavingRecordButton: React.FC<AddSavingRecordButtonProps> = ({
       onClick={onClick}
       disabled={disabled || loading}
       sx={{
-        backgroundColor: '#4A90E2',
+        backgroundColor: '#0B00DD',
         color: 'white',
-        borderRadius: '12px',
+        borderRadius: '30px',
         textTransform: 'none',
-        fontWeight: 700,
-        fontSize: '16px',
-        padding: '14px 32px',
-        boxShadow: '0 4px 20px rgba(74, 144, 226, 0.3)',
-        background: 'linear-gradient(135deg, #4A90E2 0%, #357ABD 100%)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        fontWeight: 'bold',
+        fontSize: '18px',
+        fontFamily: '"Inter", "Roboto", "Arial", sans-serif',
+        padding: '10px 20px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
         '&:hover': {
-          background: 'linear-gradient(135deg, #357ABD 0%, #2563EB 100%)',
-          boxShadow: '0 6px 25px rgba(74, 144, 226, 0.4)',
-          transform: 'translateY(-2px)',
+          backgroundColor: '#0a00bb',
+          boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+          transform: 'translateY(-1px)',
         },
         '&:active': {
           transform: 'translateY(0px)',
@@ -42,11 +41,10 @@ const AddSavingRecordButton: React.FC<AddSavingRecordButtonProps> = ({
           backgroundColor: '#e2e8f0',
           color: '#94a3b8',
           boxShadow: 'none',
-          background: 'none',
         },
         minWidth: '220px',
         height: '52px',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+        transition: 'all 0.2s ease'
       }}
     >
       {loading ? 'Adding...' : 'Add Saving Record'}

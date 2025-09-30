@@ -1,225 +1,237 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  Box,
+  Button,
+  IconButton,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
-  Paper,
   Typography,
-  Box
+  useMediaQuery,
+  Tooltip,
+  useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from '@mui/material';
-import SavingRecord, { SavingRecord as SavingRecordType } from './SavingRecord';
+import {
+  DeleteOutline,
+  AccountBalanceWallet,
+  CalendarToday,
+  Schedule,
+  Description,
+  Savings // Add this import for the savings icon
+} from '@mui/icons-material';
 
-interface SavingRecordsHistoryTableProps {
-  records: SavingRecordType[];
+interface SavingRecord {
+  id: number;
+  amount: number;
+  date: string; // Date part
+  time: string; // Time part  
+  description?: string;
+  goalId: number;
+  userId?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-const SavingRecordsHistoryTable: React.FC<SavingRecordsHistoryTableProps> = ({ records }) => {
-  return (
-    <Box sx={{ mt: 4, position: 'relative' }}>
-      {/* Decorative background elements */}
-      <Box sx={{
-        position: 'absolute',
-        top: -30,
-        right: -30,
-        width: 120,
-        height: 120,
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(0, 119, 182, 0.06) 0%, transparent 70%)',
-        zIndex: 0,
-        animation: 'float 8s ease-in-out infinite'
-      }} />
-      
-      <Box sx={{
-        position: 'absolute',
-        bottom: -20,
-        left: -20,
-        width: 80,
-        height: 80,
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(0, 180, 216, 0.04) 0%, transparent 70%)',
-        zIndex: 0,
-        animation: 'float 6s ease-in-out infinite reverse'
-      }} />
+interface SavingRecordsHistoryTableProps {
+  records: SavingRecord[];
+  onDeleteRecord?: (recordId: number) => void;
+}
 
-      {/* Header with enhanced styling */}
-      <Box sx={{ 
-        ml:5,
-        mb: 3,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2,
-        position: 'relative',
-        zIndex: 1
+const SavingRecordsHistoryTable: React.FC<SavingRecordsHistoryTableProps> = ({ 
+  records, 
+  onDeleteRecord 
+}) => {
+  const theme = useTheme();
+  const isTabletOrDesktop = useMediaQuery(theme.breakpoints.down("lg"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  
+  const [showAll, setShowAll] = useState<boolean>(false);
+  const [deletingRecord, setDeletingRecord] = useState<number | null>(null);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState<boolean>(false);
+  const [recordToDelete, setRecordToDelete] = useState<SavingRecord | null>(null);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  const formatTime = (timeString: string) => {
+    // timeString is in format "HH:mm:ss" from backend TimeSpan
+    if (!timeString) {
+      return '12:00 AM'; // Fallback for missing time
+    }
+    
+    // Create a temporary date with the time to format it properly
+    const tempDate = new Date(`1970-01-01T${timeString}`);
+    if (isNaN(tempDate.getTime())) {
+      return '12:00 AM'; // Fallback for invalid time
+    }
+    
+    return tempDate.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-LK', {
+      style: 'currency',
+      currency: 'LKR',
+      minimumFractionDigits: 2,
+    }).format(amount);
+  };
+
+  const handleDeleteClick = (record: SavingRecord) => {
+    setRecordToDelete(record);
+    setConfirmDeleteOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!onDeleteRecord || !recordToDelete) return;
+    
+    setDeletingRecord(recordToDelete.id);
+    try {
+      await onDeleteRecord(recordToDelete.id);
+    } catch (error) {
+      console.error('Error deleting record:', error);
+    } finally {
+      setDeletingRecord(null);
+      setConfirmDeleteOpen(false);
+      setRecordToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmDeleteOpen(false);
+    setRecordToDelete(null);
+  };
+
+  // Get the records to display (limit to 8 if showAll is false)
+  const getRecordsToDisplay = () => {
+    return showAll ? records : records.slice(0, 8);
+  };
+
+  const handleViewToggle = () => {
+    setShowAll(!showAll);
+  };
+
+  const recordsToDisplay = getRecordsToDisplay();
+
+  return (
+    <Box sx={{ mx: 3 }}>
+      {/* Desktop and Tablet view */}
+      <Box sx={{
+        display: { xs: 'none', md: 'block' }
       }}>
-        <Box sx={{
-          width: 40,
-          height: 40,
-          borderRadius: '12px',
-          background: "linear-gradient(135deg, #0077B6 0%, #00B4D8 100%)",
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: "0 4px 16px rgba(0, 119, 182, 0.3)",
-          animation: 'pulse 2s ease-in-out infinite'
-        }}>
-          <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
-            📊
-          </Typography>
-        </Box>
-        <Typography 
-          variant="h5" 
-          sx={{ 
-            background: "linear-gradient(135deg, #0077B6 0%, #023E8A 100%)",
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            color: "transparent",
-            fontWeight: '800',
-            letterSpacing: '-0.02em',
-            fontSize: '1.3rem'
-          }}
-        >
-          Savings History
-        </Typography>
-      </Box>
-      
-      <TableContainer 
-        component={Paper} 
-        sx={{ 
-          borderRadius: "24px",
-          boxShadow: "0 8px 32px rgba(0, 119, 182, 0.15), 0 2px 8px rgba(0, 119, 182, 0.08)",
-          border: "2px solid rgba(0, 119, 182, 0.1)",
-          background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e0f2fe 100%)",
-          overflow: 'hidden',
-          position: 'relative',
-          zIndex: 1,
-          bottom:10,
-          transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-          "&:hover": {
-            boxShadow: "0 16px 48px rgba(0, 119, 182, 0.2), 0 4px 16px rgba(0, 119, 182, 0.15)",
-            transform: "translateY(-2px)",
-            border: "2px solid rgba(0, 119, 182, 0.2)"
-          },
-          "&::before": {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '4px',
-           
-            zIndex: 1,
-            animation: 'shimmer 3s ease-in-out infinite'
-          }
-        }}
-      >
-        <Table>
+        <Table sx={{ minWidth: 650 }} aria-label="savings history table">
           <TableHead>
-            <TableRow sx={{ 
-              background: 'linear-gradient(135deg, rgba(0, 119, 182, 0.08) 0%, rgba(0, 180, 216, 0.05) 100%)',
-              '& .MuiTableCell-root': {
-                borderBottom: '2px solid rgba(0, 119, 182, 0.15)',
-                py: 2
-              }
-            }}>
-              <TableCell>
-                <Typography 
-                  variant="subtitle2" 
-                  sx={{ 
-                    fontWeight: '700',
-                    color: '#0077B6',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    fontSize: '0.75rem'
-                  }}
-                >
-                  📅 Date
-                </Typography>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CalendarToday sx={{ fontSize: 18, color: '#666' }} />
+                Date
               </TableCell>
-              <TableCell>
-                <Typography 
-                  variant="subtitle2" 
-                  sx={{ 
-                    fontWeight: '700',
-                    color: '#0077B6',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    fontSize: '0.75rem'
-                  }}
-                >
-                  ⏰ Time
-                </Typography>
+              <TableCell sx={{ fontWeight: 'bold' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Schedule sx={{ fontSize: 18, color: '#666' }} />
+                  Time
+                </Box>
               </TableCell>
-              <TableCell>
-                <Typography 
-                  variant="subtitle2" 
-                  sx={{ 
-                    fontWeight: '700',
-                    color: '#0077B6',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    fontSize: '0.75rem'
-                  }}
-                >
-                  📝 Description
-                </Typography>
+              <TableCell sx={{ fontWeight: 'bold' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Description sx={{ fontSize: 18, color: '#666' }} />
+                  Description
+                </Box>
               </TableCell>
-              <TableCell align="right">
-                <Typography 
-                  variant="subtitle2" 
-                  sx={{ 
-                    fontWeight: '700',
-                    color: '#0077B6',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    fontSize: '0.75rem'
-                  }}
-                >
-                  💰 Amount
-                </Typography>
+              <TableCell sx={{ fontWeight: 'bold' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <AccountBalanceWallet sx={{ fontSize: 18, color: '#666' }} />
+                  Amount
+                </Box>
+              </TableCell>
+              <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>
+                Actions
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {records.length > 0 ? (
-              records.map((record, index) => (
+            {recordsToDisplay.length > 0 ? (
+              recordsToDisplay.map((record, index) => (
                 <TableRow 
                   key={record.id}
-                  sx={{
-                    background: index % 2 === 0 
-                      ? 'rgba(255, 255, 255, 0.8)' 
-                      : 'rgba(0, 119, 182, 0.02)',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      background: 'rgba(0, 119, 182, 0.08)',
-                      transform: 'translateX(4px)',
-                      boxShadow: '0 4px 16px rgba(0, 119, 182, 0.1)',
-                      '& .MuiTableCell-root': {
-                        borderBottom: '1px solid rgba(0, 119, 182, 0.2)'
-                      }
-                    },
-                    '& .MuiTableCell-root': {
-                      borderBottom: '1px solid rgba(0, 119, 182, 0.1)',
-                      py: 2
-                    }
+                  sx={{ 
+                    '&:last-child td, &:last-child th': { border: 0 },
+                    '&:hover': { backgroundColor: '#f5f5f5' },
+                    opacity: deletingRecord === record.id ? 0.5 : 1,
+                    transition: 'all 0.2s ease'
                   }}
                 >
-                  <SavingRecord record={record} />
+                  <TableCell>
+                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"}>
+                      {formatDate(record.date)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"}>
+                      {formatTime(record.time)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ wordBreak: "break-word", whiteSpace: "normal", maxWidth: "250px" }}>
+                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"} color="textSecondary">
+                      {record.description || ''}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography 
+                      variant={isTabletOrDesktop ? "body2" : "body1"} 
+                      sx={{ 
+                        color: '#4CAF50', 
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      +{formatCurrency(record.amount)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ textAlign: 'center' }}>
+                    {onDeleteRecord && (
+                      <Tooltip title="Delete record" arrow>
+                        <IconButton
+                          onClick={() => handleDeleteClick(record)}
+                          disabled={deletingRecord === record.id}
+                          size="small"
+                          sx={{
+                            color: '#f44336',
+                            '&:hover': {
+                              backgroundColor: '#ffebee',
+                              transform: 'scale(1.1)'
+                            },
+                            '&:disabled': {
+                              color: '#bdc3c7'
+                            },
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          <DeleteOutline fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell 
-                  colSpan={4} 
-                  align="center" 
-                  sx={{ 
-                    py: 6,
-                    background: 'rgba(255, 255, 255, 0.8)',
-                    borderBottom: 'none'
-                  }}
-                >
+                <TableCell colSpan={5} sx={{ textAlign: 'center', py: 6 }}>
                   <Box sx={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -227,40 +239,28 @@ const SavingRecordsHistoryTable: React.FC<SavingRecordsHistoryTableProps> = ({ r
                     gap: 2
                   }}>
                     <Box sx={{
-                      width: 64,
-                      height: 64,
-                      borderRadius: '20px',
-                      background: "linear-gradient(135deg, rgba(0, 119, 182, 0.1) 0%, rgba(0, 180, 216, 0.15) 100%)",
+                      width: 80,
+                      height: 80,
+                      borderRadius: 2,
+                      backgroundColor: '#f0f7ff',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      boxShadow: "0 4px 16px rgba(0, 119, 182, 0.2)",
-                      animation: 'breathe 4s ease-in-out infinite'
+                      border: '2px solid #e3f2fd'
                     }}>
-                      <Typography variant="h4" sx={{ color: '#0077B6' }}>
-                        📈
-                      </Typography>
+                      <AccountBalanceWallet sx={{ fontSize: 40, color: '#1976d2' }} />
                     </Box>
-                    <Typography 
-                      variant="h6" 
-                      sx={{ 
-                        color: '#0077B6',
-                        fontWeight: '600',
-                        textAlign: 'center'
-                      }}
-                    >
+                    <Typography variant="h6" sx={{ 
+                      color: '#1976d2',
+                      fontWeight: 600
+                    }}>
                       No Savings Records Yet
                     </Typography>
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        color: '#6b7280',
-                        textAlign: 'center',
-                        maxWidth: '300px',
-                        fontWeight: '500'
-                      }}
-                    >
-                      Start your savings journey by clicking "Add Saving Record" to track your progress towards your goals.
+                    <Typography variant="body2" color="textSecondary" sx={{ 
+                      textAlign: 'center',
+                      maxWidth: 300
+                    }}>
+                      Start your savings journey by adding your first saving record to track your progress towards your goals.
                     </Typography>
                   </Box>
                 </TableCell>
@@ -268,30 +268,89 @@ const SavingRecordsHistoryTable: React.FC<SavingRecordsHistoryTableProps> = ({ r
             )}
           </TableBody>
         </Table>
-      </TableContainer>
+        {/* View More/Less Button for Desktop/Tablet */}
+        {records.length > 8 && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <Button 
+              variant="outlined" 
+              onClick={handleViewToggle}
+              disableRipple
+              sx={{
+                borderRadius: "20px",
+                textTransform: "none",
+                px: 3,
+                py: 1
+              }}
+            >
+              {showAll ? "View Less" : `View More (${records.length - 8} more)`}
+            </Button>
+          </Box>
+        )}
+      </Box>
 
-      {/* CSS animations */}
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-15px) rotate(180deg); }
-        }
-        
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-        }
-        
-        @keyframes breathe {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-        }
-        
-        @keyframes shimmer {
-          0% { background-position: -200px 0; }
-          100% { background-position: 200px 0; }
-        }
-      `}</style>
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmDeleteOpen}
+        onClose={handleCancelDelete}
+        aria-labelledby="confirm-delete-dialog-title"
+        aria-describedby="confirm-delete-dialog-description"
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            padding: '8px'
+          }
+        }}
+      >
+        <DialogTitle id="confirm-delete-dialog-title" sx={{ 
+          fontWeight: 600, 
+          fontSize: '1.25rem',
+          color: '#1a1a1a'
+        }}>
+          Confirm Delete
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="confirm-delete-dialog-description" sx={{ 
+            color: '#666666',
+            fontSize: '0.95rem'
+          }}>
+            Are you sure you want to delete this saving record of{' '}
+            <strong>
+              {recordToDelete && formatCurrency(recordToDelete.amount)}
+            </strong>
+            {recordToDelete?.description && recordToDelete.description.trim() && (
+              <span> for "{recordToDelete.description}"</span>
+            )}? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button 
+            onClick={handleCancelDelete}
+            sx={{ 
+              textTransform: 'none',
+              color: '#666666',
+              fontWeight: 500
+            }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleConfirmDelete} 
+            variant="contained"
+            disabled={deletingRecord === recordToDelete?.id}
+            sx={{ 
+              textTransform: 'none',
+              backgroundColor: '#d32f2f',
+              '&:hover': {
+                backgroundColor: '#b71c1c'
+              },
+              fontWeight: 600,
+              minWidth: '80px'
+            }}
+          >
+            {deletingRecord === recordToDelete?.id ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
