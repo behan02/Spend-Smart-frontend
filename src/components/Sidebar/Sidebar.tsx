@@ -1,160 +1,91 @@
-import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box } from '@mui/material';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import SettingsIcon from '@mui/icons-material/Settings';
-import PeopleIcon from '@mui/icons-material/People';
-import LogoutIcon from '@mui/icons-material/Logout';
-import { useNavigate } from 'react-router-dom';
-import Logo from '../../assets/ChatGPT_Image_Jul_23__2025__09_24_00_PM-removebg-preview.png';
+import {
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Box,
+} from "@mui/material";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import SummarizeIcon from "@mui/icons-material/Summarize";
+import {
+  AccountBalanceWallet,
+  Flag,
+  Receipt,
+  Settings,
+  ExitToApp,
+} from "@mui/icons-material";
+import Logo from "../../assets/images/logo/Logo.png";
+import React from "react";
+import { Link } from "react-router-dom";
 
-const Sidebar = () => {
-  const navigate = useNavigate(); //  for navigation programmatically
+// ✅ Define a type for menu items
+interface MenuItem {
+  text: string;
+  icon: React.ReactNode;
+  path: string;
+}
 
+// ✅ Type menuItems
+const menuItems: MenuItem[] = [
+  { text: "Dashboard", icon: <DashboardIcon />, path: "/", },
+  { text: "Report", icon: <SummarizeIcon />, path: "/report" },
+  { text: "Budget", icon: <AccountBalanceWallet />, path: "/budget" },
+  { text: "Goals", icon: <Flag />, path: "/goals" },
+  { text: "Transaction", icon: <Receipt />, path: "/transaction" },
+  { text: "Settings", icon: <Settings />, path: "/settings" },
+  { text: "Logout", icon: <ExitToApp />, path: "/logout" },
+];
+
+// ✅ Sidebar component typed
+const Sidebar: React.FC = () => {
   return (
     <Drawer
       variant="permanent"
       sx={{
-        width: 240,
+        width: 280,
+        height: 1117,
         flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: 240,
-          backgroundColor: '#0D47A1',
-          color: '#fff',
+        [`& .MuiDrawer-paper`]: {
+          width: 280,
+          boxSizing: "border-box",
+          background: "#023e8a",
+          color: "#fff",
         },
       }}
     >
-      {/* Logo Section */}
-      <Box 
-        sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center',
-          padding: '20px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.12)'
-        }}
-      >
-        <img 
-          src={Logo} 
-          alt="SpendSmart Logo" 
-          style={{ 
-            height: 150,
-            width: '120',
-            
-            objectFit: 'contain'
-          }} 
-        />
-      </Box>
-
-      <List sx={{ paddingTop: '25px' }}>
-        {/* Dashboard Button */}
-        <ListItem disablePadding sx={{ marginBottom: '21px' }}>
-          <ListItemButton 
-            onClick={() => navigate('/')}
-            sx={{
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                transform: 'translateX(8px)',
-                transition: 'all 0.3s ease',
-                '& .MuiListItemIcon-root': {
-                  transform: 'scale(1.1)',
-                  transition: 'transform 0.3s ease',
+      <Box
+        component="img"
+        src={Logo}
+        alt="site logo"
+        sx={{ width: 150, height: 200, padding: 5 }}
+      />
+      
+      <List>
+        {menuItems.map((item) => (
+          <Link to={item.path} key={item.text} style={{ textDecoration: "none" }}>
+            <ListItemButton
+              sx={{
+                color: "white",
+                backgroundColor: "#023e8a",
+                borderRadius: 30,
+                "&:hover": {
+                  backgroundColor: "white",
+                  borderRadius: 30,
+                  color: "#023e8a",
                 },
-                '& .MuiListItemText-primary': {
-                  fontWeight: 'bold',
-                  transition: 'font-weight 0.3s ease',
-                }
-              },
-              transition: 'all 0.3s ease',
-            }}
-          >
-            <ListItemIcon sx={{ color: '#fff', transition: 'transform 0.3s ease' }}>
-              <DashboardIcon />
-            </ListItemIcon>
-            <ListItemText primary="Dashboard" />
-          </ListItemButton>
-        </ListItem>
-
-        {/* Manage Users Button */}
-        <ListItem disablePadding sx={{ marginBottom: '16px' }}>
-          <ListItemButton 
-            onClick={() => navigate('/user')}
-            sx={{
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                transform: 'translateX(8px)',
-                transition: 'all 0.3s ease',
-                '& .MuiListItemIcon-root': {
-                  transform: 'scale(1.1)',
-                  transition: 'transform 0.3s ease',
+                "&:hover .icon": {
+                  color: "#023e8a",
                 },
-                '& .MuiListItemText-primary': {
-                  fontWeight: 'bold',
-                  transition: 'font-weight 0.3s ease',
-                }
-              },
-              transition: 'all 0.3s ease',
-            }}
-          >
-            <ListItemIcon sx={{ color: '#fff', transition: 'transform 0.3s ease' }}>
-              <PeopleIcon />
-            </ListItemIcon>
-            <ListItemText primary="Manage Users" />
-          </ListItemButton>
-        </ListItem>
-
-        {/* System Settings Button */}
-        <ListItem disablePadding sx={{ marginBottom: '16px' }}>
-          <ListItemButton 
-            onClick={() => navigate('/settings')}
-            sx={{
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                transform: 'translateX(8px)',
-                transition: 'all 0.3s ease',
-                '& .MuiListItemIcon-root': {
-                  transform: 'scale(1.1)',
-                  transition: 'transform 0.3s ease',
-                },
-                '& .MuiListItemText-primary': {
-                  fontWeight: 'bold',
-                  transition: 'font-weight 0.3s ease',
-                }
-              },
-              transition: 'all 0.3s ease',
-            }}
-          >
-            <ListItemIcon sx={{ color: '#fff', transition: 'transform 0.3s ease' }}>
-              <SettingsIcon />
-            </ListItemIcon>
-            <ListItemText primary="System Settings" />
-          </ListItemButton>
-        </ListItem>
-
-        {/* Logout Button */}
-        <ListItem disablePadding>
-          <ListItemButton
-            sx={{
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                transform: 'translateX(8px)',
-                transition: 'all 0.3s ease',
-                '& .MuiListItemIcon-root': {
-                  transform: 'scale(1.1)',
-                  transition: 'transform 0.3s ease',
-                },
-                '& .MuiListItemText-primary': {
-                  fontWeight: 'bold',
-                  transition: 'font-weight 0.3s ease',
-                }
-              },
-              transition: 'all 0.3s ease',
-            }}
-          >
-            <ListItemIcon sx={{ color: '#fff', transition: 'transform 0.3s ease' }}>
-              <LogoutIcon />
-            </ListItemIcon>
-            <ListItemText primary="Logout" />
-          </ListItemButton>
-        </ListItem>
+              }}
+            >
+              <ListItemIcon className="icon" sx={{ color: "#fff" }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          </Link>
+        ))}
       </List>
     </Drawer>
   );
