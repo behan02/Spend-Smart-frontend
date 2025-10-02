@@ -1,63 +1,168 @@
-import { Box, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography, useMediaQuery } from "@mui/material";
+import { Box, Button, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography, useMediaQuery } from "@mui/material";
 import { DeleteOutline } from "@mui/icons-material";
 import theme from "../../../assets/styles/theme";
+import { useEffect, useState } from "react";
+import CategoryIcons, { iconType } from "../../../assets/categoryIcons/CategoryIcons";
+import { set } from "date-fns";
 
 interface Transaction {
+  id: number;
   type: string;
   category: string;
+  amount: number;
   date: string;
   description: string;
-  amount: number;
+  userId: number;  
 }
 
-let tablelist: Transaction[] = [
-  {
-    type: "Expense",
-    category: "Transport",
-    date: "20/11/2024",
-    description: "Travelling expenses",
-    amount: 670,
-  },
-  {
-    type: "Income",
-    category: "Salary",
-    date: "22/11/2024",
-    description: "Salary income",
-    amount: 180000,
-  },
-  {
-    type: "Income",
-    category: "Sales",
-    date: "29/11/2024",
-    description: "Sales",
-    amount: 18000,
-  },
-  {
-    type: "Expense",
-    category: "Food",
-    date: "16/11/2024",
-    description: "For my lunch",
-    amount: 450,
-  },
-  {
-    type: "Income",
-    category: "Salary",
-    date: "30/11/2024",
-    description: "Salary income",
-    amount: 180000,
-  }
-];
+interface TransactionTableProps {
+  typeFilter: string;
+  categoryFilter: string;
+  addfiltersuccessfully: boolean;
+  setAddfilterssuccessfully: (clicked: boolean) => void;
+  addtransactionsuccessfully: boolean;
+  setAddtransactionsuccessfully: (clicked: boolean) => void;
+  date: string;
+  startDate: string;
+  endDate: string;
+  sortApplied: boolean;
+  setSortApplied: (clicked: boolean) => void;
+  sortOption: string;
+  addRecurringTransactionSuccessfully: boolean;
+  setAddRecurringTransactionSuccessfully: (clicked: boolean) => void;
+  // Add new props
+  executedTransactionsDeleted?: boolean;
+  setExecutedTransactionsDeleted?: (clicked: boolean) => void;
+}
 
-const TransactionTable: React.FC = () => {
-
+const TransactionTable: React.FC<TransactionTableProps> = ({
+  typeFilter, 
+  categoryFilter, 
+  addfiltersuccessfully, 
+  setAddfilterssuccessfully, 
+  addtransactionsuccessfully, 
+  setAddtransactionsuccessfully, 
+  date, 
+  startDate, 
+  endDate, 
+  sortApplied, 
+  setSortApplied, 
+  sortOption, 
+  addRecurringTransactionSuccessfully, 
+  setAddRecurringTransactionSuccessfully,
+  // Add new props
+  executedTransactionsDeleted,
+  setExecutedTransactionsDeleted
+}) => {
+    
+  // Media query to check if the screen width is less than or equal to "laptop"
   const isTabletOrDesktop: boolean = useMediaQuery(theme.breakpoints.down("laptop"));
+
+  // State to store the list of transactions
+  const [transactionList, setTransactionList] = useState<Transaction[]>([]);
+
+  // State to control how many transactions to show
+  const [showAll, setShowAll] = useState<boolean>(false);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'LKR'
+    }).format(amount);
+  };
+
+  let userId: number = 1; // Assuming a static user ID for now
+
+  // Fetch transactions from the API
+  useEffect(() => {
+    async function fetchTransactions(){
+      try{
+        const response = await fetch(`https://localhost:7211/api/Transaction/GetTransaction/${userId}?type=${typeFilter}&category=${categoryFilter}&date=${date}&startDate=${startDate}&endDate=${endDate}&sorting=${sortOption}`);
+        if(!response.ok){
+          throw new Error("Failed to fetch transactions");
+        }
+        const data = await response.json();
+        setTransactionList(data);
+      }catch(error){
+        console.error("Error fetching transactions:", error);
+      }
+    }
+
+    fetchTransactions();
+
+    if(addtransactionsuccessfully || addfiltersuccessfully || sortApplied || executedTransactionsDeleted) {
+      fetchTransactions();
+      setAddtransactionsuccessfully(false);
+      setAddfilterssuccessfully(false);
+      setSortApplied(false);
+      setAddRecurringTransactionSuccessfully(false);
+      // Reset the executed transactions deleted flag
+      if (setExecutedTransactionsDeleted) {
+        setExecutedTransactionsDeleted(false);
+      }
+    }
+  },[
+    addtransactionsuccessfully, 
+    addfiltersuccessfully, 
+    sortApplied, 
+    addRecurringTransactionSuccessfully,
+    executedTransactionsDeleted // Add this dependency
+  ]);
+
+  // useEffect(() => {
+  //   async function fetchTransactions(){
+  //     try{
+  //       const response = await fetch(`https://localhost:7211/api/Transaction/GetTransaction?filterOn=${filterOn}&filterQuery=Expense`);
+  //       if(!response.ok){
+  //         throw new Error("Failed to fetch transactions");
+  //       }
+  //       const data = await response.json();
+  //       setTransactionList(data);
+  //     }catch(error){
+  //       console.error("Error fetching transactions:", error);
+  //     }
+  //   }
+
+  //   fetchTransactions();
+  // },[]);
+
+  // Function to delete a transaction by ID
+  async function deleteTransaction(id: number) {
+    try{
+      console.log("Deleting transaction with ID:", id);
+      const response = await fetch(`https://localhost:7211/api/Transaction/DeleteTransaction/${userId}/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if(!response.ok){
+        throw new Error("Failed to delete transaction");
+      }
+      // Update the transaction list after deletion
+      setTransactionList((prevList) => prevList.filter((transaction) => transaction.id !== id));
+    }catch(error){
+      console.error("Error deleting transaction:", error);
+    }
+  }
+  // Get the transactions to display (limit to 10 if showAll is false)
+  const getTransactionsToDisplay = () => {
+    return showAll ? transactionList : transactionList.slice(0, 8);
+  };
+
+  // Toggle view more/less
+  const handleViewToggle = () => {
+    setShowAll(!showAll);
+  };
+
+  const transactionsToDisplay = getTransactionsToDisplay();
 
   return (
     <ThemeProvider theme={theme}>
       { /* Desktop and Tablet view */ }
-      <Box mt="30px" sx={{
+      <Box sx={{
         [theme.breakpoints.between("mobile","tablet")]: {
-          display: "none",
+          display: "none", // Hide table for mobile view
         }
       }}>
         <TableContainer component={Paper} sx={{borderRadius: "15px"}}>
@@ -73,24 +178,52 @@ const TransactionTable: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {tablelist.map((list: Transaction, index: number) => (
+              {transactionsToDisplay.map((list: Transaction, index: number) => (
                 <TableRow 
                   key={index} 
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
-                  <TableCell>##</TableCell>
+                  {/* Category Icon */}
+                  {/* <TableCell sx={{textAlign: "center"}}>{CategoryIcons.map((item: iconType, iconIndex: number) => (
+                    list.category === item.category ? <item.icon key={iconIndex} sx={{color: item.color}}/> : null
+                  ))}</TableCell> */}
+                  <TableCell sx={{textAlign: "center"}}>
+                    {CategoryIcons.map((item: iconType, iconIndex: number) => (
+                      list.category === item.category ? (
+                        <Box
+                          key={iconIndex}
+                          sx={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 40,
+                            height: 40,
+                            borderRadius: "50%",
+                            backgroundColor: item.color,
+                          }}
+                        >
+                          <span style={{ fontSize: "1.5rem" }}>{item.icon}</span>
+                        </Box>
+                      ) : null
+                    ))}
+                  </TableCell>
+                  {/* Transaction Type */}
                   <TableCell>
                     <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.type}</Typography>
                   </TableCell>
+                  {/* Transaction Category */}
                   <TableCell>
                     <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.category}</Typography>
                   </TableCell>
+                  {/* Transaction Date */}
                   <TableCell>
                     <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.date}</Typography>
                   </TableCell>
+                  {/* Transaction Description */}
                   <TableCell sx={{wordBreak: "break-word", whiteSpace: "normal", maxWidth: "250px"}}>
                     <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.description}</Typography>
                   </TableCell>
+                  {/* Transaction Amount and Delete Button */}
                   <TableCell>
                     <Box sx={{
                       display: "flex",
@@ -102,9 +235,10 @@ const TransactionTable: React.FC = () => {
                         fontWeight: "bold",
                       }}
                       >
-                        {list.amount}
+                        {/* {list.amount} */}
+                        {formatCurrency(list.amount)}
                       </Typography>
-                      <IconButton>
+                      <IconButton onClick={() => deleteTransaction(list.id)}>
                         <DeleteOutline fontSize="medium"/>
                       </IconButton>
                     </Box>  
@@ -114,7 +248,27 @@ const TransactionTable: React.FC = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        {/* View More/Less Button for Desktop/Tablet */}
+        {transactionList.length > 8 && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <Button 
+              variant="outlined" 
+              onClick={handleViewToggle}
+              disableRipple
+              sx={{
+                borderRadius: "20px",
+                textTransform: "none",
+                px: 3,
+                py: 1
+              }}
+            >
+              {showAll ? "View Less" : `View More (${transactionList.length - 8} more)`}
+            </Button>
+          </Box>
+        )}
       </Box>
+
+      
 
       {/* Mobile view */}
       <Box mt="30px" sx={{
@@ -128,9 +282,32 @@ const TransactionTable: React.FC = () => {
         <TableContainer component={Paper} sx={{borderRadius: "15px"}}>
           <Table aria-label="simple table">
             <TableBody>
-              {tablelist.map((list: Transaction, index: number) => (
+              {transactionList.map((list: Transaction, index: number) => (
                 <TableRow key={index}>
-                  <TableCell>##</TableCell>
+                  {/* <TableCell sx={{textAlign: "center"}}>{CategoryIcons.map((item: iconType, iconIndex: number) => (
+                    list.category === item.category ? <span key={iconIndex} style={{ fontSize: "1.5rem" }}>{item.icon}</span> : null
+                  ))}
+                  </TableCell> */}
+                  <TableCell sx={{textAlign: "center"}}>
+                    {CategoryIcons.map((item: iconType, iconIndex: number) => (
+                      list.category === item.category ? (
+                        <Box
+                          key={iconIndex}
+                          sx={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 40,
+                            height: 40,
+                            borderRadius: "50%",
+                            backgroundColor: item.color,
+                          }}
+                        >
+                          <span style={{ fontSize: "1.5rem" }}>{item.icon}</span>
+                        </Box>
+                      ) : null
+                    ))}
+                  </TableCell>
                   <TableCell>
                     <Typography variant="body2" component="p">{list.category}</Typography>
                     <Typography variant="body2" component="p">{list.type}</Typography>
@@ -151,7 +328,7 @@ const TransactionTable: React.FC = () => {
                       >
                         {list.amount}
                       </Typography>
-                      <IconButton>
+                      <IconButton onClick={() => deleteTransaction(list.id)}>
                         <DeleteOutline fontSize="small"/>
                       </IconButton>
                     </Box>  
@@ -162,6 +339,23 @@ const TransactionTable: React.FC = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        {/* View More/Less Button for Mobile */}
+        {transactionList.length > 10 && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <Button 
+              variant="outlined" 
+              onClick={handleViewToggle}
+              sx={{
+                borderRadius: "20px",
+                textTransform: "none",
+                px: 3,
+                py: 1
+              }}
+            >
+              {showAll ? "View Less" : `View More (${transactionList.length - 10} more)`}
+            </Button>
+          </Box>
+        )}
       </Box>
     </ThemeProvider>
   )
