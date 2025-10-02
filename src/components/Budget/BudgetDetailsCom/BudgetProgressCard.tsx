@@ -59,7 +59,7 @@ const BudgetProgressCard: React.FC<BudgetProgressCardProps> = ({
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'LKR'
+      currency: 'USD'
     }).format(amount);
   };
 

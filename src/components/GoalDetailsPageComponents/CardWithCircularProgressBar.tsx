@@ -49,13 +49,10 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
   // Calculate remaining days
   const remainingDays = goal.remainingDays || 0;
 
-  // Circle properties - reduced filled range for more attractive look
+  // Circle properties
   const radius = 55;
   const circumference = 2 * Math.PI * radius;
-  // Reduce the maximum fill to 75% of the circle for better aesthetics
-  const maxFillPercentage = 75;
-  const adjustedProgress = (progressPercentage / 100) * (maxFillPercentage / 100);
-  const strokeDashoffset = circumference - (adjustedProgress * circumference);
+  const strokeDashoffset = circumference - (progressPercentage / 100) * circumference;
 
   return (
     <Card 
@@ -206,8 +203,6 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
                 stroke="rgba(0, 119, 182, 0.1)"
                 strokeWidth="10"
                 fill="transparent"
-                strokeDasharray={`${circumference * (maxFillPercentage / 100)} ${circumference}`}
-                transform="rotate(-135 65 65)"
               />
               {/* Progress circle */}
               <circle
@@ -218,10 +213,10 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
                   `url(#gradient-${goal.id})` : "rgba(0, 119, 182, 0.1)"}
                 strokeWidth="10"
                 fill="transparent"
-                strokeDasharray={`${circumference * (maxFillPercentage / 100)} ${circumference}`}
+                strokeDasharray={circumference}
                 strokeDashoffset={strokeDashoffset}
                 strokeLinecap="round"
-                transform="rotate(-135 65 65)"
+                transform="rotate(-90 65 65)"
                 style={{
                   transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
                   filter: 'drop-shadow(0 2px 8px rgba(0, 119, 182, 0.3))'
@@ -237,7 +232,7 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
               </defs>
             </svg>
             
-            {/* Percentage text in center - Updated with Poppins font */}
+            {/* Percentage text in center */}
             <Box sx={{ 
               position: 'absolute',
               display: 'flex',
@@ -245,34 +240,36 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <Typography
-                variant="h4"
-                fontWeight="700"
-                sx={{
-                  fontFamily: 'Poppins, Arial, sans-serif',
-                  color: '#22223b',
-                  fontSize: '1.4rem', // Reduced font size
-                  textAlign: 'center',
-                  lineHeight: 1.2,
-                  letterSpacing: '-0.01em',
-                  mb: '-2px',
+              <Typography 
+                variant="h3" 
+                fontWeight="800" 
+                sx={{ 
+                  background: progressPercentage >= 100 
+                    ? "linear-gradient(135deg, #059669 0%, #047857 100%)"
+                    : "linear-gradient(135deg, #0077B6 0%, #023E8A 100%)",
+                  backgroundClip: "text",
+                  WebkitBackgroundClip: "text",
+                  color: "transparent",
+                  lineHeight: 1,
+                  fontSize: '2rem',
+                  textShadow: '0 2px 8px rgba(0, 119, 182, 0.2)',
+                  animation: progressPercentage >= 100 ? 'celebrate 1s ease-in-out infinite' : 'none'
                 }}
               >
-                {currentSavedAmount.toLocaleString()}
-                <Typography
-                  component="span"
-                  variant="subtitle2"
-                  sx={{
-                    display: 'block',
-                    fontFamily: 'Poppins, Arial, sans-serif',
-                    fontWeight: 400,
-                    fontSize: '0.75rem', // Reduced font size
-                    color: '#4a4e69',
-                    mt: 0.3,
-                  }}
-                >
-                  LKR Saved
-                </Typography>
+                {progressPercentage}%
+              </Typography>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: '#0077B6',
+                  fontSize: '0.75rem',
+                  fontWeight: '600',
+                  mt: 0.5,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}
+              >
+                Complete
               </Typography>
             </Box>
           </Box>

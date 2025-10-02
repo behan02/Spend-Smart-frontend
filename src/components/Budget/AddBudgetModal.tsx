@@ -454,7 +454,7 @@ const AddBudgetModal: React.FC<AddBudgetModalProps> = ({
                       placeholder="Enter amount"
                       size="small"
                       InputProps={{
-                        startAdornment: <span style={{ marginRight: 8 }}>LKR</span>,
+                        startAdornment: <span style={{ marginRight: 8 }}>$</span>,
                       }}
                     />
                   </Box>
