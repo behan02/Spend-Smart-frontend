@@ -33,10 +33,18 @@ interface MenuItem {
 
 // Type menuItems with optional badges
 const menuItems: MenuItem[] = [
+<<<<<<< HEAD
   {
     text: "Dashboard",
     icon: <DashboardIcon />,
     path: "/dashboard",
+=======
+
+  {
+    text: "Dashboard",
+    icon: <DashboardIcon />,
+    path: "/",
+>>>>>>> 218a639ca6aff3d8c7673d3fc292c40805e415fd
   },
   { 
     text: "Report", 
@@ -69,6 +77,10 @@ const menuItems: MenuItem[] = [
     icon: <ExitToApp />, 
     path: "/" 
   },
+<<<<<<< HEAD
+=======
+
+>>>>>>> 218a639ca6aff3d8c7673d3fc292c40805e415fd
 ];
 
 
@@ -253,8 +265,65 @@ const Sidebar: React.FC = () => {
         </List>
       </Box>
 
+<<<<<<< HEAD
       
       
+=======
+      {/* Bottom User Section */}
+      <Box
+        sx={{
+          mt: "auto",
+          p: 2,
+          background: "#ffffff",
+          borderTop: "1px solid rgba(2, 62, 138, 0.1)",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            p: 2,
+            borderRadius: 2,
+            background: "rgba(2, 62, 138, 0.05)",
+            border: "1px solid rgba(2, 62, 138, 0.1)",
+          }}
+        >
+          <Avatar
+            sx={{
+              width: 40,
+              height: 40,
+              background: "#023e8a",
+              mr: 2,
+              fontSize: "1.1rem",
+              fontWeight: 600,
+            }}
+          >
+            U
+          </Avatar>
+          <Box>
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 600,
+                color: "#334155",
+                fontSize: "0.9rem",
+              }}
+            >
+              User Name
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                color: "#64748b",
+                fontSize: "0.75rem",
+              }}
+            >
+              Free Plan
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+>>>>>>> 218a639ca6aff3d8c7673d3fc292c40805e415fd
     </Drawer>
   );
 };

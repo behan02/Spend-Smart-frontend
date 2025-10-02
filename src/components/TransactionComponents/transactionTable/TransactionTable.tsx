@@ -1,191 +1,274 @@
-import React, { useState, useEffect } from 'react';
-import { Box, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography, useMediaQuery, CircularProgress } from "@mui/material";
+import { Box, Button, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography, useMediaQuery } from "@mui/material";
 import { DeleteOutline } from "@mui/icons-material";
 import theme from "../../../assets/styles/theme";
-import { transactionApi, TransactionView } from '../../../api/transactionApi';
-import { useUser } from '../../../context/UserContext';
+import { useEffect, useState } from "react";
+import CategoryIcons, { iconType } from "../../../assets/categoryIcons/CategoryIcons";
+import { set } from "date-fns";
 
-// Interface for our local transaction type
 interface Transaction {
   id: number;
   type: string;
   category: string;
-  date: string;
-  description?: string;
   amount: number;
-  userId?: number;
+  date: string;
+  description: string;
+  userId: number;  
 }
 
 interface TransactionTableProps {
-  onTransactionDeleted?: () => void;
+  typeFilter: string;
+  categoryFilter: string;
+  addfiltersuccessfully: boolean;
+  setAddfilterssuccessfully: (clicked: boolean) => void;
+  addtransactionsuccessfully: boolean;
+  setAddtransactionsuccessfully: (clicked: boolean) => void;
+  date: string;
+  startDate: string;
+  endDate: string;
+  sortApplied: boolean;
+  setSortApplied: (clicked: boolean) => void;
+  sortOption: string;
+  addRecurringTransactionSuccessfully: boolean;
+  setAddRecurringTransactionSuccessfully: (clicked: boolean) => void;
+  // Add new props
+  executedTransactionsDeleted?: boolean;
+  setExecutedTransactionsDeleted?: (clicked: boolean) => void;
 }
 
-const TransactionTable: React.FC<TransactionTableProps> = ({ onTransactionDeleted }) => {
-  const { user } = useUser();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
+const TransactionTable: React.FC<TransactionTableProps> = ({
+  typeFilter, 
+  categoryFilter, 
+  addfiltersuccessfully, 
+  setAddfilterssuccessfully, 
+  addtransactionsuccessfully, 
+  setAddtransactionsuccessfully, 
+  date, 
+  startDate, 
+  endDate, 
+  sortApplied, 
+  setSortApplied, 
+  sortOption, 
+  addRecurringTransactionSuccessfully, 
+  setAddRecurringTransactionSuccessfully,
+  // Add new props
+  executedTransactionsDeleted,
+  setExecutedTransactionsDeleted
+}) => {
+    
+  // Media query to check if the screen width is less than or equal to "laptop"
   const isTabletOrDesktop: boolean = useMediaQuery(theme.breakpoints.down("laptop"));
 
-  useEffect(() => {
-    fetchTransactions();
-  }, [user]);
+  // State to store the list of transactions
+  const [transactionList, setTransactionList] = useState<Transaction[]>([]);
 
-  const fetchTransactions = async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
+  // State to control how many transactions to show
+  const [showAll, setShowAll] = useState<boolean>(false);
 
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await transactionApi.getUserTransactions(user.id);
-      console.log("Fetched transactions:", result);
-      
-      // Map API response to our Transaction interface
-      const mappedTransactions: Transaction[] = result.map(t => ({
-        id: t.id,
-        type: t.type,
-        category: t.category,
-        date: t.date,
-        description: t.description,
-        amount: t.amount,
-        userId: t.userId
-      }));
-      
-      setTransactions(mappedTransactions);
-    } catch (error) {
-      console.error("Error fetching transactions:", error);
-      setError("Failed to load transactions. Please try again later.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeleteTransaction = async (transactionId: number) => {
-    if (!window.confirm("Are you sure you want to delete this transaction?")) {
-      return;
-    }
-
-    try {
-      await transactionApi.deleteTransaction(transactionId);
-      // Remove from local state
-      setTransactions(transactions.filter(t => t.id !== transactionId));
-      // Notify parent component
-      if (onTransactionDeleted) {
-        onTransactionDeleted();
-      }
-    } catch (error) {
-      console.error("Error deleting transaction:", error);
-      alert("Failed to delete transaction. Please try again.");
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString();
-    } catch (e) {
-      return dateString;
-    }
-  };
-
-  const formatAmount = (amount: number) => {
+  const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'LKR',
-      currencyDisplay: 'code'
-    }).format(amount).replace('LKR', 'LKR');
+      currency: 'LKR'
+    }).format(amount);
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  let userId: number = 1; // Assuming a static user ID for now
 
-  if (error) {
-    return (
-      <Box sx={{ p: 3, textAlign: 'center', color: 'error.main' }}>
-        <Typography>{error}</Typography>
-        <Box mt={2}>
-          <button onClick={fetchTransactions}>Try Again</button>
-        </Box>
-      </Box>
-    );
-  }
+  // Fetch transactions from the API
+  useEffect(() => {
+    async function fetchTransactions(){
+      try{
+        const response = await fetch(`https://localhost:7211/api/Transaction/GetTransaction/${userId}?type=${typeFilter}&category=${categoryFilter}&date=${date}&startDate=${startDate}&endDate=${endDate}&sorting=${sortOption}`);
+        if(!response.ok){
+          throw new Error("Failed to fetch transactions");
+        }
+        const data = await response.json();
+        setTransactionList(data);
+      }catch(error){
+        console.error("Error fetching transactions:", error);
+      }
+    }
 
-  if (transactions.length === 0) {
-    return (
-      <Box sx={{ p: 3, textAlign: 'center', color: 'text.secondary' }}>
-        <Typography>No transactions found.</Typography>
-      </Box>
-    );
+    fetchTransactions();
+
+    if(addtransactionsuccessfully || addfiltersuccessfully || sortApplied || executedTransactionsDeleted) {
+      fetchTransactions();
+      setAddtransactionsuccessfully(false);
+      setAddfilterssuccessfully(false);
+      setSortApplied(false);
+      setAddRecurringTransactionSuccessfully(false);
+      // Reset the executed transactions deleted flag
+      if (setExecutedTransactionsDeleted) {
+        setExecutedTransactionsDeleted(false);
+      }
+    }
+  },[
+    addtransactionsuccessfully, 
+    addfiltersuccessfully, 
+    sortApplied, 
+    addRecurringTransactionSuccessfully,
+    executedTransactionsDeleted // Add this dependency
+  ]);
+
+  // useEffect(() => {
+  //   async function fetchTransactions(){
+  //     try{
+  //       const response = await fetch(`https://localhost:7211/api/Transaction/GetTransaction?filterOn=${filterOn}&filterQuery=Expense`);
+  //       if(!response.ok){
+  //         throw new Error("Failed to fetch transactions");
+  //       }
+  //       const data = await response.json();
+  //       setTransactionList(data);
+  //     }catch(error){
+  //       console.error("Error fetching transactions:", error);
+  //     }
+  //   }
+
+  //   fetchTransactions();
+  // },[]);
+
+  // Function to delete a transaction by ID
+  async function deleteTransaction(id: number) {
+    try{
+      console.log("Deleting transaction with ID:", id);
+      const response = await fetch(`https://localhost:7211/api/Transaction/DeleteTransaction/${userId}/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if(!response.ok){
+        throw new Error("Failed to delete transaction");
+      }
+      // Update the transaction list after deletion
+      setTransactionList((prevList) => prevList.filter((transaction) => transaction.id !== id));
+    }catch(error){
+      console.error("Error deleting transaction:", error);
+    }
   }
+  // Get the transactions to display (limit to 10 if showAll is false)
+  const getTransactionsToDisplay = () => {
+    return showAll ? transactionList : transactionList.slice(0, 8);
+  };
+
+  // Toggle view more/less
+  const handleViewToggle = () => {
+    setShowAll(!showAll);
+  };
+
+  const transactionsToDisplay = getTransactionsToDisplay();
 
   return (
     <ThemeProvider theme={theme}>
       { /* Desktop and Tablet view */ }
-      <Box mt="30px" sx={{
+      <Box sx={{
         [theme.breakpoints.between("mobile","tablet")]: {
-          display: "none",
+          display: "none", // Hide table for mobile view
         }
       }}>
         <TableContainer component={Paper} sx={{borderRadius: "15px"}}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
               <TableRow>
-                <TableCell sx={{fontWeight: "bold"}}>ID</TableCell>
+                <TableCell></TableCell>
                 <TableCell sx={{fontWeight: "bold"}}>Type</TableCell>
                 <TableCell sx={{fontWeight: "bold"}}>Category</TableCell>
                 <TableCell sx={{fontWeight: "bold"}}>Date</TableCell>
                 <TableCell sx={{fontWeight: "bold"}}>Description</TableCell>
                 <TableCell sx={{fontWeight: "bold"}}>Amount</TableCell>
-                <TableCell sx={{fontWeight: "bold"}}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {transactions.map((transaction: Transaction) => (
+              {transactionsToDisplay.map((list: Transaction, index: number) => (
                 <TableRow 
-                  key={transaction.id} 
+                  key={index} 
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
-                  <TableCell>{transaction.id}</TableCell>
-                  <TableCell>
-                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{transaction.type}</Typography>
+                  {/* Category Icon */}
+                  {/* <TableCell sx={{textAlign: "center"}}>{CategoryIcons.map((item: iconType, iconIndex: number) => (
+                    list.category === item.category ? <item.icon key={iconIndex} sx={{color: item.color}}/> : null
+                  ))}</TableCell> */}
+                  <TableCell sx={{textAlign: "center"}}>
+                    {CategoryIcons.map((item: iconType, iconIndex: number) => (
+                      list.category === item.category ? (
+                        <Box
+                          key={iconIndex}
+                          sx={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 40,
+                            height: 40,
+                            borderRadius: "50%",
+                            backgroundColor: item.color,
+                          }}
+                        >
+                          <span style={{ fontSize: "1.5rem" }}>{item.icon}</span>
+                        </Box>
+                      ) : null
+                    ))}
                   </TableCell>
+                  {/* Transaction Type */}
                   <TableCell>
-                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{transaction.category}</Typography>
+                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.type}</Typography>
                   </TableCell>
+                  {/* Transaction Category */}
                   <TableCell>
-                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{formatDate(transaction.date)}</Typography>
+                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.category}</Typography>
                   </TableCell>
+                  {/* Transaction Date */}
+                  <TableCell>
+                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.date}</Typography>
+                  </TableCell>
+                  {/* Transaction Description */}
                   <TableCell sx={{wordBreak: "break-word", whiteSpace: "normal", maxWidth: "250px"}}>
-                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{transaction.description || 'N/A'}</Typography>
+                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p">{list.description}</Typography>
                   </TableCell>
+                  {/* Transaction Amount and Delete Button */}
                   <TableCell>
-                    <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p" sx={{
-                      color: transaction.type.toLowerCase() === "income" ? "#19A23D" : "#EE3838",
-                      fontWeight: "bold",
+                    <Box sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
                     }}>
-                      {formatAmount(transaction.amount)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <IconButton onClick={() => handleDeleteTransaction(transaction.id)}>
-                      <DeleteOutline fontSize="medium"/>
-                    </IconButton>
+                      <Typography variant={isTabletOrDesktop ? "body2" : "body1"} component="p" sx={{
+                        color: list.type === "Income" ? "#19A23D" : "#EE3838",
+                        fontWeight: "bold",
+                      }}
+                      >
+                        {/* {list.amount} */}
+                        {formatCurrency(list.amount)}
+                      </Typography>
+                      <IconButton onClick={() => deleteTransaction(list.id)}>
+                        <DeleteOutline fontSize="medium"/>
+                      </IconButton>
+                    </Box>  
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
+        {/* View More/Less Button for Desktop/Tablet */}
+        {transactionList.length > 8 && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <Button 
+              variant="outlined" 
+              onClick={handleViewToggle}
+              disableRipple
+              sx={{
+                borderRadius: "20px",
+                textTransform: "none",
+                px: 3,
+                py: 1
+              }}
+            >
+              {showAll ? "View Less" : `View More (${transactionList.length - 8} more)`}
+            </Button>
+          </Box>
+        )}
       </Box>
+
+      
 
       {/* Mobile view */}
       <Box mt="30px" sx={{
@@ -199,16 +282,38 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ onTransactionDelete
         <TableContainer component={Paper} sx={{borderRadius: "15px"}}>
           <Table aria-label="simple table">
             <TableBody>
-              {transactions.map((transaction: Transaction) => (
-                <TableRow key={transaction.id}>
-                  <TableCell>{transaction.id}</TableCell>
-                  <TableCell>
-                    <Typography variant="body2" component="p">{transaction.category}</Typography>
-                    <Typography variant="body2" component="p">{transaction.type}</Typography>
+              {transactionList.map((list: Transaction, index: number) => (
+                <TableRow key={index}>
+                  {/* <TableCell sx={{textAlign: "center"}}>{CategoryIcons.map((item: iconType, iconIndex: number) => (
+                    list.category === item.category ? <span key={iconIndex} style={{ fontSize: "1.5rem" }}>{item.icon}</span> : null
+                  ))}
+                  </TableCell> */}
+                  <TableCell sx={{textAlign: "center"}}>
+                    {CategoryIcons.map((item: iconType, iconIndex: number) => (
+                      list.category === item.category ? (
+                        <Box
+                          key={iconIndex}
+                          sx={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 40,
+                            height: 40,
+                            borderRadius: "50%",
+                            backgroundColor: item.color,
+                          }}
+                        >
+                          <span style={{ fontSize: "1.5rem" }}>{item.icon}</span>
+                        </Box>
+                      ) : null
+                    ))}
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" component="p">{formatDate(transaction.date)}</Typography>
-                    <Typography variant="body2" component="p">{transaction.description || 'N/A'}</Typography>
+                    <Typography variant="body2" component="p">{list.category}</Typography>
+                    <Typography variant="body2" component="p">{list.type}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" component="p">{list.date}</Typography>
                   </TableCell>
                   <TableCell>
                     <Box sx={{
@@ -217,24 +322,43 @@ const TransactionTable: React.FC<TransactionTableProps> = ({ onTransactionDelete
                       alignItems: "center",
                     }}>
                       <Typography variant="body2" component="p" sx={{
-                        color: transaction.type.toLowerCase() === "income" ? "#19A23D" : "#EE3838",
+                        color: list.type === "Income" ? "#19A23D" : "#EE3838",
                         fontWeight: "bold",
-                      }}>
-                        {formatAmount(transaction.amount)}
+                      }}
+                      >
+                        {list.amount}
                       </Typography>
-                      <IconButton onClick={() => handleDeleteTransaction(transaction.id)}>
+                      <IconButton onClick={() => deleteTransaction(list.id)}>
                         <DeleteOutline fontSize="small"/>
                       </IconButton>
                     </Box>  
                   </TableCell>
+                  {/* <TableCell><DeleteOutline /></TableCell> */}
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
+        {/* View More/Less Button for Mobile */}
+        {transactionList.length > 10 && (
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <Button 
+              variant="outlined" 
+              onClick={handleViewToggle}
+              sx={{
+                borderRadius: "20px",
+                textTransform: "none",
+                px: 3,
+                py: 1
+              }}
+            >
+              {showAll ? "View Less" : `View More (${transactionList.length - 10} more)`}
+            </Button>
+          </Box>
+        )}
       </Box>
     </ThemeProvider>
-  );
-};
+  )
+}
 
 export default TransactionTable;
