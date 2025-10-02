@@ -33,18 +33,10 @@ interface MenuItem {
 
 // Type menuItems with optional badges
 const menuItems: MenuItem[] = [
-<<<<<<< HEAD
   {
     text: "Dashboard",
     icon: <DashboardIcon />,
     path: "/dashboard",
-=======
-
-  {
-    text: "Dashboard",
-    icon: <DashboardIcon />,
-    path: "/",
->>>>>>> 218a639ca6aff3d8c7673d3fc292c40805e415fd
   },
   { 
     text: "Report", 
@@ -77,10 +69,6 @@ const menuItems: MenuItem[] = [
     icon: <ExitToApp />, 
     path: "/" 
   },
-<<<<<<< HEAD
-=======
-
->>>>>>> 218a639ca6aff3d8c7673d3fc292c40805e415fd
 ];
 
 
@@ -158,7 +146,7 @@ const Sidebar: React.FC = () => {
        
 
         <List sx={{ p: 0 }}>
-          {menuItems.map((item, index) => {
+          {menuItems.map((item) => {
             const isActive = activeItem === item.text;
             const isLogout = item.text === "Logout";
 
@@ -265,10 +253,6 @@ const Sidebar: React.FC = () => {
         </List>
       </Box>
 
-<<<<<<< HEAD
-      
-      
-=======
       {/* Bottom User Section */}
       <Box
         sx={{
@@ -323,7 +307,6 @@ const Sidebar: React.FC = () => {
           </Box>
         </Box>
       </Box>
->>>>>>> 218a639ca6aff3d8c7673d3fc292c40805e415fd
     </Drawer>
   );
 };
