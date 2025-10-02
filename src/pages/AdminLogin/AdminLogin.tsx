@@ -1,12 +1,12 @@
-import React from "react";
-import { Grid, ListItem } from "@mui/material";
-import AdminRegisterLeftImage from "../../components/AdminRegisterComponents/AdminRegisterLeftImage";
-import AdminRegisterForm from "../../components/AdminRegisterComponents/AdminRegisterForm";
+import { Grid } from "@mui/material"
+import AdminLoginLeftImage from "../../components/AdminLoginComponents/AdminLoginLeftImage";
 
-const AdminRegister: React.FC = () => (
-  <Grid container spacing={2} sx={{ height: "100vh", width: "100%",margin: 0, padding: 0 }}>  
-  
-  <Grid
+import AdminLoginForm from "../../components/AdminLoginComponents/AdminLoginForm";
+
+function AdminLogin() {
+  return (
+    <Grid container spacing={2} sx={{ height: "100vh" }}>
+      <Grid
               item
               xs={0}
               md={6}
@@ -16,15 +16,13 @@ const AdminRegister: React.FC = () => (
                 flexGrow: 1,
               }}
             >
-    <AdminRegisterLeftImage />
-
-    </Grid>
- 
-    <Grid
-      item
-      xs={12}
-      md={6}
-       sx={{
+      <AdminLoginLeftImage />
+      </Grid>
+      <Grid
+        item
+        xs={12}
+        md={6}
+         sx={{
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -58,24 +56,14 @@ const AdminRegister: React.FC = () => (
             zIndex: 0,
           },
         }}
-    >
-      
-      <ListItem
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          alignContent: "center",
-          justifyItems: "center",
+        >
+          
+          <AdminLoginForm/>
+        </Grid>
 
-       
-        }}
-      >
-        <AdminRegisterForm />
-      </ListItem>
-    </Grid>
-  </Grid>
-);
 
-export default AdminRegister;
+      </Grid>
+  )
+}
+
+export default AdminLogin

@@ -19,12 +19,12 @@ import {
 import MailIcon from "@mui/icons-material/MailOutline";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import LoginLeftImage from "../components/LoginComponents/LoginLeftImage";
-import ForgetPasswordImg from "../assets/images/ForgotPassword.png";
-import Logo from "../assets/images/logo/Logo.png";
+import LoginLeftImage from "../../components/LoginComponents/LoginLeftImage";
+import ForgetPasswordImg from "../../assets/images/ForgotPassword.png";
+import Logo from "../../assets/images/logo/Logo.png";
 import { Link } from "react-router-dom";
 
-function ForgetPassword() {
+function AdminForgetPassword() {
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState({ email: "" });
   const [successMessage, setSuccessMessage] = useState("");
@@ -60,7 +60,7 @@ function ForgetPassword() {
 
     if (validateForm()) {
       try {
-        const response = await fetch("https://localhost:7211/api/user/auth/forgot-password", {
+        const response = await fetch("https://localhost:7211/api/admin/auth/forgot-password", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
@@ -174,18 +174,17 @@ function ForgetPassword() {
           />
 
           <Fade in timeout={800}>
-            <Box sx={{ position: "relative", zIndex: 1, width: "100%", maxWidth: { xs: 350, sm: 400, md: 400 }, mt: 0 }}>
+            <Box sx={{ position: "relative", zIndex: 1, width: "100%", maxWidth: { xs: 350, sm: 400, md: 400 } }}>
               {/* Logo with animation */}
-              <Box sx={{ textAlign: "center", mb: 4, mt: 0 }}>
+              <Box sx={{ textAlign: "center", mb: 4 }}>
                 <Slide direction="down" in timeout={600}>
                   <img
                     src={Logo}
                     alt="Logo"
                     style={{ 
-                      maxWidth: isMobile ? "120px" : isTablet ? "150px" : "180px", 
-                      height: isMobile ? "120px" : isTablet ? "150px" : "180px",
+                      maxWidth: isMobile ? "80px" : isTablet ? "110px" : "130px", 
+                      height: isMobile ? "80px" : isTablet ? "110px" : "130px",
                       filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))",
-                      marginTop: 0
                     }}
                   />
                 </Slide>
@@ -209,7 +208,6 @@ function ForgetPassword() {
                       left: 0,
                       right: 0,
                       height: 2,
-                      background: "linear-gradient(90deg, #023E8A, #0277BD, #023E8A)",
                       borderRadius: "16px 16px 0 0",
                     },
                   }}
@@ -372,7 +370,7 @@ function ForgetPassword() {
                         >
                           Don't have an account yet?{" "}
                           <Link
-                            to="/register"
+                            to="/admin/register"
                             style={{
                               textDecoration: "none",
                               color: "#023E8A",
@@ -396,4 +394,4 @@ function ForgetPassword() {
   );
 }
 
-export default ForgetPassword;
+export default AdminForgetPassword;

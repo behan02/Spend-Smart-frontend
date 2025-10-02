@@ -6,7 +6,10 @@ import {
   MenuItem,
   FormHelperText,
   SelectChangeEvent,
+  InputAdornment,
+  Divider,
 } from "@mui/material";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 
 interface CurrencyOption {
   code: string;
@@ -43,9 +46,32 @@ const Currency: React.FC<CurrencyProps> = ({
   helperText,
 }) => {
   return (
-    <FormControl fullWidth margin="normal" error={error}>
+    <FormControl fullWidth error={error} >
       <InputLabel>{label}</InputLabel>
-      <Select label={label} value={value} onChange={onChange}>
+      <Select
+        label={label}
+        value={value}
+        onChange={onChange}
+        startAdornment={
+          <InputAdornment position="start">
+            <AttachMoneyIcon sx={{ color: "#023E8A" }} />
+            <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+          </InputAdornment>
+        }
+        sx={{
+          height: "50px",
+          borderRadius: 2,
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderRadius: 2,
+          },
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#023E8A",
+          },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#023E8A",
+          },
+        }}
+      >
         {currencyOptions.map((option) => (
           <MenuItem key={option.code} value={option.code}>
             {option.label}

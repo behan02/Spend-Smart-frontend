@@ -7,14 +7,16 @@ const RegisterLeftImage: React.FC = () => (
     item
     xs={false}
     md={6}
-    sx={{
-      display: { xs: "none", md: "flex" },
-      backgroundColor: "#023E8A",
-      flexGrow: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      margin: 0,
-      padding: 0,
+     sx={{
+          background: "linear-gradient(135deg, #023E8A 0%, #0077B6 50%, #00B4D8 100%)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          position: "relative",
+          overflow: "hidden",
+          flexGrow:1,
+          maxHeight: "100%",
     }}
   >
     <Box>
