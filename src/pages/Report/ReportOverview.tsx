@@ -6,10 +6,15 @@ import Footer from "../../components/footer/Footer";
 import ReportTable from "../../components/ReportOverview/ReportTable";
 import GenerateReport from "../../components/ReportOverview/GenerateReport";
 import Sidebar from "../../components/sidebar/sidebar";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import theme from "../../assets/styles/theme";
+
 
 const ReportOverview: React.FC = () => {
   return (
-    <Box display="flex" sx={{ mt: -138}}>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+    <Box display="flex">
       <Sidebar />
 
       <Box sx={{  flexGrow: 1 }}>
@@ -113,6 +118,7 @@ const ReportOverview: React.FC = () => {
         </Box>
       </Box>
     </Box>
+    </ThemeProvider>
   );
 };
 

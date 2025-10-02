@@ -27,7 +27,6 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import { Link } from "react-router-dom";
 import { useForm, Controller, useWatch } from "react-hook-form";
-import Currency from "./Currency";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 import Logo from "../../assets/images/logo/Logo.png";
@@ -449,24 +448,7 @@ const RegisterForm: React.FC = () => {
               )}
             />
 
-            <Controller
-              name="currency"
-              control={control}
-              defaultValue=""
-              render={({ field, fieldState }) => (
-                <Grow in timeout={1300}>
-                  <Box sx={{ maxWidth: { xs: "100%", sm: "280px", md: "300px" }, width: "100%" }}>
-                    <Currency
-                      value={field.value}
-                      onChange={field.onChange}
-                      label="Preferred Currency"
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                    />
-                  </Box>
-                </Grow>
-              )}
-            />
+           
 
             <Grow in timeout={1400}>
               <Button

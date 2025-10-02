@@ -18,11 +18,14 @@ import ReportGenerate from "./pages/Report/ReportGenerate";
 import VerifyEmail  from "./pages/VerifyEmail";
 import AdminForgetPassword from "./pages/AdminRegister/AdminForgetPassword"; 
 import AdminResetPassword from "./pages/AdminRegister/AdminResetPassword";
-import AdminVerifyEmail from "./pages/AdminRegister/AdminVerification"; 
+import AdminVerifyEmail from "./pages/AdminRegister/AdminVerification";
+import AdminDashboard from "./pages/Dashboard"
+import ManageUsersPage from "./pages/ManageUsersPage";  
+import SystemSettingsPage from "./pages/SystemSettingsPage";
+import EmailVerification from "./pages/VerifyEmail";
 import { ThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
 import theme from "./assets/styles/theme";
-
 
 function App() {
   return (
@@ -51,6 +54,14 @@ function App() {
             <Route path="/admin/forgetpassword" element={<AdminForgetPassword />} />
             <Route path="/admin/resetpassword" element={<AdminResetPassword />} />
             <Route path="/admin/verification" element={<AdminVerifyEmail />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
+            {/* User management path for Manage Users */}
+            <Route path="/user" element={<ManageUsersPage />} />
+            <Route path="/admin/settings" element={<SystemSettingsPage />} />
+            
+            {/* Email verification route */}
+            <Route path="/admin/verify-email/:token" element={<EmailVerification />} />
           </Routes>
         </Router>
       </UserProvider>
