@@ -63,28 +63,27 @@ const Sidebar: React.FC = () => {
       
       <List>
         {menuItems.map((item) => (
-          <Link to={item.path} style={{ textDecoration: "none" }}>
-          <ListItemButton
-            key={item.text}
-            sx={{
-              color: "white",
-              backgroundColor: "#023e8a",
-              borderRadius: 30,
-              "&:hover": {
-                backgroundColor: "white",
+          <Link to={item.path} key={item.text} style={{ textDecoration: "none" }}>
+            <ListItemButton
+              sx={{
+                color: "white",
+                backgroundColor: "#023e8a",
                 borderRadius: 30,
-                color: "#023e8a",
-              },
-              "&:hover .icon": {
-                color: "#023e8a",
-              },
-            }}
-          >
-            <ListItemIcon className="icon" sx={{ color: "#fff" }}>
-              {item.icon}
-            </ListItemIcon>
-            <ListItemText primary={item.text} />
-          </ListItemButton>
+                "&:hover": {
+                  backgroundColor: "white",
+                  borderRadius: 30,
+                  color: "#023e8a",
+                },
+                "&:hover .icon": {
+                  color: "#023e8a",
+                },
+              }}
+            >
+              <ListItemIcon className="icon" sx={{ color: "#fff" }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
           </Link>
         ))}
       </List>
