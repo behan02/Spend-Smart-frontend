@@ -96,6 +96,7 @@ function ForgetPassword() {
           md={6}
           sx={{
             display: { xs: "none", md: "block" }, // Hide on xs, show on md and up
+            flexGrow:1
           }}
         >
           <LoginLeftImage
