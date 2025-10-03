@@ -74,7 +74,7 @@ const BudgetPeriodChart: React.FC<BudgetPeriodChartProps> = ({
               y={budgetLimit} 
               stroke="#ff4444" 
               strokeDasharray="5 5"
-              label={{ value: `Budget: LKR ${budgetLimit.toFixed(2)}`, position: 'top' }}
+              label={{ value: `Budget: $${budgetLimit.toFixed(2)}`, position: 'top' }}
             />
             
             {/* Cumulative spending line */}
@@ -138,7 +138,7 @@ const BudgetPeriodChart: React.FC<BudgetPeriodChartProps> = ({
             Current Spending
           </Typography>
           <Typography variant="h6" fontWeight="bold" color="primary.main">
-            LKR {chartData[chartData.length - 1]?.cumulativeAmount.toFixed(2) || '0.00'}
+            ${chartData[chartData.length - 1]?.cumulativeAmount.toFixed(2) || '0.00'}
           </Typography>
         </Box>
         <Box sx={{ textAlign: 'center' }}>
@@ -146,7 +146,7 @@ const BudgetPeriodChart: React.FC<BudgetPeriodChartProps> = ({
             Budget Limit
           </Typography>
           <Typography variant="h6" fontWeight="bold">
-            LKR {budgetLimit.toFixed(2)}
+            ${budgetLimit.toFixed(2)}
           </Typography>
         </Box>
         <Box sx={{ textAlign: 'center' }}>
@@ -158,7 +158,7 @@ const BudgetPeriodChart: React.FC<BudgetPeriodChartProps> = ({
             fontWeight="bold" 
             color={chartData[chartData.length - 1]?.cumulativeAmount > budgetLimit ? 'error.main' : 'success.main'}
           >
-            LKR {Math.abs(budgetLimit - (chartData[chartData.length - 1]?.cumulativeAmount || 0)).toFixed(2)}
+            ${Math.abs(budgetLimit - (chartData[chartData.length - 1]?.cumulativeAmount || 0)).toFixed(2)}
           </Typography>
         </Box>
       </Box>

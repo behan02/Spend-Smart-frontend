@@ -31,7 +31,7 @@ export const budgetService = {
         spentAmount: apiResponse.totalSpentAmount,
         remainingAmount: apiResponse.remainingAmount,
         description: apiResponse.description,
-        progress: Math.round(apiResponse.progressPercentage * 10) / 10, // Round to 1 decimal place
+        progress: Math.round(apiResponse.progressPercentage * 10) / 10,
         remainingDays: apiResponse.daysRemaining,
         status: apiResponse.status.toLowerCase() as 'active' | 'completed' | 'exceeded',
         categories: apiResponse.categories.map(cat => ({

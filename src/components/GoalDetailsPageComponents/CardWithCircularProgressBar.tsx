@@ -231,7 +231,6 @@ const CardWithCircularProgressBar: React.FC<CardWithCircularProgressBarProps> = 
   // Calculate remaining amount
   const remainingAmount = Math.max(0, goal.targetAmount - currentSavedAmount);
 
-
   // Circle properties
   const radius = 90;
   const circumference = 2 * Math.PI * radius;

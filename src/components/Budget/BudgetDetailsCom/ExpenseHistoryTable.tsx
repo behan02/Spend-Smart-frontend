@@ -10,22 +10,34 @@ import {
   TableRow,
   TablePagination,
   Chip,
+  IconButton,
+  Menu,
+  MenuItem,
   TextField,
   InputAdornment
 } from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SearchIcon from '@mui/icons-material/Search';
 import { Transaction } from '../types/BudgetDetails';
 
 interface ExpenseHistoryTableProps {
   transactions: Transaction[];
+  onTransactionUpdate?: (budgetId: string) => void;
+  onEditTransaction?: (transaction: Transaction) => void;
+  onDeleteTransaction?: (transactionId: number) => void;
 }
 
 const ExpenseHistoryTable: React.FC<ExpenseHistoryTableProps> = ({
-  transactions
+  transactions,
+  onTransactionUpdate: _onTransactionUpdate,
+  onEditTransaction,
+  onDeleteTransaction
 }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
@@ -36,10 +48,34 @@ const ExpenseHistoryTable: React.FC<ExpenseHistoryTableProps> = ({
     setPage(0);
   };
 
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, transaction: Transaction) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedTransaction(transaction);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedTransaction(null);
+  };
+
+  const handleEdit = () => {
+    if (selectedTransaction && onEditTransaction) {
+      onEditTransaction(selectedTransaction);
+    }
+    handleMenuClose();
+  };
+
+  const handleDelete = () => {
+    if (selectedTransaction && onDeleteTransaction) {
+      onDeleteTransaction(selectedTransaction.id);
+    }
+    handleMenuClose();
+  };
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'LKR'
+      currency: 'USD'
     }).format(amount);
   };
 
@@ -107,6 +143,7 @@ const ExpenseHistoryTable: React.FC<ExpenseHistoryTableProps> = ({
               <TableCell>Date</TableCell>
               <TableCell>Description</TableCell>
               <TableCell align="right">Amount</TableCell>
+              <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -151,6 +188,14 @@ const ExpenseHistoryTable: React.FC<ExpenseHistoryTableProps> = ({
                     variant="outlined"
                   />
                 </TableCell>
+                <TableCell align="center">
+                  <IconButton
+                    size="small"
+                    onClick={(e) => handleMenuOpen(e, transaction)}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -166,6 +211,18 @@ const ExpenseHistoryTable: React.FC<ExpenseHistoryTableProps> = ({
         onRowsPerPageChange={handleChangeRowsPerPage}
         rowsPerPageOptions={[5, 10, 25]}
       />
+
+      {/* Action Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleEdit}>Edit</MenuItem>
+        <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
+          Delete
+        </MenuItem>
+      </Menu>
     </Box>
   );
 };
